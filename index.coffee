@@ -295,7 +295,7 @@ run = ->
 
     console.log ""
 
-    # Run run run!
+    # Run folder scanning tasks in parallel.
     async.parallelLimit folderTasks, 2
 
     return await true
