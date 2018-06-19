@@ -1,0 +1,39 @@
+{
+    "name": "imgrecog.js",
+    "version": "0.5.0",
+    "description": "Node.js utility to detect and tag images on a folder using Google Vision / AI.",
+    "homepage": "http://github.com/igoramadas/imgrecog.js",
+    "author": "Igor Ramadas <igor@devv.com>",
+    "license": "Apache-2.0",
+    "subdomain": "imgrecog.js",
+    "main": "index",
+    "domains": [
+        "imgrecog.js.devv.com"
+    ],
+    "bin": {
+        "imgrecog.js": "./bin/imgrecog.js"
+    },
+    "engines": {
+        "node": "*"
+    },
+    "scripts": {
+        "docs": "make docs"
+    },
+    "dependencies": {
+        "@google-cloud/vision": "^0.19.0",
+        "async": "^2.6.1",
+        "coffeescript": "^2.3.1"
+    },
+    "devDependencies": {
+        "betterdocco": ">= 0.8.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/igoramadas/imgrecog.js.git"
+    },
+    "keywords": [
+        "imgrecog.js",
+        "cloud vision",
+        "image recognition"
+    ]
+}

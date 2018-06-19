@@ -1,0 +1,8 @@
+.DS_Store
+.coveralls.yml
+.history/
+.idea/
+.vscode/
+coverage/
+credentials.json
+node_modules/
