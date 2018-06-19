@@ -5,7 +5,8 @@ path = require "path"
 vision = require "@google-cloud/vision"
 client = null
 
-# Get current executable folder.
+# Get current and bin executable folder.
+currentFolder = process.cwd() + "/"
 executableFolder = path.dirname(require.main.filename) + "/"
 
 # Collection of image models.
@@ -78,6 +79,7 @@ getParams = ->
         showHelp()
         return process.exit 0
 
+    # Check params...
     for p in params
         switch p
             when "-h", "-help"
@@ -106,7 +108,7 @@ getParams = ->
 
     # Exit if no folders were passed, search on current directory.
     if folders.length < 1
-        folders.push process.cwd
+        folders.push currentFolder
         return process.exit 0
 
     for f in folders
@@ -249,8 +251,6 @@ finished = (err, result) ->
     # Bye!
     console.log ""
 
-
-
 # Run it!
 run = ->
     console.log ""
@@ -264,8 +264,19 @@ run = ->
     console.log "Options: #{JSON.stringify(options, null, 0)}"
     console.log ""
 
-    # Instantiate Google Vision client.
-    client = new vision.ImageAnnotatorClient {keyFilename: executableFolder + "../credentials.json"}
+    credentialsExecutable = executableFolder + "credentials.json"
+    credentialsCurrent = currentFolder + "credentials.json"
+
+    # Create client, checking if a credentials.json file exists.
+    try
+        if fs.existsSync credentialsCurrent
+            client = new vision.ImageAnnotatorClient {keyFilename: credentialsCurrent}
+        else if fs.existsSync credentialsExecutable
+            client = new vision.ImageAnnotatorClient {keyFilename: credentialsExecutable}
+        else
+            client = new vision.ImageAnnotatorClient()
+    catch ex
+        console.error "Could not create a Vision API client, make sure you have defined credentials on a credentials.json file or environment variables.", ex
 
     folderTasks = []
     console.log "Will parse images on:"

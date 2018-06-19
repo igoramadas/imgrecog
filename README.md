@@ -1,6 +1,6 @@
 # IMGRecog.js
 
-Soon...
+This is a command line utility to process and tag images using the Google Vision API.
 
 More info at https://github.com/igoramadas/imgrecog.js
 
