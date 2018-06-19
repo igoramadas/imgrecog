@@ -1,5 +1,4 @@
 (function() {
-  // Required dependencies.
   var async, client, currentFolder, executableFolder, fileQueue, finished, folders, fs, getParams, images, likelyhood, options, path, queueProcessor, run, scanFile, scanFolder, showHelp, startTime, vision;
 
   async = require("async");
@@ -323,17 +322,22 @@
   };
 
   // Run it!
-  run = function() {
-    var credentialsCurrent, credentialsExecutable, ex, folder, folderTasks, j, len;
+  run = async function() {
+    var arr, credentialsCurrent, credentialsExecutable, ex, folder, folderTasks, j, key, len, value;
     console.log("");
     console.log("#######################################################");
     console.log("###                 - IMGRecog.js -                 ###");
     console.log("#######################################################");
     console.log("");
-    // First we get the parameters. If --help, it will end here.
+    // First we get the parameters. If -help, it will end here.
     getParams();
-    console.log(`Options: ${JSON.stringify(options, null, 0)}`);
-    console.log("");
+    // Passed options.
+    arr = [];
+    for (key in options) {
+      value = options[key];
+      arr.push(`${key}: ${value}`);
+    }
+    console.log(`Options: ${arr.join(" | ")}`);
     credentialsExecutable = executableFolder + "credentials.json";
     credentialsCurrent = currentFolder + "credentials.json";
     try {
@@ -342,19 +346,22 @@
         client = new vision.ImageAnnotatorClient({
           keyFilename: credentialsCurrent
         });
+        console.log(`Using credentials from ${credentialsCurrent}`);
       } else if (fs.existsSync(credentialsExecutable)) {
         client = new vision.ImageAnnotatorClient({
           keyFilename: credentialsExecutable
         });
+        console.log(`Using credentials from ${credentialsExecutable}`);
       } else {
         client = new vision.ImageAnnotatorClient();
+        console.log("Using credentials from environment variables");
       }
     } catch (error) {
       ex = error;
       console.error("Could not create a Vision API client, make sure you have defined credentials on a credentials.json file or environment variables.", ex);
     }
+    console.log("");
     folderTasks = [];
-    console.log("Will parse images on:");
 // Iterate and scan search folders.
     for (j = 0, len = folders.length; j < len; j++) {
       folder = folders[j];
@@ -367,10 +374,23 @@
     }
     console.log("");
     // Run run run!
-    return async.parallelLimit(folderTasks, 2);
+    async.parallelLimit(folderTasks, 2);
+    return (await true);
   };
 
-  // Program called, starts here!
+  // Unhandled rejections goes here.
+  process.on("unhandledRejection", function(reason, p) {
+    if (options.verbose) {
+      console.log("ERROR!");
+      console.log(reason);
+    } else {
+      console.log("ERROR!", reason.message || reason.code || reason);
+    }
+    console.log("");
+    return process.exit(0);
+  });
+
+  // Run baby run!
   // -----------------------------------------------------------------------------
   run();
 

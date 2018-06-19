@@ -1,4 +1,3 @@
-# Required dependencies.
 async = require "async"
 fs = require "fs"
 path = require "path"
@@ -259,10 +258,15 @@ run = ->
     console.log "#######################################################"
     console.log ""
 
-    # First we get the parameters. If --help, it will end here.
+    # First we get the parameters. If -help, it will end here.
     getParams()
-    console.log "Options: #{JSON.stringify(options, null, 0)}"
-    console.log ""
+
+    # Passed options.
+    arr = []
+    for key, value of options
+        arr.push "#{key}: #{value}"
+
+    console.log "Options: #{arr.join(" | ")}"
 
     credentialsExecutable = executableFolder + "credentials.json"
     credentialsCurrent = currentFolder + "credentials.json"
@@ -271,15 +275,18 @@ run = ->
     try
         if fs.existsSync credentialsCurrent
             client = new vision.ImageAnnotatorClient {keyFilename: credentialsCurrent}
+            console.log "Using credentials from #{credentialsCurrent}"
         else if fs.existsSync credentialsExecutable
             client = new vision.ImageAnnotatorClient {keyFilename: credentialsExecutable}
+            console.log "Using credentials from #{credentialsExecutable}"
         else
             client = new vision.ImageAnnotatorClient()
+            console.log "Using credentials from environment variables"
     catch ex
         console.error "Could not create a Vision API client, make sure you have defined credentials on a credentials.json file or environment variables.", ex
 
+    console.log ""
     folderTasks = []
-    console.log "Will parse images on:"
 
     # Iterate and scan search folders.
     for folder in folders
@@ -291,6 +298,19 @@ run = ->
     # Run run run!
     async.parallelLimit folderTasks, 2
 
-# Program called, starts here!
+    return await true
+
+# Unhandled rejections goes here.
+process.on "unhandledRejection", (reason, p) ->
+    if options.verbose
+        console.log "ERROR!"
+        console.log reason
+    else
+        console.log "ERROR!", reason.message or reason.code or reason
+
+    console.log ""
+    process.exit 0
+
+# Run baby run!
 # -----------------------------------------------------------------------------
 run()
