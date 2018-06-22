@@ -50,14 +50,14 @@ showHelp = ->
     console.log ""
     console.log "imgrecog.js <options> <folders>"
     console.log ""
-    console.log "  -fa     -faces        detect faces"
-    console.log "  -lb     -labels       detect labels"
-    console.log "  -ln     -landmarks    detect landmarks"
-    console.log "  -lg     -logos        detect logos"
-    console.log "  -sf     -safe         detect safe search"
-    console.log "  -a      -all          detect all (same as enabling everything above)"
-    console.log "  -v      -verbose      enable verbose"
-    console.log "  -h      -help         help me (this screen)"
+    console.log "  -faces        detect faces"
+    console.log "  -labels       detect labels"
+    console.log "  -landmarks    detect landmarks"
+    console.log "  -logos        detect logos"
+    console.log "  -safe         detect safe search"
+    console.log "  -all          detect all (same as enabling everything above)"
+    console.log "  -verbose      enable verbose"
+    console.log "  -help         help me (this screen)"
     console.log ""
     console.log ""
     console.log "Examples:"
@@ -66,7 +66,7 @@ showHelp = ->
     console.log "  $ imgrecog.js -labels -safe"
     console.log ""
     console.log "Detect everything on specific directory"
-    console.log "  $ imgrecog.js -a /home/someuser/docs"
+    console.log "  $ imgrecog.js -all /home/someuser/docs"
     console.log ""
 
 # Get parameters from command line.
@@ -81,26 +81,26 @@ getParams = ->
     # Check params...
     for p in params
         switch p
-            when "-h", "-help"
+            when "-help"
                 showHelp()
                 return process.exit 0
-            when "-a", "-all"
+            when "-all"
                 options.faces = true
                 options.labels = true
                 options.landmarks = true
                 options.logos = true
                 options.safe = true
-            when "-fa", "-faces"
+            when "-faces"
                 options.faces = true
-            when "-lb", "-labels"
+            when "-labels"
                 options.labels = true
-            when "-ln", "-landmarks"
+            when "-landmarks"
                 options.landmarks = true
-            when "-lg", "-logos"
+            when "-logos"
                 options.logos = true
-            when "-sf", "-safe"
+            when "-safe"
                 options.safe = true
-            when "-v", "-verbose"
+            when "-verbose"
                 options.verbose = true
             else
                 folders.push p

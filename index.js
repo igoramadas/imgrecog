@@ -63,14 +63,14 @@
     console.log("");
     console.log("imgrecog.js <options> <folders>");
     console.log("");
-    console.log("  -fa     -faces        detect faces");
-    console.log("  -lb     -labels       detect labels");
-    console.log("  -ln     -landmarks    detect landmarks");
-    console.log("  -lg     -logos        detect logos");
-    console.log("  -sf     -safe         detect safe search");
-    console.log("  -a      -all          detect all (same as enabling everything above)");
-    console.log("  -v      -verbose      enable verbose");
-    console.log("  -h      -help         help me (this screen)");
+    console.log("  -faces        detect faces");
+    console.log("  -labels       detect labels");
+    console.log("  -landmarks    detect landmarks");
+    console.log("  -logos        detect logos");
+    console.log("  -safe         detect safe search");
+    console.log("  -all          detect all (same as enabling everything above)");
+    console.log("  -verbose      enable verbose");
+    console.log("  -help         help me (this screen)");
     console.log("");
     console.log("");
     console.log("Examples:");
@@ -79,7 +79,7 @@
     console.log("  $ imgrecog.js -labels -safe");
     console.log("");
     console.log("Detect everything on specific directory");
-    console.log("  $ imgrecog.js -a /home/someuser/docs");
+    console.log("  $ imgrecog.js -all /home/someuser/docs");
     return console.log("");
   };
 
@@ -96,11 +96,9 @@
     for (j = 0, len = params.length; j < len; j++) {
       p = params[j];
       switch (p) {
-        case "-h":
         case "-help":
           showHelp();
           return process.exit(0);
-        case "-a":
         case "-all":
           options.faces = true;
           options.labels = true;
@@ -108,27 +106,21 @@
           options.logos = true;
           options.safe = true;
           break;
-        case "-fa":
         case "-faces":
           options.faces = true;
           break;
-        case "-lb":
         case "-labels":
           options.labels = true;
           break;
-        case "-ln":
         case "-landmarks":
           options.landmarks = true;
           break;
-        case "-lg":
         case "-logos":
           options.logos = true;
           break;
-        case "-sf":
         case "-safe":
           options.safe = true;
           break;
-        case "-v":
         case "-verbose":
           options.verbose = true;
           break;
