@@ -26,7 +26,7 @@ fileQueue.drain = -> finished()
 # Default options.
 options = {
     decimals: 2
-    extensions: ["png", "jpg", "gif", "bpm", "raw", "webp"]
+    extensions: ["png", "jpg", "jpeg", "gif", "bpm", "raw", "webp"]
     labels: false
     landmarks: false
     logos: false
