@@ -268,14 +268,18 @@ run = ->
 
     console.log "Options: #{arr.join(" | ")}"
 
-    credentialsExecutable = executableFolder + "credentials.json"
-    credentialsCurrent = currentFolder + "credentials.json"
+    credentialsExecutable = executableFolder + "imgrecog.json"
+    credentialsHome = "~/imgrecog.json"
+    credentialsCurrent = currentFolder + "imgrecog.json"
 
     # Create client, checking if a credentials.json file exists.
     try
         if fs.existsSync credentialsCurrent
             client = new vision.ImageAnnotatorClient {keyFilename: credentialsCurrent}
             console.log "Using credentials from #{credentialsCurrent}"
+         else if fs.existsSync credentialsHome
+            client = new vision.ImageAnnotatorClient {keyFilename: credentialsHome}
+            console.log "Using credentials from #{credentialsHome}"
         else if fs.existsSync credentialsExecutable
             client = new vision.ImageAnnotatorClient {keyFilename: credentialsExecutable}
             console.log "Using credentials from #{credentialsExecutable}"
@@ -283,7 +287,7 @@ run = ->
             client = new vision.ImageAnnotatorClient()
             console.log "Using credentials from environment variables"
     catch ex
-        console.error "Could not create a Vision API client, make sure you have defined credentials on a credentials.json file or environment variables.", ex
+        console.error "Could not create a Vision API client, make sure you have defined credentials on a imgrecog.json file or environment variables.", ex
 
     console.log ""
     folderTasks = []

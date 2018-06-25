@@ -323,7 +323,7 @@
 
   // Run it!
   run = async function() {
-    var arr, credentialsCurrent, credentialsExecutable, ex, folder, folderTasks, j, key, len, value;
+    var arr, credentialsCurrent, credentialsExecutable, credentialsHome, ex, folder, folderTasks, j, key, len, value;
     console.log("");
     console.log("#######################################################");
     console.log("###                 - IMGRecog.js -                 ###");
@@ -338,8 +338,9 @@
       arr.push(`${key}: ${value}`);
     }
     console.log(`Options: ${arr.join(" | ")}`);
-    credentialsExecutable = executableFolder + "credentials.json";
-    credentialsCurrent = currentFolder + "credentials.json";
+    credentialsExecutable = executableFolder + "imgrecog.json";
+    credentialsHome = "~/imgrecog.json";
+    credentialsCurrent = currentFolder + "imgrecog.json";
     try {
       // Create client, checking if a credentials.json file exists.
       if (fs.existsSync(credentialsCurrent)) {
@@ -347,6 +348,11 @@
           keyFilename: credentialsCurrent
         });
         console.log(`Using credentials from ${credentialsCurrent}`);
+      } else if (fs.existsSync(credentialsHome)) {
+        client = new vision.ImageAnnotatorClient({
+          keyFilename: credentialsHome
+        });
+        console.log(`Using credentials from ${credentialsHome}`);
       } else if (fs.existsSync(credentialsExecutable)) {
         client = new vision.ImageAnnotatorClient({
           keyFilename: credentialsExecutable
@@ -358,7 +364,7 @@
       }
     } catch (error) {
       ex = error;
-      console.error("Could not create a Vision API client, make sure you have defined credentials on a credentials.json file or environment variables.", ex);
+      console.error("Could not create a Vision API client, make sure you have defined credentials on a imgrecog.json file or environment variables.", ex);
     }
     console.log("");
     folderTasks = [];
