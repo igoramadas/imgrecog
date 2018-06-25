@@ -4,5 +4,5 @@
 .idea/
 .vscode/
 coverage/
-credentials.json
+imgrecog.json
 node_modules/

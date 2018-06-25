@@ -1,11 +1,13 @@
 async = require "async"
 fs = require "fs"
+os = require "os"
 path = require "path"
 vision = require "@google-cloud/vision"
 client = null
 
 # Get current and bin executable folder.
 currentFolder = process.cwd() + "/"
+homeFolder = os.homedir() + "/"
 executableFolder = path.dirname(require.main.filename) + "/"
 
 # Collection of image models.
@@ -24,11 +26,11 @@ fileQueue.drain = -> finished()
 # Default options.
 options = {
     decimals: 2
-    extensions: ["png", "jpg", "gif", "bpm", "tiff"]
-    faces: false
+    extensions: ["png", "jpg", "gif", "bpm", "raw", "webp"]
     labels: false
     landmarks: false
     logos: false
+    overwrite: false
     safe: false
     verbose: false
 }
@@ -36,10 +38,10 @@ options = {
 # Transforms safe search strings to score.
 likelyhood = {
     VERY_UNLIKELY: 0
-    UNLIKELY: 0.2
-    POSSIBLE: 0.5
-    LIKELY: 0.8
-    VERY_LIKELY: 1
+    UNLIKELY: 0.15
+    POSSIBLE: 0.45
+    LIKELY: 0.75
+    VERY_LIKELY: 0.95
 }
 
 # Set start time (Unix timestamp).
@@ -50,14 +52,14 @@ showHelp = ->
     console.log ""
     console.log "imgrecog.js <options> <folders>"
     console.log ""
-    console.log "  -faces        detect faces"
-    console.log "  -labels       detect labels"
-    console.log "  -landmarks    detect landmarks"
-    console.log "  -logos        detect logos"
-    console.log "  -safe         detect safe search"
-    console.log "  -all          detect all (same as enabling everything above)"
-    console.log "  -verbose      enable verbose"
-    console.log "  -help         help me (this screen)"
+    console.log "  -labels            detect labels"
+    console.log "  -landmarks         detect landmarks"
+    console.log "  -logos             detect logos"
+    console.log "  -safe              detect safe search"
+    console.log "  -all               detect all (same as enabling everything above)"
+    console.log "  -overwrite   -w    reprocess existing files / overwrite tags"
+    console.log "  -verbose     -v    enable verbose"
+    console.log "  -help        -h    help me (this screen)"
     console.log ""
     console.log ""
     console.log "Examples:"
@@ -65,8 +67,8 @@ showHelp = ->
     console.log "Detect labels and safe search on current directory"
     console.log "  $ imgrecog.js -labels -safe"
     console.log ""
-    console.log "Detect everything on specific directory"
-    console.log "  $ imgrecog.js -all /home/someuser/docs"
+    console.log "Detect everything and overwrite tags on specific directories"
+    console.log "  $ imgrecog.js -all -w /home/someuser/images /home/someuser/photos"
     console.log ""
 
 # Get parameters from command line.
@@ -84,14 +86,15 @@ getParams = ->
             when "-help"
                 showHelp()
                 return process.exit 0
+            when "-v", "-verbose"
+                options.verbose = true
+            when "-w", "-overwrite"
+                options.overwrite = true
             when "-all"
-                options.faces = true
                 options.labels = true
                 options.landmarks = true
                 options.logos = true
                 options.safe = true
-            when "-faces"
-                options.faces = true
             when "-labels"
                 options.labels = true
             when "-landmarks"
@@ -100,8 +103,6 @@ getParams = ->
                 options.logos = true
             when "-safe"
                 options.safe = true
-            when "-verbose"
-                options.verbose = true
             else
                 folders.push p
 
@@ -117,72 +118,93 @@ getParams = ->
 
 # Scan and process image file.
 scanFile = (filepath, callback) ->
+    outputPath = filepath + ".tags"
     tags = {}
 
-    # Detect faces?
-    if options.faces
-        try
-            result = await client.faceDetection filepath
-            result = result[0].faceAnnotations
-            result.filepath = filepath
-            console.dir result if options.verbose
+    # File was processed before?
+    exists = fs.existsSync outputPath
 
-            # Iterate faces and add expressions as tags.
-            for face in result
-                for key, value of face.description
-                    tags[key] = likelyhood[value]
-
-        catch ex
-            console.error filepath, "detect faces", ex
+    if exists
+        if options.overwrite
+            console.log filepath, "already processed, overwrite" if options.verbose
+        else
+            console.log filepath, "already processed, skip" if options.verbose
+            return
 
     # Detect labels?
     if options.labels
         try
             result = await client.labelDetection filepath
             result = result[0].labelAnnotations
-            result.filepath = filepath
-            console.dir result if options.verbose
+            logtext = []
 
             # Add labels as tags.
             for label in result
-                tags[label.description] = label.score.toFixed options.decimals
+                score = label.score.toFixed options.decimals
+                logtext.push "#{label.description}:#{score}"
+                tags[label.description] = score
 
+            if options.verbose and logtext.length > 0
+                console.log filepath, "labels", logtext.join(", ")
         catch ex
-            console.error filepath, "detect labels", ex
+            console.error filepath, "labels", ex
 
     # Detect landmarks?
     if options.landmarks
         try
             result = await client.landmarkDetection filepath
             result = result[0].landmarkAnnotations
-            result.filepath = filepath
-            console.dir result if options.verbose
+            logtext = []
 
             # Add landmarks as tags.
             for r in result
                 for land in r.landmarks
-                    tags[land.description] = land.score.toFixed options.decimals
+                    score = land.score.toFixed options.decimals
+                    logtext.push "#{land.description}:#{score}"
+                    tags[land.description] = score
 
+            if options.verbose and logtext.length > 0
+                console.log filepath, "landmarks", logtext.join(", ")
         catch ex
-            console.error filepath, "detect landmarks", ex
+            console.error filepath, "landmarks", ex
+
+    # Detect logos?
+    if options.logos
+        try
+            result = await client.logoDetection filepath
+            result = result[0].logoAnnotations
+            logtext = []
+
+            # Add logos as tags.
+            for logo in result
+                score = logo.score.toFixed options.decimals
+                logtext.push "#{logo.description}:#{score}"
+                tags[logo.description] = score
+
+            if options.verbose and logtext.length > 0
+                console.log filepath, "logos", logtext.join(", ")
+        catch ex
+            console.error filepath, "logos", ex
 
     # Detect safe search?
     if options.safe
         try
             result = await client.safeSearchDetection filepath
             result = result[0].safeSearchAnnotation
-            result.filepath = filepath
-            console.dir result if options.verbose
+            logtext = []
 
             # Add safe search labels as tags.
             for key, value of result
-                tags[key] = likelyhood[value]
+                score = likelyhood[value]
+                logtext.push "#{key}:#{score}"
+                tags[key] = score
 
+            if options.verbose and logtext.length > 0
+                console.log filepath, "safe", logtext.join(", ")
         catch ex
-            console.error filepath, "detect safe search", ex
+            console.error filepath, "safe", ex
 
-    # Output file path and data.
-    outputPath = filepath + ".tags"
+    # Output data to JSON.
     outputData = JSON.stringify tags, null, 2
 
     # Write results to .json file.
@@ -217,7 +239,7 @@ scanFolder = (folder, callback) ->
                 if options.extensions.indexOf(ext) >= 0
                     fileQueue.push filepath
                 else if options.verbose
-                    console.log "Skip #{filepath}"
+                    console.log filepath, "extensions not included, skip"
         catch ex
             console.error "Error reading #{filepath}: #{ex}"
 
@@ -268,14 +290,18 @@ run = ->
 
     console.log "Options: #{arr.join(" | ")}"
 
-    credentialsExecutable = executableFolder + "credentials.json"
-    credentialsCurrent = currentFolder + "credentials.json"
+    credentialsExecutable = executableFolder + "imgrecog.json"
+    credentialsHome = homeFolder + "imgrecog.json"
+    credentialsCurrent = currentFolder + "imgrecog.json"
 
     # Create client, checking if a credentials.json file exists.
     try
         if fs.existsSync credentialsCurrent
             client = new vision.ImageAnnotatorClient {keyFilename: credentialsCurrent}
             console.log "Using credentials from #{credentialsCurrent}"
+         else if fs.existsSync credentialsHome
+            client = new vision.ImageAnnotatorClient {keyFilename: credentialsHome}
+            console.log "Using credentials from #{credentialsHome}"
         else if fs.existsSync credentialsExecutable
             client = new vision.ImageAnnotatorClient {keyFilename: credentialsExecutable}
             console.log "Using credentials from #{credentialsExecutable}"
@@ -283,7 +309,7 @@ run = ->
             client = new vision.ImageAnnotatorClient()
             console.log "Using credentials from environment variables"
     catch ex
-        console.error "Could not create a Vision API client, make sure you have defined credentials on a credentials.json file or environment variables.", ex
+        console.error "Could not create a Vision API client, make sure you have defined credentials on a imgrecog.json file or environment variables.", ex
 
     console.log ""
     folderTasks = []
@@ -297,8 +323,6 @@ run = ->
 
     # Run folder scanning tasks in parallel.
     async.parallelLimit folderTasks, 2
-
-    return await true
 
 # Unhandled rejections goes here.
 process.on "unhandledRejection", (reason, p) ->

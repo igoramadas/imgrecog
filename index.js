@@ -1,9 +1,11 @@
 (function() {
-  var async, client, currentFolder, executableFolder, fileQueue, finished, folders, fs, getParams, images, likelyhood, options, path, queueProcessor, run, scanFile, scanFolder, showHelp, startTime, vision;
+  var async, client, currentFolder, executableFolder, fileQueue, finished, folders, fs, getParams, homeFolder, images, likelyhood, options, os, path, queueProcessor, run, scanFile, scanFolder, showHelp, startTime, vision;
 
   async = require("async");
 
   fs = require("fs");
+
+  os = require("os");
 
   path = require("path");
 
@@ -13,6 +15,8 @@
 
   // Get current and bin executable folder.
   currentFolder = process.cwd() + "/";
+
+  homeFolder = os.homedir() + "/";
 
   executableFolder = path.dirname(require.main.filename) + "/";
 
@@ -37,11 +41,11 @@
   // Default options.
   options = {
     decimals: 2,
-    extensions: ["png", "jpg", "gif", "bpm", "tiff"],
-    faces: false,
+    extensions: ["png", "jpg", "gif", "bpm", "raw", "webp"],
     labels: false,
     landmarks: false,
     logos: false,
+    overwrite: false,
     safe: false,
     verbose: false
   };
@@ -49,10 +53,10 @@
   // Transforms safe search strings to score.
   likelyhood = {
     VERY_UNLIKELY: 0,
-    UNLIKELY: 0.2,
-    POSSIBLE: 0.5,
-    LIKELY: 0.8,
-    VERY_LIKELY: 1
+    UNLIKELY: 0.15,
+    POSSIBLE: 0.45,
+    LIKELY: 0.75,
+    VERY_LIKELY: 0.95
   };
 
   // Set start time (Unix timestamp).
@@ -63,14 +67,14 @@
     console.log("");
     console.log("imgrecog.js <options> <folders>");
     console.log("");
-    console.log("  -faces        detect faces");
-    console.log("  -labels       detect labels");
-    console.log("  -landmarks    detect landmarks");
-    console.log("  -logos        detect logos");
-    console.log("  -safe         detect safe search");
-    console.log("  -all          detect all (same as enabling everything above)");
-    console.log("  -verbose      enable verbose");
-    console.log("  -help         help me (this screen)");
+    console.log("  -labels            detect labels");
+    console.log("  -landmarks         detect landmarks");
+    console.log("  -logos             detect logos");
+    console.log("  -safe              detect safe search");
+    console.log("  -all               detect all (same as enabling everything above)");
+    console.log("  -overwrite   -w    reprocess existing files / overwrite tags");
+    console.log("  -verbose     -v    enable verbose");
+    console.log("  -help        -h    help me (this screen)");
     console.log("");
     console.log("");
     console.log("Examples:");
@@ -78,8 +82,8 @@
     console.log("Detect labels and safe search on current directory");
     console.log("  $ imgrecog.js -labels -safe");
     console.log("");
-    console.log("Detect everything on specific directory");
-    console.log("  $ imgrecog.js -all /home/someuser/docs");
+    console.log("Detect everything and overwrite tags on specific directories");
+    console.log("  $ imgrecog.js -all -w /home/someuser/images /home/someuser/photos");
     return console.log("");
   };
 
@@ -99,15 +103,19 @@
         case "-help":
           showHelp();
           return process.exit(0);
+        case "-v":
+        case "-verbose":
+          options.verbose = true;
+          break;
+        case "-w":
+        case "-overwrite":
+          options.overwrite = true;
+          break;
         case "-all":
-          options.faces = true;
           options.labels = true;
           options.landmarks = true;
           options.logos = true;
           options.safe = true;
-          break;
-        case "-faces":
-          options.faces = true;
           break;
         case "-labels":
           options.labels = true;
@@ -120,9 +128,6 @@
           break;
         case "-safe":
           options.safe = true;
-          break;
-        case "-verbose":
-          options.verbose = true;
           break;
         default:
           folders.push(p);
@@ -144,29 +149,21 @@
 
   // Scan and process image file.
   scanFile = async function(filepath, callback) {
-    var ex, face, j, k, key, l, label, land, len, len1, len2, len3, m, outputData, outputPath, r, ref, ref1, result, tags, value;
+    var ex, exists, j, k, key, l, label, land, len, len1, len2, len3, logo, logtext, m, outputData, outputPath, r, ref, result, score, tags, value;
+    outputPath = filepath + ".tags";
     tags = {};
-    // Detect faces?
-    if (options.faces) {
-      try {
-        result = (await client.faceDetection(filepath));
-        result = result[0].faceAnnotations;
-        result.filepath = filepath;
+    // File was processed before?
+    exists = fs.existsSync(outputPath);
+    if (exists) {
+      if (options.overwrite) {
         if (options.verbose) {
-          console.dir(result);
+          console.log(filepath, "already processed, overwrite");
         }
-// Iterate faces and add expressions as tags.
-        for (j = 0, len = result.length; j < len; j++) {
-          face = result[j];
-          ref = face.description;
-          for (key in ref) {
-            value = ref[key];
-            tags[key] = likelyhood[value];
-          }
+      } else {
+        if (options.verbose) {
+          console.log(filepath, "already processed, skip");
         }
-      } catch (error) {
-        ex = error;
-        console.error(filepath, "detect faces", ex);
+        return;
       }
     }
     // Detect labels?
@@ -174,18 +171,20 @@
       try {
         result = (await client.labelDetection(filepath));
         result = result[0].labelAnnotations;
-        result.filepath = filepath;
-        if (options.verbose) {
-          console.dir(result);
-        }
+        logtext = [];
 // Add labels as tags.
-        for (k = 0, len1 = result.length; k < len1; k++) {
-          label = result[k];
-          tags[label.description] = label.score.toFixed(options.decimals);
+        for (j = 0, len = result.length; j < len; j++) {
+          label = result[j];
+          score = label.score.toFixed(options.decimals);
+          logtext.push(`${label.description}:${score}`);
+          tags[label.description] = score;
+        }
+        if (options.verbose && logtext.length > 0) {
+          console.log(filepath, "labels", logtext.join(", "));
         }
       } catch (error) {
         ex = error;
-        console.error(filepath, "detect labels", ex);
+        console.error(filepath, "labels", ex);
       }
     }
     // Detect landmarks?
@@ -193,22 +192,45 @@
       try {
         result = (await client.landmarkDetection(filepath));
         result = result[0].landmarkAnnotations;
-        result.filepath = filepath;
-        if (options.verbose) {
-          console.dir(result);
-        }
+        logtext = [];
 // Add landmarks as tags.
-        for (l = 0, len2 = result.length; l < len2; l++) {
-          r = result[l];
-          ref1 = r.landmarks;
-          for (m = 0, len3 = ref1.length; m < len3; m++) {
-            land = ref1[m];
-            tags[land.description] = land.score.toFixed(options.decimals);
+        for (k = 0, len1 = result.length; k < len1; k++) {
+          r = result[k];
+          ref = r.landmarks;
+          for (l = 0, len2 = ref.length; l < len2; l++) {
+            land = ref[l];
+            score = land.score.toFixed(options.decimals);
+            logtext.push(`${land.description}:${score}`);
+            tags[land.description] = score;
           }
+        }
+        if (options.verbose && logtext.length > 0) {
+          console.log(filepath, "landmarks", logtext.join(", "));
         }
       } catch (error) {
         ex = error;
-        console.error(filepath, "detect landmarks", ex);
+        console.error(filepath, "landmarks", ex);
+      }
+    }
+    // Detect logos?
+    if (options.logos) {
+      try {
+        result = (await client.logoDetection(filepath));
+        result = result[0].logoAnnotations;
+        logtext = [];
+// Add logos as tags.
+        for (m = 0, len3 = result.length; m < len3; m++) {
+          logo = result[m];
+          score = logo.score.toFixed(options.decimals);
+          logtext.push(`${logo.description}:${score}`);
+          tags[logo.description] = score;
+        }
+        if (options.verbose && logtext.length > 0) {
+          console.log(filepath, "logos", logtext.join(", "));
+        }
+      } catch (error) {
+        ex = error;
+        console.error(filepath, "logos", ex);
       }
     }
     // Detect safe search?
@@ -216,22 +238,23 @@
       try {
         result = (await client.safeSearchDetection(filepath));
         result = result[0].safeSearchAnnotation;
-        result.filepath = filepath;
-        if (options.verbose) {
-          console.dir(result);
-        }
+        logtext = [];
 // Add safe search labels as tags.
         for (key in result) {
           value = result[key];
-          tags[key] = likelyhood[value];
+          score = likelyhood[value];
+          logtext.push(`${key}:${score}`);
+          tags[key] = score;
+        }
+        if (options.verbose && logtext.length > 0) {
+          console.log(filepath, "safe", logtext.join(", "));
         }
       } catch (error) {
         ex = error;
-        console.error(filepath, "detect safe search", ex);
+        console.error(filepath, "safe", ex);
       }
     }
-    // Output file path and data.
-    outputPath = filepath + ".tags";
+    // Output data to JSON.
     outputData = JSON.stringify(tags, null, 2);
     try {
       // Write results to .json file.
@@ -269,7 +292,7 @@
           if (options.extensions.indexOf(ext) >= 0) {
             return fileQueue.push(filepath);
           } else if (options.verbose) {
-            return console.log(`Skip ${filepath}`);
+            return console.log(filepath, "extensions not included, skip");
           }
         }
       } catch (error) {
@@ -314,8 +337,8 @@
   };
 
   // Run it!
-  run = async function() {
-    var arr, credentialsCurrent, credentialsExecutable, ex, folder, folderTasks, j, key, len, value;
+  run = function() {
+    var arr, credentialsCurrent, credentialsExecutable, credentialsHome, ex, folder, folderTasks, j, key, len, value;
     console.log("");
     console.log("#######################################################");
     console.log("###                 - IMGRecog.js -                 ###");
@@ -330,8 +353,9 @@
       arr.push(`${key}: ${value}`);
     }
     console.log(`Options: ${arr.join(" | ")}`);
-    credentialsExecutable = executableFolder + "credentials.json";
-    credentialsCurrent = currentFolder + "credentials.json";
+    credentialsExecutable = executableFolder + "imgrecog.json";
+    credentialsHome = homeFolder + "imgrecog.json";
+    credentialsCurrent = currentFolder + "imgrecog.json";
     try {
       // Create client, checking if a credentials.json file exists.
       if (fs.existsSync(credentialsCurrent)) {
@@ -339,6 +363,11 @@
           keyFilename: credentialsCurrent
         });
         console.log(`Using credentials from ${credentialsCurrent}`);
+      } else if (fs.existsSync(credentialsHome)) {
+        client = new vision.ImageAnnotatorClient({
+          keyFilename: credentialsHome
+        });
+        console.log(`Using credentials from ${credentialsHome}`);
       } else if (fs.existsSync(credentialsExecutable)) {
         client = new vision.ImageAnnotatorClient({
           keyFilename: credentialsExecutable
@@ -350,7 +379,7 @@
       }
     } catch (error) {
       ex = error;
-      console.error("Could not create a Vision API client, make sure you have defined credentials on a credentials.json file or environment variables.", ex);
+      console.error("Could not create a Vision API client, make sure you have defined credentials on a imgrecog.json file or environment variables.", ex);
     }
     console.log("");
     folderTasks = [];
@@ -366,8 +395,7 @@
     }
     console.log("");
     // Run folder scanning tasks in parallel.
-    async.parallelLimit(folderTasks, 2);
-    return (await true);
+    return async.parallelLimit(folderTasks, 2);
   };
 
   // Unhandled rejections goes here.

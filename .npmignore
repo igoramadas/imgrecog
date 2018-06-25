@@ -4,5 +4,6 @@
 .git*
 .vscode/
 docs/
+imgrecog.json
 index.html
 index.coffee
