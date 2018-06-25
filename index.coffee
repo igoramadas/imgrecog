@@ -24,11 +24,12 @@ fileQueue.drain = -> finished()
 # Default options.
 options = {
     decimals: 2
-    extensions: ["png", "jpg", "gif", "bpm", "tiff"]
+    extensions: ["png", "jpg", "gif", "bpm", "raw", ".webp"]
     faces: false
     labels: false
     landmarks: false
     logos: false
+    overwrite: false
     safe: false
     verbose: false
 }
@@ -36,10 +37,10 @@ options = {
 # Transforms safe search strings to score.
 likelyhood = {
     VERY_UNLIKELY: 0
-    UNLIKELY: 0.2
-    POSSIBLE: 0.5
-    LIKELY: 0.8
-    VERY_LIKELY: 1
+    UNLIKELY: 0.15
+    POSSIBLE: 0.45
+    LIKELY: 0.75
+    VERY_LIKELY: 0.95
 }
 
 # Set start time (Unix timestamp).
@@ -50,14 +51,15 @@ showHelp = ->
     console.log ""
     console.log "imgrecog.js <options> <folders>"
     console.log ""
-    console.log "  -fa     -faces        detect faces"
-    console.log "  -lb     -labels       detect labels"
-    console.log "  -ln     -landmarks    detect landmarks"
-    console.log "  -lg     -logos        detect logos"
-    console.log "  -sf     -safe         detect safe search"
-    console.log "  -a      -all          detect all (same as enabling everything above)"
-    console.log "  -v      -verbose      enable verbose"
-    console.log "  -h      -help         help me (this screen)"
+    console.log "  -faces             detect faces"
+    console.log "  -labels            detect labels"
+    console.log "  -landmarks         detect landmarks"
+    console.log "  -logos             detect logos"
+    console.log "  -safe              detect safe search"
+    console.log "  -all               detect all (same as enabling everything above)"
+    console.log "  -overwrite   -w    reprocess existing files / overwrite tags"
+    console.log "  -verbose     -v    enable verbose"
+    console.log "  -help        -h    help me (this screen)"
     console.log ""
     console.log ""
     console.log "Examples:"
@@ -84,24 +86,26 @@ getParams = ->
             when "-h", "-help"
                 showHelp()
                 return process.exit 0
-            when "-a", "-all"
-                options.faces = true
-                options.labels = true
-                options.landmarks = true
-                options.logos = true
-                options.safe = true
-            when "-fa", "-faces"
-                options.faces = true
-            when "-lb", "-labels"
-                options.labels = true
-            when "-ln", "-landmarks"
-                options.landmarks = true
-            when "-lg", "-logos"
-                options.logos = true
-            when "-sf", "-safe"
-                options.safe = true
             when "-v", "-verbose"
                 options.verbose = true
+            when "-w", "-overwrite"
+                options.overwrite = true
+            when "-all"
+                options.faces = true
+                options.labels = true
+                options.landmarks = true
+                options.logos = true
+                options.safe = true
+            when "-faces"
+                options.faces = true
+            when "-labels"
+                options.labels = true
+            when "-landmarks"
+                options.landmarks = true
+            when "-logos"
+                options.logos = true
+            when "-safe"
+                options.safe = true
             else
                 folders.push p
 
@@ -117,7 +121,18 @@ getParams = ->
 
 # Scan and process image file.
 scanFile = (filepath, callback) ->
+    outputPath = filepath + ".tags"
     tags = {}
+
+    # File was processed before?
+    exists = fs.existsSync outputPath
+
+    if exists?
+        if options.overwrite
+            console.log filepath, "already processed, will overwrite" if options.verbose
+        else
+            console.log filepath, "already processed, skip" if options.verbose
+            return
 
     # Detect faces?
     if options.faces
@@ -181,8 +196,7 @@ scanFile = (filepath, callback) ->
         catch ex
             console.error filepath, "detect safe search", ex
 
-    # Output file path and data.
-    outputPath = filepath + ".tags"
+    # Output data to JSON.
     outputData = JSON.stringify tags, null, 2
 
     # Write results to .json file.
@@ -217,7 +231,7 @@ scanFolder = (folder, callback) ->
                 if options.extensions.indexOf(ext) >= 0
                     fileQueue.push filepath
                 else if options.verbose
-                    console.log "Skip #{filepath}"
+                    console.log filepath, "extensions not included, skip"
         catch ex
             console.error "Error reading #{filepath}: #{ex}"
 

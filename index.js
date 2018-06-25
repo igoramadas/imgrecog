@@ -37,11 +37,12 @@
   // Default options.
   options = {
     decimals: 2,
-    extensions: ["png", "jpg", "gif", "bpm", "tiff"],
+    extensions: ["png", "jpg", "gif", "bpm", "raw", ".webp"],
     faces: false,
     labels: false,
     landmarks: false,
     logos: false,
+    overwrite: false,
     safe: false,
     verbose: false
   };
@@ -49,10 +50,10 @@
   // Transforms safe search strings to score.
   likelyhood = {
     VERY_UNLIKELY: 0,
-    UNLIKELY: 0.2,
-    POSSIBLE: 0.5,
-    LIKELY: 0.8,
-    VERY_LIKELY: 1
+    UNLIKELY: 0.15,
+    POSSIBLE: 0.45,
+    LIKELY: 0.75,
+    VERY_LIKELY: 0.95
   };
 
   // Set start time (Unix timestamp).
@@ -63,14 +64,15 @@
     console.log("");
     console.log("imgrecog.js <options> <folders>");
     console.log("");
-    console.log("  -fa     -faces        detect faces");
-    console.log("  -lb     -labels       detect labels");
-    console.log("  -ln     -landmarks    detect landmarks");
-    console.log("  -lg     -logos        detect logos");
-    console.log("  -sf     -safe         detect safe search");
-    console.log("  -a      -all          detect all (same as enabling everything above)");
-    console.log("  -v      -verbose      enable verbose");
-    console.log("  -h      -help         help me (this screen)");
+    console.log("  -faces             detect faces");
+    console.log("  -labels            detect labels");
+    console.log("  -landmarks         detect landmarks");
+    console.log("  -logos             detect logos");
+    console.log("  -safe              detect safe search");
+    console.log("  -all               detect all (same as enabling everything above)");
+    console.log("  -overwrite   -w    reprocess existing files / overwrite tags");
+    console.log("  -verbose     -v    enable verbose");
+    console.log("  -help        -h    help me (this screen)");
     console.log("");
     console.log("");
     console.log("Examples:");
@@ -100,7 +102,14 @@
         case "-help":
           showHelp();
           return process.exit(0);
-        case "-a":
+        case "-v":
+        case "-verbose":
+          options.verbose = true;
+          break;
+        case "-w":
+        case "-overwrite":
+          options.overwrite = true;
+          break;
         case "-all":
           options.faces = true;
           options.labels = true;
@@ -108,29 +117,20 @@
           options.logos = true;
           options.safe = true;
           break;
-        case "-fa":
         case "-faces":
           options.faces = true;
           break;
-        case "-lb":
         case "-labels":
           options.labels = true;
           break;
-        case "-ln":
         case "-landmarks":
           options.landmarks = true;
           break;
-        case "-lg":
         case "-logos":
           options.logos = true;
           break;
-        case "-sf":
         case "-safe":
           options.safe = true;
-          break;
-        case "-v":
-        case "-verbose":
-          options.verbose = true;
           break;
         default:
           folders.push(p);
@@ -152,8 +152,23 @@
 
   // Scan and process image file.
   scanFile = async function(filepath, callback) {
-    var ex, face, j, k, key, l, label, land, len, len1, len2, len3, m, outputData, outputPath, r, ref, ref1, result, tags, value;
+    var ex, exists, face, j, k, key, l, label, land, len, len1, len2, len3, m, outputData, outputPath, r, ref, ref1, result, tags, value;
+    outputPath = filepath + ".tags";
     tags = {};
+    // File was processed before?
+    exists = fs.existsSync(outputPath);
+    if (exists != null) {
+      if (options.overwrite) {
+        if (options.verbose) {
+          console.log(filepath, "already processed, will overwrite");
+        }
+      } else {
+        if (options.verbose) {
+          console.log(filepath, "already processed, skip");
+        }
+        return;
+      }
+    }
     // Detect faces?
     if (options.faces) {
       try {
@@ -238,8 +253,7 @@
         console.error(filepath, "detect safe search", ex);
       }
     }
-    // Output file path and data.
-    outputPath = filepath + ".tags";
+    // Output data to JSON.
     outputData = JSON.stringify(tags, null, 2);
     try {
       // Write results to .json file.
@@ -277,7 +291,7 @@
           if (options.extensions.indexOf(ext) >= 0) {
             return fileQueue.push(filepath);
           } else if (options.verbose) {
-            return console.log(`Skip ${filepath}`);
+            return console.log(filepath, "extensions not included, skip");
           }
         }
       } catch (error) {
