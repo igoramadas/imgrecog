@@ -1,9 +1,11 @@
 (function() {
-  var async, client, currentFolder, executableFolder, fileQueue, finished, folders, fs, getParams, images, likelyhood, options, path, queueProcessor, run, scanFile, scanFolder, showHelp, startTime, vision;
+  var async, client, currentFolder, executableFolder, fileQueue, finished, folders, fs, getParams, homeFolder, images, likelyhood, options, os, path, queueProcessor, run, scanFile, scanFolder, showHelp, startTime, vision;
 
   async = require("async");
 
   fs = require("fs");
+
+  os = require("os");
 
   path = require("path");
 
@@ -13,6 +15,8 @@
 
   // Get current and bin executable folder.
   currentFolder = process.cwd() + "/";
+
+  homeFolder = os.homedir() + "/";
 
   executableFolder = path.dirname(require.main.filename) + "/";
 
@@ -37,8 +41,7 @@
   // Default options.
   options = {
     decimals: 2,
-    extensions: ["png", "jpg", "gif", "bpm", "raw", ".webp"],
-    faces: false,
+    extensions: ["png", "jpg", "gif", "bpm", "raw", "webp"],
     labels: false,
     landmarks: false,
     logos: false,
@@ -64,7 +67,6 @@
     console.log("");
     console.log("imgrecog.js <options> <folders>");
     console.log("");
-    console.log("  -faces             detect faces");
     console.log("  -labels            detect labels");
     console.log("  -landmarks         detect landmarks");
     console.log("  -logos             detect logos");
@@ -111,14 +113,10 @@
           options.overwrite = true;
           break;
         case "-all":
-          options.faces = true;
           options.labels = true;
           options.landmarks = true;
           options.logos = true;
           options.safe = true;
-          break;
-        case "-faces":
-          options.faces = true;
           break;
         case "-labels":
           options.labels = true;
@@ -152,12 +150,12 @@
 
   // Scan and process image file.
   scanFile = async function(filepath, callback) {
-    var ex, exists, face, j, k, key, l, label, land, len, len1, len2, len3, len4, logo, m, n, outputData, outputPath, r, ref, ref1, result, tags, value;
+    var ex, exists, j, k, key, l, label, land, len, len1, len2, len3, logo, logtext, m, outputData, outputPath, r, ref, result, score, tags, value;
     outputPath = filepath + ".tags";
     tags = {};
     // File was processed before?
     exists = fs.existsSync(outputPath);
-    if (exists != null) {
+    if (exists) {
       if (options.overwrite) {
         if (options.verbose) {
           console.log(filepath, "already processed, overwrite");
@@ -169,46 +167,25 @@
         return;
       }
     }
-    // Detect faces?
-    if (options.faces) {
-      try {
-        result = (await client.faceDetection(filepath));
-        result = result[0].faceAnnotations;
-        result.filepath = filepath;
-// Iterate faces and add expressions as tags.
-        for (j = 0, len = result.length; j < len; j++) {
-          face = result[j];
-          ref = face.description;
-          for (key in ref) {
-            value = ref[key];
-            tags[key] = likelyhood[value];
-          }
-        }
-        if (options.verbose) {
-          console.log(filepath, `faces: ${JSON.stringify(result, null, 0)}`);
-        }
-      } catch (error) {
-        ex = error;
-        console.error(filepath, "detect faces", ex);
-      }
-    }
     // Detect labels?
     if (options.labels) {
       try {
         result = (await client.labelDetection(filepath));
         result = result[0].labelAnnotations;
-        result.filepath = filepath;
+        logtext = [];
 // Add labels as tags.
-        for (k = 0, len1 = result.length; k < len1; k++) {
-          label = result[k];
-          tags[label.description] = label.score.toFixed(options.decimals);
+        for (j = 0, len = result.length; j < len; j++) {
+          label = result[j];
+          score = label.score.toFixed(options.decimals);
+          logtext.push(`${label.description}:${score}`);
+          tags[label.description] = score;
         }
-        if (options.verbose) {
-          console.log(filepath, `labels: ${JSON.stringify(result, null, 0)}`);
+        if (options.verbose && logtext.length > 0) {
+          console.log(filepath, "labels", logtext.join(", "));
         }
       } catch (error) {
         ex = error;
-        console.error(filepath, "detect labels", ex);
+        console.error(filepath, "labels", ex);
       }
     }
     // Detect landmarks?
@@ -216,22 +193,24 @@
       try {
         result = (await client.landmarkDetection(filepath));
         result = result[0].landmarkAnnotations;
-        result.filepath = filepath;
+        logtext = [];
 // Add landmarks as tags.
-        for (l = 0, len2 = result.length; l < len2; l++) {
-          r = result[l];
-          ref1 = r.landmarks;
-          for (m = 0, len3 = ref1.length; m < len3; m++) {
-            land = ref1[m];
-            tags[land.description] = land.score.toFixed(options.decimals);
+        for (k = 0, len1 = result.length; k < len1; k++) {
+          r = result[k];
+          ref = r.landmarks;
+          for (l = 0, len2 = ref.length; l < len2; l++) {
+            land = ref[l];
+            score = land.score.toFixed(options.decimals);
+            logtext.push(`${land.description}:${score}`);
+            tags[land.description] = score;
           }
         }
-        if (options.verbose) {
-          console.log(filepath, `landmarks: ${JSON.stringify(result, null, 0)}`);
+        if (options.verbose && logtext.length > 0) {
+          console.log(filepath, "landmarks", logtext.join(", "));
         }
       } catch (error) {
         ex = error;
-        console.error(filepath, "detect landmarks", ex);
+        console.error(filepath, "landmarks", ex);
       }
     }
     // Detect logos?
@@ -239,18 +218,20 @@
       try {
         result = (await client.logoDetection(filepath));
         result = result[0].logoAnnotations;
-        result.filepath = filepath;
+        logtext = [];
 // Add logos as tags.
-        for (n = 0, len4 = result.length; n < len4; n++) {
-          logo = result[n];
-          tags[logo.description] = logo.score.toFixed(options.decimals);
+        for (m = 0, len3 = result.length; m < len3; m++) {
+          logo = result[m];
+          score = logo.score.toFixed(options.decimals);
+          logtext.push(`${logo.description}:${score}`);
+          tags[logo.description] = score;
         }
-        if (options.verbose) {
-          console.log(filepath, `logos: ${JSON.stringify(result, null, 0)}`);
+        if (options.verbose && logtext.length > 0) {
+          console.log(filepath, "logos", logtext.join(", "));
         }
       } catch (error) {
         ex = error;
-        console.error(filepath, "detect logos", ex);
+        console.error(filepath, "logos", ex);
       }
     }
     // Detect safe search?
@@ -258,19 +239,20 @@
       try {
         result = (await client.safeSearchDetection(filepath));
         result = result[0].safeSearchAnnotation;
-        result.filepath = filepath;
+        logtext = [];
 // Add safe search labels as tags.
         for (key in result) {
           value = result[key];
-          tags[key] = likelyhood[value];
-          keys.push(key);
+          score = likelyhood[value];
+          logtext.push(`${key}:${score}`);
+          tags[key] = score;
         }
-        if (options.verbose) {
-          console.log(filepath, `safe: ${JSON.stringify(result, null, 0)}`);
+        if (options.verbose && logtext.length > 0) {
+          console.log(filepath, "safe", logtext.join(", "));
         }
       } catch (error) {
         ex = error;
-        console.error(filepath, "detect safe search", ex);
+        console.error(filepath, "safe", ex);
       }
     }
     // Output data to JSON.
@@ -356,7 +338,7 @@
   };
 
   // Run it!
-  run = async function() {
+  run = function() {
     var arr, credentialsCurrent, credentialsExecutable, credentialsHome, ex, folder, folderTasks, j, key, len, value;
     console.log("");
     console.log("#######################################################");
@@ -373,7 +355,7 @@
     }
     console.log(`Options: ${arr.join(" | ")}`);
     credentialsExecutable = executableFolder + "imgrecog.json";
-    credentialsHome = "~/imgrecog.json";
+    credentialsHome = homeFolder + "imgrecog.json";
     credentialsCurrent = currentFolder + "imgrecog.json";
     try {
       // Create client, checking if a credentials.json file exists.
@@ -414,8 +396,7 @@
     }
     console.log("");
     // Run folder scanning tasks in parallel.
-    async.parallelLimit(folderTasks, 2);
-    return (await true);
+    return async.parallelLimit(folderTasks, 2);
   };
 
   // Unhandled rejections goes here.

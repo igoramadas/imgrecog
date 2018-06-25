@@ -1,11 +1,13 @@
 async = require "async"
 fs = require "fs"
+os = require "os"
 path = require "path"
 vision = require "@google-cloud/vision"
 client = null
 
 # Get current and bin executable folder.
 currentFolder = process.cwd() + "/"
+homeFolder = os.homedir() + "/"
 executableFolder = path.dirname(require.main.filename) + "/"
 
 # Collection of image models.
@@ -24,8 +26,7 @@ fileQueue.drain = -> finished()
 # Default options.
 options = {
     decimals: 2
-    extensions: ["png", "jpg", "gif", "bpm", "raw", ".webp"]
-    faces: false
+    extensions: ["png", "jpg", "gif", "bpm", "raw", "webp"]
     labels: false
     landmarks: false
     logos: false
@@ -51,7 +52,6 @@ showHelp = ->
     console.log ""
     console.log "imgrecog.js <options> <folders>"
     console.log ""
-    console.log "  -faces             detect faces"
     console.log "  -labels            detect labels"
     console.log "  -landmarks         detect landmarks"
     console.log "  -logos             detect logos"
@@ -91,13 +91,10 @@ getParams = ->
             when "-w", "-overwrite"
                 options.overwrite = true
             when "-all"
-                options.faces = true
                 options.labels = true
                 options.landmarks = true
                 options.logos = true
                 options.safe = true
-            when "-faces"
-                options.faces = true
             when "-labels"
                 options.labels = true
             when "-landmarks"
@@ -127,90 +124,85 @@ scanFile = (filepath, callback) ->
     # File was processed before?
     exists = fs.existsSync outputPath
 
-    if exists?
+    if exists
         if options.overwrite
             console.log filepath, "already processed, overwrite" if options.verbose
         else
             console.log filepath, "already processed, skip" if options.verbose
             return
 
-    # Detect faces?
-    if options.faces
-        try
-            result = await client.faceDetection filepath
-            result = result[0].faceAnnotations
-            result.filepath = filepath
-
-            # Iterate faces and add expressions as tags.
-            for face in result
-                for key, value of face.description
-                    tags[key] = likelyhood[value]
-
-            console.log filepath, "faces: #{JSON.stringify(result, null, 0)}" if options.verbose
-        catch ex
-            console.error filepath, "detect faces", ex
-
     # Detect labels?
     if options.labels
         try
             result = await client.labelDetection filepath
             result = result[0].labelAnnotations
-            result.filepath = filepath
+            logtext = []
 
             # Add labels as tags.
             for label in result
-                tags[label.description] = label.score.toFixed options.decimals
+                score = label.score.toFixed options.decimals
+                logtext.push "#{label.description}:#{score}"
+                tags[label.description] = score
 
-            console.log filepath, "labels: #{JSON.stringify(result, null, 0)}" if options.verbose
+            if options.verbose and logtext.length > 0
+                console.log filepath, "labels", logtext.join(", ")
         catch ex
-            console.error filepath, "detect labels", ex
+            console.error filepath, "labels", ex
 
     # Detect landmarks?
     if options.landmarks
         try
             result = await client.landmarkDetection filepath
             result = result[0].landmarkAnnotations
-            result.filepath = filepath
+            logtext = []
 
             # Add landmarks as tags.
             for r in result
                 for land in r.landmarks
-                    tags[land.description] = land.score.toFixed options.decimals
+                    score = land.score.toFixed options.decimals
+                    logtext.push "#{land.description}:#{score}"
+                    tags[land.description] = score
 
-            console.log filepath, "landmarks: #{JSON.stringify(result, null, 0)}" if options.verbose
+            if options.verbose and logtext.length > 0
+                console.log filepath, "landmarks", logtext.join(", ")
         catch ex
-            console.error filepath, "detect landmarks", ex
+            console.error filepath, "landmarks", ex
 
     # Detect logos?
     if options.logos
         try
             result = await client.logoDetection filepath
             result = result[0].logoAnnotations
-            result.filepath = filepath
+            logtext = []
 
             # Add logos as tags.
             for logo in result
-                tags[logo.description] = logo.score.toFixed options.decimals
+                score = logo.score.toFixed options.decimals
+                logtext.push "#{logo.description}:#{score}"
+                tags[logo.description] = score
 
-            console.log filepath, "logos: #{JSON.stringify(result, null, 0)}" if options.verbose
+            if options.verbose and logtext.length > 0
+                console.log filepath, "logos", logtext.join(", ")
         catch ex
-            console.error filepath, "detect logos", ex
+            console.error filepath, "logos", ex
 
     # Detect safe search?
     if options.safe
         try
             result = await client.safeSearchDetection filepath
             result = result[0].safeSearchAnnotation
-            result.filepath = filepath
+            logtext = []
 
             # Add safe search labels as tags.
             for key, value of result
-                tags[key] = likelyhood[value]
-                keys.push key
+                score = likelyhood[value]
+                logtext.push "#{key}:#{score}"
+                tags[key] = score
 
-            console.log filepath, "safe: #{JSON.stringify(result, null, 0)}" if options.verbose
+            if options.verbose and logtext.length > 0
+                console.log filepath, "safe", logtext.join(", ")
         catch ex
-            console.error filepath, "detect safe search", ex
+            console.error filepath, "safe", ex
 
     # Output data to JSON.
     outputData = JSON.stringify tags, null, 2
@@ -299,7 +291,7 @@ run = ->
     console.log "Options: #{arr.join(" | ")}"
 
     credentialsExecutable = executableFolder + "imgrecog.json"
-    credentialsHome = "~/imgrecog.json"
+    credentialsHome = homeFolder + "imgrecog.json"
     credentialsCurrent = currentFolder + "imgrecog.json"
 
     # Create client, checking if a credentials.json file exists.
@@ -331,8 +323,6 @@ run = ->
 
     # Run folder scanning tasks in parallel.
     async.parallelLimit folderTasks, 2
-
-    return await true
 
 # Unhandled rejections goes here.
 process.on "unhandledRejection", (reason, p) ->
