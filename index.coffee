@@ -67,8 +67,8 @@ showHelp = ->
     console.log "Detect labels and safe search on current directory"
     console.log "  $ imgrecog.js -labels -safe"
     console.log ""
-    console.log "Detect everything on specific directory"
-    console.log "  $ imgrecog.js -a /home/someuser/docs"
+    console.log "Detect everything and overwrite tags on specific directories"
+    console.log "  $ imgrecog.js -all -w /home/someuser/images /home/someuser/photos"
     console.log ""
 
 # Get parameters from command line.
@@ -129,7 +129,7 @@ scanFile = (filepath, callback) ->
 
     if exists?
         if options.overwrite
-            console.log filepath, "already processed, will overwrite" if options.verbose
+            console.log filepath, "already processed, overwrite" if options.verbose
         else
             console.log filepath, "already processed, skip" if options.verbose
             return
@@ -140,13 +140,13 @@ scanFile = (filepath, callback) ->
             result = await client.faceDetection filepath
             result = result[0].faceAnnotations
             result.filepath = filepath
-            console.dir result if options.verbose
 
             # Iterate faces and add expressions as tags.
             for face in result
                 for key, value of face.description
                     tags[key] = likelyhood[value]
 
+            console.log filepath, "faces: #{JSON.stringify(result, null, 0)}" if options.verbose
         catch ex
             console.error filepath, "detect faces", ex
 
@@ -156,12 +156,12 @@ scanFile = (filepath, callback) ->
             result = await client.labelDetection filepath
             result = result[0].labelAnnotations
             result.filepath = filepath
-            console.dir result if options.verbose
 
             # Add labels as tags.
             for label in result
                 tags[label.description] = label.score.toFixed options.decimals
 
+            console.log filepath, "labels: #{JSON.stringify(result, null, 0)}" if options.verbose
         catch ex
             console.error filepath, "detect labels", ex
 
@@ -171,15 +171,30 @@ scanFile = (filepath, callback) ->
             result = await client.landmarkDetection filepath
             result = result[0].landmarkAnnotations
             result.filepath = filepath
-            console.dir result if options.verbose
 
             # Add landmarks as tags.
             for r in result
                 for land in r.landmarks
                     tags[land.description] = land.score.toFixed options.decimals
 
+            console.log filepath, "landmarks: #{JSON.stringify(result, null, 0)}" if options.verbose
         catch ex
             console.error filepath, "detect landmarks", ex
+
+    # Detect logos?
+    if options.logos
+        try
+            result = await client.logoDetection filepath
+            result = result[0].logoAnnotations
+            result.filepath = filepath
+
+            # Add logos as tags.
+            for logo in result
+                tags[logo.description] = logo.score.toFixed options.decimals
+
+            console.log filepath, "logos: #{JSON.stringify(result, null, 0)}" if options.verbose
+        catch ex
+            console.error filepath, "detect logos", ex
 
     # Detect safe search?
     if options.safe
@@ -187,12 +202,13 @@ scanFile = (filepath, callback) ->
             result = await client.safeSearchDetection filepath
             result = result[0].safeSearchAnnotation
             result.filepath = filepath
-            console.dir result if options.verbose
 
             # Add safe search labels as tags.
             for key, value of result
                 tags[key] = likelyhood[value]
+                keys.push key
 
+            console.log filepath, "safe: #{JSON.stringify(result, null, 0)}" if options.verbose
         catch ex
             console.error filepath, "detect safe search", ex
 

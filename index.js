@@ -80,8 +80,8 @@
     console.log("Detect labels and safe search on current directory");
     console.log("  $ imgrecog.js -labels -safe");
     console.log("");
-    console.log("Detect everything on specific directory");
-    console.log("  $ imgrecog.js -a /home/someuser/docs");
+    console.log("Detect everything and overwrite tags on specific directories");
+    console.log("  $ imgrecog.js -all -w /home/someuser/images /home/someuser/photos");
     return console.log("");
   };
 
@@ -152,7 +152,7 @@
 
   // Scan and process image file.
   scanFile = async function(filepath, callback) {
-    var ex, exists, face, j, k, key, l, label, land, len, len1, len2, len3, m, outputData, outputPath, r, ref, ref1, result, tags, value;
+    var ex, exists, face, j, k, key, l, label, land, len, len1, len2, len3, len4, logo, m, n, outputData, outputPath, r, ref, ref1, result, tags, value;
     outputPath = filepath + ".tags";
     tags = {};
     // File was processed before?
@@ -160,7 +160,7 @@
     if (exists != null) {
       if (options.overwrite) {
         if (options.verbose) {
-          console.log(filepath, "already processed, will overwrite");
+          console.log(filepath, "already processed, overwrite");
         }
       } else {
         if (options.verbose) {
@@ -175,9 +175,6 @@
         result = (await client.faceDetection(filepath));
         result = result[0].faceAnnotations;
         result.filepath = filepath;
-        if (options.verbose) {
-          console.dir(result);
-        }
 // Iterate faces and add expressions as tags.
         for (j = 0, len = result.length; j < len; j++) {
           face = result[j];
@@ -186,6 +183,9 @@
             value = ref[key];
             tags[key] = likelyhood[value];
           }
+        }
+        if (options.verbose) {
+          console.log(filepath, `faces: ${JSON.stringify(result, null, 0)}`);
         }
       } catch (error) {
         ex = error;
@@ -198,13 +198,13 @@
         result = (await client.labelDetection(filepath));
         result = result[0].labelAnnotations;
         result.filepath = filepath;
-        if (options.verbose) {
-          console.dir(result);
-        }
 // Add labels as tags.
         for (k = 0, len1 = result.length; k < len1; k++) {
           label = result[k];
           tags[label.description] = label.score.toFixed(options.decimals);
+        }
+        if (options.verbose) {
+          console.log(filepath, `labels: ${JSON.stringify(result, null, 0)}`);
         }
       } catch (error) {
         ex = error;
@@ -217,9 +217,6 @@
         result = (await client.landmarkDetection(filepath));
         result = result[0].landmarkAnnotations;
         result.filepath = filepath;
-        if (options.verbose) {
-          console.dir(result);
-        }
 // Add landmarks as tags.
         for (l = 0, len2 = result.length; l < len2; l++) {
           r = result[l];
@@ -229,9 +226,31 @@
             tags[land.description] = land.score.toFixed(options.decimals);
           }
         }
+        if (options.verbose) {
+          console.log(filepath, `landmarks: ${JSON.stringify(result, null, 0)}`);
+        }
       } catch (error) {
         ex = error;
         console.error(filepath, "detect landmarks", ex);
+      }
+    }
+    // Detect logos?
+    if (options.logos) {
+      try {
+        result = (await client.logoDetection(filepath));
+        result = result[0].logoAnnotations;
+        result.filepath = filepath;
+// Add logos as tags.
+        for (n = 0, len4 = result.length; n < len4; n++) {
+          logo = result[n];
+          tags[logo.description] = logo.score.toFixed(options.decimals);
+        }
+        if (options.verbose) {
+          console.log(filepath, `logos: ${JSON.stringify(result, null, 0)}`);
+        }
+      } catch (error) {
+        ex = error;
+        console.error(filepath, "detect logos", ex);
       }
     }
     // Detect safe search?
@@ -240,13 +259,14 @@
         result = (await client.safeSearchDetection(filepath));
         result = result[0].safeSearchAnnotation;
         result.filepath = filepath;
-        if (options.verbose) {
-          console.dir(result);
-        }
 // Add safe search labels as tags.
         for (key in result) {
           value = result[key];
           tags[key] = likelyhood[value];
+          keys.push(key);
+        }
+        if (options.verbose) {
+          console.log(filepath, `safe: ${JSON.stringify(result, null, 0)}`);
         }
       } catch (error) {
         ex = error;
