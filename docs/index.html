@@ -2,202 +2,125 @@
 
 <html>
 <head>
-  <title>index.coffee - Docs</title>
+  <title>index.coffee</title>
   <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-  <meta name="viewport" content="width=device-width, target-densitydpi=160dpi, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" media="all" href="public/stylesheets/normalize.css" />
   <link rel="stylesheet" media="all" href="docco.css" />
 </head>
 <body>
-  <div id="container">
-    <div id="background"></div>
-    
-    <ul class="sections">
-        
-          <li id="title">
-              <div class="annotation">
-                  <h1>index.coffee</h1>
-              </div>
-          </li>
-        
-        
-        
-        <li id="section-1">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-1">&#182;</a>
-              </div>
-              <p>Required dependencies.</p>
+  <div class="container">
+    <div class="page">
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>async = <span class="hljs-built_in">require</span> <span class="hljs-string">"async"</span>
+      <div class="header">
+        
+          <h1>index.coffee</h1>
+        
+
+        
+      </div>
+
+      
+        
+        
+        
+          <div class='highlight'><pre>async = <span class="hljs-built_in">require</span> <span class="hljs-string">"async"</span>
 fs = <span class="hljs-built_in">require</span> <span class="hljs-string">"fs"</span>
 path = <span class="hljs-built_in">require</span> <span class="hljs-string">"path"</span>
 vision = <span class="hljs-built_in">require</span> <span class="hljs-string">"@google-cloud/vision"</span>
-client = <span class="hljs-literal">null</span></pre></div></div>
-            
-        </li>
+client = <span class="hljs-literal">null</span></pre></div>
         
+      
         
-        <li id="section-2">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-2">&#182;</a>
-              </div>
-              <p>Get current executable folder.</p>
+        <p>Get current and bin executable folder.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>executableFolder = path.dirname(<span class="hljs-built_in">require</span>.main.filename) + <span class="hljs-string">"/"</span></pre></div></div>
-            
-        </li>
         
+          <div class='highlight'><pre>currentFolder = process.cwd() + <span class="hljs-string">"/"</span>
+executableFolder = path.dirname(<span class="hljs-built_in">require</span>.main.filename) + <span class="hljs-string">"/"</span></pre></div>
         
-        <li id="section-3">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-3">&#182;</a>
-              </div>
-              <p>Collection of image models.</p>
+      
+        
+        <p>Collection of image models.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>images = {}</pre></div></div>
-            
-        </li>
         
+          <div class='highlight'><pre>images = {}</pre></div>
         
-        <li id="section-4">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-4">&#182;</a>
-              </div>
-              <p>Collection of folders to scan.</p>
+      
+        
+        <p>Collection of folders to scan.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>folders = []</pre></div></div>
-            
-        </li>
         
+          <div class='highlight'><pre>folders = []</pre></div>
         
-        <li id="section-5">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-5">&#182;</a>
-              </div>
-              <p>Create file processor queue  to parse files against Google Vision.</p>
+      
+        
+        <p>Create file processor queue  to parse files against Google Vision.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">queueProcessor</span> = <span class="hljs-params">(filepath, callback)</span> -&gt;</span> scanFile filepath, callback
-fileQueue = async.queue queueProcessor, <span class="hljs-number">4</span></pre></div></div>
-            
-        </li>
         
+          <div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">queueProcessor</span> = <span class="hljs-params">(filepath, callback)</span> -&gt;</span> scanFile filepath, callback
+fileQueue = async.queue queueProcessor, <span class="hljs-number">4</span></pre></div>
         
-        <li id="section-6">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-6">&#182;</a>
-              </div>
-              <p>File processor queue will drain once we have processed all files.</p>
+      
+        
+        <p>File processor queue will drain once we have processed all files.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>fileQueue.drain = <span class="hljs-function">-&gt;</span> finished()</pre></div></div>
-            
-        </li>
         
+          <div class='highlight'><pre>fileQueue.drain = <span class="hljs-function">-&gt;</span> finished()</pre></div>
         
-        <li id="section-7">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-7">&#182;</a>
-              </div>
-              <p>Default options.</p>
+      
+        
+        <p>Default options.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>options = {
+        
+          <div class='highlight'><pre>options = {
     decimals: <span class="hljs-number">2</span>
-    extensions: [<span class="hljs-string">"png"</span>, <span class="hljs-string">"jpg"</span>, <span class="hljs-string">"gif"</span>, <span class="hljs-string">"bpm"</span>, <span class="hljs-string">"tiff"</span>]
+    extensions: [<span class="hljs-string">"png"</span>, <span class="hljs-string">"jpg"</span>, <span class="hljs-string">"gif"</span>, <span class="hljs-string">"bpm"</span>, <span class="hljs-string">"raw"</span>, <span class="hljs-string">".webp"</span>]
     faces: <span class="hljs-literal">false</span>
     labels: <span class="hljs-literal">false</span>
     landmarks: <span class="hljs-literal">false</span>
     logos: <span class="hljs-literal">false</span>
+    overwrite: <span class="hljs-literal">false</span>
     safe: <span class="hljs-literal">false</span>
     verbose: <span class="hljs-literal">false</span>
-}</pre></div></div>
-            
-        </li>
+}</pre></div>
         
+      
         
-        <li id="section-8">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
-              </div>
-              <p>Transforms safe search strings to score.</p>
+        <p>Transforms safe search strings to score.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>likelyhood = {
+        
+          <div class='highlight'><pre>likelyhood = {
     VERY_UNLIKELY: <span class="hljs-number">0</span>
-    UNLIKELY: <span class="hljs-number">0.2</span>
-    POSSIBLE: <span class="hljs-number">0.5</span>
-    LIKELY: <span class="hljs-number">0.8</span>
-    VERY_LIKELY: <span class="hljs-number">1</span>
-}</pre></div></div>
-            
-        </li>
+    UNLIKELY: <span class="hljs-number">0.15</span>
+    POSSIBLE: <span class="hljs-number">0.45</span>
+    LIKELY: <span class="hljs-number">0.75</span>
+    VERY_LIKELY: <span class="hljs-number">0.95</span>
+}</pre></div>
         
+      
         
-        <li id="section-9">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
-              </div>
-              <p>Set start time (Unix timestamp).</p>
+        <p>Set start time (Unix timestamp).</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>startTime = Date.now()</pre></div></div>
-            
-        </li>
         
+          <div class='highlight'><pre>startTime = Date.now()</pre></div>
         
-        <li id="section-10">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
-              </div>
-              <p>Show help on command line (imgrecog.js -help).</p>
+      
+        
+        <p>Show help on command line (imgrecog.js -help).</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">showHelp</span> = -&gt;</span>
+        
+          <div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">showHelp</span> = -&gt;</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"imgrecog.js &lt;options&gt; &lt;folders&gt;"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -fa     -faces        detect faces"</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -lb     -labels       detect labels"</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -ln     -landmarks    detect landmarks"</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -lg     -logos        detect logos"</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -sf     -safe         detect safe search"</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -a      -all          detect all (same as enabling everything above)"</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -v      -verbose      enable verbose"</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -h      -help         help me (this screen)"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -faces             detect faces"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -labels            detect labels"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -landmarks         detect landmarks"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -logos             detect logos"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -safe              detect safe search"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -all               detect all (same as enabling everything above)"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -overwrite   -w    reprocess existing files / overwrite tags"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -verbose     -v    enable verbose"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -help        -h    help me (this screen)"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Examples:"</span>
@@ -205,295 +128,228 @@ fileQueue = async.queue queueProcessor, <span class="hljs-number">4</span></pre>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Detect labels and safe search on current directory"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  $ imgrecog.js -labels -safe"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Detect everything on specific directory"</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  $ imgrecog.js -a /home/someuser/docs"</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span></pre></div></div>
-            
-        </li>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Detect everything and overwrite tags on specific directories"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  $ imgrecog.js -all -w /home/someuser/images /home/someuser/photos"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span></pre></div>
         
+      
         
-        <li id="section-11">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
-              </div>
-              <p>Get parameters from command line.</p>
+        <p>Get parameters from command line.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">getParams</span> = -&gt;</span>
-    params = Array::slice.call process.argv, <span class="hljs-number">2</span></pre></div></div>
-            
-        </li>
         
+          <div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">getParams</span> = -&gt;</span>
+    params = Array::slice.call process.argv, <span class="hljs-number">2</span></pre></div>
         
-        <li id="section-12">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
-              </div>
-              <p>No parameters? Show help.</p>
+      
+        
+        <p>No parameters? Show help.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> params.length <span class="hljs-keyword">is</span> <span class="hljs-number">0</span>
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">if</span> params.length <span class="hljs-keyword">is</span> <span class="hljs-number">0</span>
         showHelp()
-        <span class="hljs-keyword">return</span> process.exit <span class="hljs-number">0</span>
+        <span class="hljs-keyword">return</span> process.exit <span class="hljs-number">0</span></pre></div>
+        
+      
+        
+        <p>Check params…</p>
 
-    <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> params
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> params
         <span class="hljs-keyword">switch</span> p
             <span class="hljs-keyword">when</span> <span class="hljs-string">"-h"</span>, <span class="hljs-string">"-help"</span>
                 showHelp()
                 <span class="hljs-keyword">return</span> process.exit <span class="hljs-number">0</span>
-            <span class="hljs-keyword">when</span> <span class="hljs-string">"-a"</span>, <span class="hljs-string">"-all"</span>
-                options.faces = <span class="hljs-literal">true</span>
-                options.labels = <span class="hljs-literal">true</span>
-                options.landmarks = <span class="hljs-literal">true</span>
-                options.logos = <span class="hljs-literal">true</span>
-                options.safe = <span class="hljs-literal">true</span>
-            <span class="hljs-keyword">when</span> <span class="hljs-string">"-fa"</span>, <span class="hljs-string">"-faces"</span>
-                options.faces = <span class="hljs-literal">true</span>
-            <span class="hljs-keyword">when</span> <span class="hljs-string">"-lb"</span>, <span class="hljs-string">"-labels"</span>
-                options.labels = <span class="hljs-literal">true</span>
-            <span class="hljs-keyword">when</span> <span class="hljs-string">"-ln"</span>, <span class="hljs-string">"-landmarks"</span>
-                options.landmarks = <span class="hljs-literal">true</span>
-            <span class="hljs-keyword">when</span> <span class="hljs-string">"-lg"</span>, <span class="hljs-string">"-logos"</span>
-                options.logos = <span class="hljs-literal">true</span>
-            <span class="hljs-keyword">when</span> <span class="hljs-string">"-sf"</span>, <span class="hljs-string">"-safe"</span>
-                options.safe = <span class="hljs-literal">true</span>
             <span class="hljs-keyword">when</span> <span class="hljs-string">"-v"</span>, <span class="hljs-string">"-verbose"</span>
                 options.verbose = <span class="hljs-literal">true</span>
+            <span class="hljs-keyword">when</span> <span class="hljs-string">"-w"</span>, <span class="hljs-string">"-overwrite"</span>
+                options.overwrite = <span class="hljs-literal">true</span>
+            <span class="hljs-keyword">when</span> <span class="hljs-string">"-all"</span>
+                options.faces = <span class="hljs-literal">true</span>
+                options.labels = <span class="hljs-literal">true</span>
+                options.landmarks = <span class="hljs-literal">true</span>
+                options.logos = <span class="hljs-literal">true</span>
+                options.safe = <span class="hljs-literal">true</span>
+            <span class="hljs-keyword">when</span> <span class="hljs-string">"-faces"</span>
+                options.faces = <span class="hljs-literal">true</span>
+            <span class="hljs-keyword">when</span> <span class="hljs-string">"-labels"</span>
+                options.labels = <span class="hljs-literal">true</span>
+            <span class="hljs-keyword">when</span> <span class="hljs-string">"-landmarks"</span>
+                options.landmarks = <span class="hljs-literal">true</span>
+            <span class="hljs-keyword">when</span> <span class="hljs-string">"-logos"</span>
+                options.logos = <span class="hljs-literal">true</span>
+            <span class="hljs-keyword">when</span> <span class="hljs-string">"-safe"</span>
+                options.safe = <span class="hljs-literal">true</span>
             <span class="hljs-keyword">else</span>
-                folders.push p</pre></div></div>
-            
-        </li>
+                folders.push p</pre></div>
         
+      
         
-        <li id="section-13">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
-              </div>
-              <p>Exit if no folders were passed, search on current directory.</p>
+        <p>Exit if no folders were passed, search on current directory.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> folders.length &lt; <span class="hljs-number">1</span>
-        folders.push process.cwd
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">if</span> folders.length &lt; <span class="hljs-number">1</span>
+        folders.push currentFolder
         <span class="hljs-keyword">return</span> process.exit <span class="hljs-number">0</span>
 
     <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> folders
         <span class="hljs-keyword">if</span> f.substring(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>) <span class="hljs-keyword">is</span> <span class="hljs-string">"-"</span>
             <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Abort! Invalid option: <span class="hljs-subst">#{f}</span>. Use -help to get a list of available options."</span>
-            <span class="hljs-keyword">return</span> process.exit <span class="hljs-number">0</span></pre></div></div>
-            
-        </li>
+            <span class="hljs-keyword">return</span> process.exit <span class="hljs-number">0</span></pre></div>
         
+      
         
-        <li id="section-14">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
-              </div>
-              <p>Scan and process image file.</p>
+        <p>Scan and process image file.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">scanFile</span> = <span class="hljs-params">(filepath, callback)</span> -&gt;</span>
-    tags = {}</pre></div></div>
-            
-        </li>
         
+          <div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">scanFile</span> = <span class="hljs-params">(filepath, callback)</span> -&gt;</span>
+    outputPath = filepath + <span class="hljs-string">".tags"</span>
+    tags = {}</pre></div>
         
-        <li id="section-15">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
-              </div>
-              <p>Detect faces?</p>
+      
+        
+        <p>File was processed before?</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> options.faces
+        
+          <div class='highlight'><pre>    exists = fs.existsSync outputPath
+
+    <span class="hljs-keyword">if</span> exists?
+        <span class="hljs-keyword">if</span> options.overwrite
+            <span class="hljs-built_in">console</span>.log filepath, <span class="hljs-string">"already processed, overwrite"</span> <span class="hljs-keyword">if</span> options.verbose
+        <span class="hljs-keyword">else</span>
+            <span class="hljs-built_in">console</span>.log filepath, <span class="hljs-string">"already processed, skip"</span> <span class="hljs-keyword">if</span> options.verbose
+            <span class="hljs-keyword">return</span></pre></div>
+        
+      
+        
+        <p>Detect faces?</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">if</span> options.faces
         <span class="hljs-keyword">try</span>
             result = <span class="hljs-keyword">await</span> client.faceDetection filepath
             result = result[<span class="hljs-number">0</span>].faceAnnotations
-            result.filepath = filepath
-            <span class="hljs-built_in">console</span>.dir result <span class="hljs-keyword">if</span> options.verbose</pre></div></div>
-            
-        </li>
+            result.filepath = filepath</pre></div>
         
+      
         
-        <li id="section-16">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
-              </div>
-              <p>Iterate faces and add expressions as tags.</p>
+        <p>Iterate faces and add expressions as tags.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">for</span> face <span class="hljs-keyword">in</span> result
+        
+          <div class='highlight'><pre>            <span class="hljs-keyword">for</span> face <span class="hljs-keyword">in</span> result
                 <span class="hljs-keyword">for</span> key, value <span class="hljs-keyword">of</span> face.description
                     tags[key] = likelyhood[value]
 
+            <span class="hljs-built_in">console</span>.log filepath, <span class="hljs-string">"faces: <span class="hljs-subst">#{JSON.stringify(result, <span class="hljs-literal">null</span>, <span class="hljs-number">0</span>)}</span>"</span> <span class="hljs-keyword">if</span> options.verbose
         <span class="hljs-keyword">catch</span> ex
-            <span class="hljs-built_in">console</span>.error filepath, <span class="hljs-string">"detect faces"</span>, ex</pre></div></div>
-            
-        </li>
+            <span class="hljs-built_in">console</span>.error filepath, <span class="hljs-string">"detect faces"</span>, ex</pre></div>
         
+      
         
-        <li id="section-17">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
-              </div>
-              <p>Detect labels?</p>
+        <p>Detect labels?</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> options.labels
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">if</span> options.labels
         <span class="hljs-keyword">try</span>
             result = <span class="hljs-keyword">await</span> client.labelDetection filepath
             result = result[<span class="hljs-number">0</span>].labelAnnotations
-            result.filepath = filepath
-            <span class="hljs-built_in">console</span>.dir result <span class="hljs-keyword">if</span> options.verbose</pre></div></div>
-            
-        </li>
+            result.filepath = filepath</pre></div>
         
+      
         
-        <li id="section-18">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
-              </div>
-              <p>Add labels as tags.</p>
+        <p>Add labels as tags.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">for</span> label <span class="hljs-keyword">in</span> result
+        
+          <div class='highlight'><pre>            <span class="hljs-keyword">for</span> label <span class="hljs-keyword">in</span> result
                 tags[label.description] = label.score.toFixed options.decimals
 
+            <span class="hljs-built_in">console</span>.log filepath, <span class="hljs-string">"labels: <span class="hljs-subst">#{JSON.stringify(result, <span class="hljs-literal">null</span>, <span class="hljs-number">0</span>)}</span>"</span> <span class="hljs-keyword">if</span> options.verbose
         <span class="hljs-keyword">catch</span> ex
-            <span class="hljs-built_in">console</span>.error filepath, <span class="hljs-string">"detect labels"</span>, ex</pre></div></div>
-            
-        </li>
+            <span class="hljs-built_in">console</span>.error filepath, <span class="hljs-string">"detect labels"</span>, ex</pre></div>
         
+      
         
-        <li id="section-19">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
-              </div>
-              <p>Detect landmarks?</p>
+        <p>Detect landmarks?</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> options.landmarks
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">if</span> options.landmarks
         <span class="hljs-keyword">try</span>
             result = <span class="hljs-keyword">await</span> client.landmarkDetection filepath
             result = result[<span class="hljs-number">0</span>].landmarkAnnotations
-            result.filepath = filepath
-            <span class="hljs-built_in">console</span>.dir result <span class="hljs-keyword">if</span> options.verbose</pre></div></div>
-            
-        </li>
+            result.filepath = filepath</pre></div>
         
+      
         
-        <li id="section-20">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
-              </div>
-              <p>Add landmarks as tags.</p>
+        <p>Add landmarks as tags.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> result
+        
+          <div class='highlight'><pre>            <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> result
                 <span class="hljs-keyword">for</span> land <span class="hljs-keyword">in</span> r.landmarks
                     tags[land.description] = land.score.toFixed options.decimals
 
+            <span class="hljs-built_in">console</span>.log filepath, <span class="hljs-string">"landmarks: <span class="hljs-subst">#{JSON.stringify(result, <span class="hljs-literal">null</span>, <span class="hljs-number">0</span>)}</span>"</span> <span class="hljs-keyword">if</span> options.verbose
         <span class="hljs-keyword">catch</span> ex
-            <span class="hljs-built_in">console</span>.error filepath, <span class="hljs-string">"detect landmarks"</span>, ex</pre></div></div>
-            
-        </li>
+            <span class="hljs-built_in">console</span>.error filepath, <span class="hljs-string">"detect landmarks"</span>, ex</pre></div>
         
+      
         
-        <li id="section-21">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
-              </div>
-              <p>Detect safe search?</p>
+        <p>Detect logos?</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">if</span> options.safe
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">if</span> options.logos
+        <span class="hljs-keyword">try</span>
+            result = <span class="hljs-keyword">await</span> client.logoDetection filepath
+            result = result[<span class="hljs-number">0</span>].logoAnnotations
+            result.filepath = filepath</pre></div>
+        
+      
+        
+        <p>Add logos as tags.</p>
+
+        
+          <div class='highlight'><pre>            <span class="hljs-keyword">for</span> logo <span class="hljs-keyword">in</span> result
+                tags[logo.description] = logo.score.toFixed options.decimals
+
+            <span class="hljs-built_in">console</span>.log filepath, <span class="hljs-string">"logos: <span class="hljs-subst">#{JSON.stringify(result, <span class="hljs-literal">null</span>, <span class="hljs-number">0</span>)}</span>"</span> <span class="hljs-keyword">if</span> options.verbose
+        <span class="hljs-keyword">catch</span> ex
+            <span class="hljs-built_in">console</span>.error filepath, <span class="hljs-string">"detect logos"</span>, ex</pre></div>
+        
+      
+        
+        <p>Detect safe search?</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">if</span> options.safe
         <span class="hljs-keyword">try</span>
             result = <span class="hljs-keyword">await</span> client.safeSearchDetection filepath
             result = result[<span class="hljs-number">0</span>].safeSearchAnnotation
-            result.filepath = filepath
-            <span class="hljs-built_in">console</span>.dir result <span class="hljs-keyword">if</span> options.verbose</pre></div></div>
-            
-        </li>
+            result.filepath = filepath</pre></div>
         
+      
         
-        <li id="section-22">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
-              </div>
-              <p>Add safe search labels as tags.</p>
+        <p>Add safe search labels as tags.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>            <span class="hljs-keyword">for</span> key, value <span class="hljs-keyword">of</span> result
+        
+          <div class='highlight'><pre>            <span class="hljs-keyword">for</span> key, value <span class="hljs-keyword">of</span> result
                 tags[key] = likelyhood[value]
+                keys.push key
 
+            <span class="hljs-built_in">console</span>.log filepath, <span class="hljs-string">"safe: <span class="hljs-subst">#{JSON.stringify(result, <span class="hljs-literal">null</span>, <span class="hljs-number">0</span>)}</span>"</span> <span class="hljs-keyword">if</span> options.verbose
         <span class="hljs-keyword">catch</span> ex
-            <span class="hljs-built_in">console</span>.error filepath, <span class="hljs-string">"detect safe search"</span>, ex</pre></div></div>
-            
-        </li>
+            <span class="hljs-built_in">console</span>.error filepath, <span class="hljs-string">"detect safe search"</span>, ex</pre></div>
         
+      
         
-        <li id="section-23">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
-              </div>
-              <p>Output file path and data.</p>
+        <p>Output data to JSON.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    outputPath = filepath + <span class="hljs-string">".tags"</span>
-    outputData = JSON.stringify tags, <span class="hljs-literal">null</span>, <span class="hljs-number">2</span></pre></div></div>
-            
-        </li>
         
+          <div class='highlight'><pre>    outputData = JSON.stringify tags, <span class="hljs-literal">null</span>, <span class="hljs-number">2</span></pre></div>
         
-        <li id="section-24">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
-              </div>
-              <p>Write results to .json file.</p>
+      
+        
+        <p>Write results to .json file.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">try</span>
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">try</span>
         fs.writeFile outputPath, outputData, <span class="hljs-function"><span class="hljs-params">(err)</span> -&gt;</span>
             <span class="hljs-keyword">if</span> err?
                 <span class="hljs-built_in">console</span>.error filepath, <span class="hljs-string">"write file"</span>, err
@@ -502,40 +358,24 @@ fileQueue = async.queue queueProcessor, <span class="hljs-number">4</span></pre>
 
             callback()
     <span class="hljs-keyword">catch</span> ex
-        <span class="hljs-built_in">console</span>.error filepath, <span class="hljs-string">"write file"</span>, ex</pre></div></div>
-            
-        </li>
+        <span class="hljs-built_in">console</span>.error filepath, <span class="hljs-string">"write file"</span>, ex</pre></div>
         
+      
         
-        <li id="section-25">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
-              </div>
-              <p>Scan a folder to match duplicates.</p>
+        <p>Scan a folder to match duplicates.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">scanFolder</span> = <span class="hljs-params">(folder, callback)</span> -&gt;</span>
+        
+          <div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">scanFolder</span> = <span class="hljs-params">(folder, callback)</span> -&gt;</span>
     <span class="hljs-keyword">if</span> options.verbose
         <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
-        <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Scanning <span class="hljs-subst">#{folder}</span> ..."</span></pre></div></div>
-            
-        </li>
+        <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Scanning <span class="hljs-subst">#{folder}</span> ..."</span></pre></div>
         
+      
         
-        <li id="section-26">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
-              </div>
-              <p>Helper to scan folder contents (directories and files).</p>
+        <p>Helper to scan folder contents (directories and files).</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="hljs-function">    <span class="hljs-title">scanner</span> = <span class="hljs-params">(file)</span> -&gt;</span>
+        
+          <div class='highlight'><pre><span class="hljs-function">    <span class="hljs-title">scanner</span> = <span class="hljs-params">(file)</span> -&gt;</span>
         filepath = path.join folder, file
         ext = path.extname(filepath).toLowerCase().replace <span class="hljs-string">"."</span>, <span class="hljs-string">""</span>
 
@@ -548,24 +388,16 @@ fileQueue = async.queue queueProcessor, <span class="hljs-number">4</span></pre>
                 <span class="hljs-keyword">if</span> options.extensions.indexOf(ext) &gt;= <span class="hljs-number">0</span>
                     fileQueue.push filepath
                 <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> options.verbose
-                    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Skip <span class="hljs-subst">#{filepath}</span>"</span>
+                    <span class="hljs-built_in">console</span>.log filepath, <span class="hljs-string">"extensions not included, skip"</span>
         <span class="hljs-keyword">catch</span> ex
-            <span class="hljs-built_in">console</span>.error <span class="hljs-string">"Error reading <span class="hljs-subst">#{filepath}</span>: <span class="hljs-subst">#{ex}</span>"</span></pre></div></div>
-            
-        </li>
+            <span class="hljs-built_in">console</span>.error <span class="hljs-string">"Error reading <span class="hljs-subst">#{filepath}</span>: <span class="hljs-subst">#{ex}</span>"</span></pre></div>
         
+      
         
-        <li id="section-27">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
-              </div>
-              <p>Make sure we have the correct folder path.</p>
+        <p>Make sure we have the correct folder path.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    folder = executableFolder + folder <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> path.isAbsolute folder
+        
+          <div class='highlight'><pre>    folder = executableFolder + folder <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> path.isAbsolute folder
 
     <span class="hljs-keyword">try</span>
         contents = fs.readdirSync folder
@@ -581,161 +413,133 @@ fileQueue = async.queue queueProcessor, <span class="hljs-number">4</span></pre>
         callback <span class="hljs-literal">null</span> <span class="hljs-keyword">if</span> callback?
     <span class="hljs-keyword">catch</span> ex
         <span class="hljs-built_in">console</span>.error <span class="hljs-string">"Error reading <span class="hljs-subst">#{folder}</span>: <span class="hljs-subst">#{ex}</span>"</span>
-        callback ex <span class="hljs-keyword">if</span> callback?</pre></div></div>
-            
-        </li>
+        callback ex <span class="hljs-keyword">if</span> callback?</pre></div>
         
+      
         
-        <li id="section-28">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
-              </div>
-              <p>Finished!</p>
+        <p>Finished!</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">finished</span> = <span class="hljs-params">(err, result)</span> -&gt;</span>
+        
+          <div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">finished</span> = <span class="hljs-params">(err, result)</span> -&gt;</span>
     duration = (Date.now() - startTime) / <span class="hljs-number">1000</span>
 
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Finished after <span class="hljs-subst">#{duration}</span> seconds!"</span></pre></div></div>
-            
-        </li>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Finished after <span class="hljs-subst">#{duration}</span> seconds!"</span></pre></div>
         
+      
         
-        <li id="section-29">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
-              </div>
-              <p>Bye!</p>
+        <p>Bye!</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span></pre></div></div>
-            
-        </li>
         
+          <div class='highlight'><pre>    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span></pre></div>
         
-        <li id="section-30">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
-              </div>
-              <p>Run it!</p>
+      
+        
+        <p>Run it!</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">run</span> = -&gt;</span>
+        
+          <div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">run</span> = -&gt;</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"#######################################################"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"###                 - IMGRecog.js -                 ###"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"#######################################################"</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span></pre></div></div>
-            
-        </li>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span></pre></div>
         
+      
         
-        <li id="section-31">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
-              </div>
-              <p>First we get the parameters. If –help, it will end here.</p>
+        <p>First we get the parameters. If -help, it will end here.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    getParams()
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Options: <span class="hljs-subst">#{JSON.stringify(options, <span class="hljs-literal">null</span>, <span class="hljs-number">0</span>)}</span>"</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span></pre></div></div>
-            
-        </li>
         
+          <div class='highlight'><pre>    getParams()</pre></div>
         
-        <li id="section-32">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
-              </div>
-              <p>Instantiate Google Vision client.</p>
+      
+        
+        <p>Passed options.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    client = <span class="hljs-keyword">new</span> vision.ImageAnnotatorClient {keyFilename: executableFolder + <span class="hljs-string">"../credentials.json"</span>}
-
-    folderTasks = []
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Will parse images on:"</span></pre></div></div>
-            
-        </li>
         
-        
-        <li id="section-33">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
-              </div>
-              <p>Iterate and scan search folders.</p>
+          <div class='highlight'><pre>    arr = []
+    <span class="hljs-keyword">for</span> key, value <span class="hljs-keyword">of</span> options
+        arr.push <span class="hljs-string">"<span class="hljs-subst">#{key}</span>: <span class="hljs-subst">#{value}</span>"</span>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    <span class="hljs-keyword">for</span> folder <span class="hljs-keyword">in</span> folders
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Options: <span class="hljs-subst">#{arr.join(<span class="hljs-string">" | "</span>)}</span>"</span>
+
+    credentialsExecutable = executableFolder + <span class="hljs-string">"imgrecog.json"</span>
+    credentialsHome = <span class="hljs-string">"~/imgrecog.json"</span>
+    credentialsCurrent = currentFolder + <span class="hljs-string">"imgrecog.json"</span></pre></div>
+        
+      
+        
+        <p>Create client, checking if a credentials.json file exists.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">try</span>
+        <span class="hljs-keyword">if</span> fs.existsSync credentialsCurrent
+            client = <span class="hljs-keyword">new</span> vision.ImageAnnotatorClient {keyFilename: credentialsCurrent}
+            <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Using credentials from <span class="hljs-subst">#{credentialsCurrent}</span>"</span>
+         <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> fs.existsSync credentialsHome
+            client = <span class="hljs-keyword">new</span> vision.ImageAnnotatorClient {keyFilename: credentialsHome}
+            <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Using credentials from <span class="hljs-subst">#{credentialsHome}</span>"</span>
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> fs.existsSync credentialsExecutable
+            client = <span class="hljs-keyword">new</span> vision.ImageAnnotatorClient {keyFilename: credentialsExecutable}
+            <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Using credentials from <span class="hljs-subst">#{credentialsExecutable}</span>"</span>
+        <span class="hljs-keyword">else</span>
+            client = <span class="hljs-keyword">new</span> vision.ImageAnnotatorClient()
+            <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Using credentials from environment variables"</span>
+    <span class="hljs-keyword">catch</span> ex
+        <span class="hljs-built_in">console</span>.error <span class="hljs-string">"Could not create a Vision API client, make sure you have defined credentials on a imgrecog.json file or environment variables."</span>, ex
+
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
+    folderTasks = []</pre></div>
+        
+      
+        
+        <p>Iterate and scan search folders.</p>
+
+        
+          <div class='highlight'><pre>    <span class="hljs-keyword">for</span> folder <span class="hljs-keyword">in</span> folders
         <span class="hljs-built_in">console</span>.log folder
         <span class="hljs-keyword">do</span> (folder) -&gt; folderTasks.push (callback) -&gt; scanFolder folder, callback
 
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span></pre></div></div>
-            
-        </li>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span></pre></div>
         
+      
         
-        <li id="section-34">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
-              </div>
-              <p>Run run run!</p>
+        <p>Run folder scanning tasks in parallel.</p>
 
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>    async.parallelLimit folderTasks, <span class="hljs-number">2</span></pre></div></div>
-            
-        </li>
         
-        
-        <li id="section-35">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
-              </div>
-              <h2 id="program-called-starts-here-">Program called, starts here!</h2>
+          <div class='highlight'><pre>    async.parallelLimit folderTasks, <span class="hljs-number">2</span>
 
-            </div>
-            
-        </li>
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">await</span> <span class="hljs-literal">true</span></pre></div>
+        
+      
+        
+        <p>Unhandled rejections goes here.</p>
+
+        
+          <div class='highlight'><pre>process.<span class="hljs-literal">on</span> <span class="hljs-string">"unhandledRejection"</span>, <span class="hljs-function"><span class="hljs-params">(reason, p)</span> -&gt;</span>
+    <span class="hljs-keyword">if</span> options.verbose
+        <span class="hljs-built_in">console</span>.log <span class="hljs-string">"ERROR!"</span>
+        <span class="hljs-built_in">console</span>.log reason
+    <span class="hljs-keyword">else</span>
+        <span class="hljs-built_in">console</span>.log <span class="hljs-string">"ERROR!"</span>, reason.message <span class="hljs-keyword">or</span> reason.code <span class="hljs-keyword">or</span> reason
+
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
+    process.exit <span class="hljs-number">0</span></pre></div>
+        
+      
+        
+        <h2 id="run-baby-run-">Run baby run!</h2>
+
+        
+      
         
         
-        <li id="section-36">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
-              </div>
-              
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>run()</pre></div></div>
-            
-        </li>
         
-    </ul>
+          <div class='highlight'><pre>run()</pre></div>
+        
+      
+      <div class="fleur">h</div>
+    </div>
   </div>
 </body>
 </html>
