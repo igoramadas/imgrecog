@@ -1,6 +1,6 @@
 (function() {
   // This script will delete all images that have
-  var ex, file, filepath, files, folder, fs, i, j, k, len, len1, len2, params, path, score, tags, toDelete;
+  var ex, file, files, folder, fs, i, imgfile, j, k, len, len1, len2, params, path, result, score, tags, tagsfile, toDelete;
 
   fs = require("fs");
 
@@ -33,18 +33,25 @@
         file = files[j];
         if (path.extname(file) === ".tags") {
           try {
-            filepath = path.join(folder, file);
-            tags = fs.readFileSync(filepath, "UTF-8");
+            tagsfile = path.join(folder, file);
+            tags = fs.readFileSync(tagsfile, "UTF-8");
             tags = JSON.parse(tags);
-            if ((tags.adult != null) && tags.adult > score) {
-              toDelete.push(filepath);
+            if (tags.adult == null) {
+              // Set default tags.
+              tags.adult = 0;
             }
-            if ((tags.violence != null) && tags.violence > score) {
-              toDelete.push(filepath);
+            if (tags.violence == null) {
+              tags.violence = 0;
+            }
+            if (parseFloat(tags.adult) > score || parseFloat(tags.violence) > score) {
+              imgfile = tagsfile.replace(".tags", "");
+              toDelete.push(tagsfile);
+              toDelete.push(imgfile);
+              console.log(imgfile, `- adult: ${tags.adult}, violence: ${tags.violence}`);
             }
           } catch (error) {
             ex = error;
-            console.error(filepath, ex);
+            console.error(tagsfile, ex);
           }
         }
       }
@@ -52,16 +59,20 @@
 // Delete unsafe files.
     for (k = 0, len2 = toDelete.length; k < len2; k++) {
       file = toDelete[k];
-      (function(file) {
-        return fs.unlink(file, function(err) {
-          if (err != null) {
-            return console.error(file, err);
-          } else {
-            return console.log(file, "deleted!");
-          }
-        });
-      })(file);
+      try {
+        result = fs.unlinkSync(file);
+        console.log(file, "- deleted");
+      } catch (error) {
+        ex = error;
+        console.error(file, ex);
+      }
     }
-  } catch (error) {}
+    console.log("");
+    console.log("FINSHED!");
+    console.log("");
+  } catch (error) {
+    ex = error;
+    console.error(ex);
+  }
 
 }).call(this);

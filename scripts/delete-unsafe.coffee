@@ -27,20 +27,33 @@ try
         for file in files
             if path.extname(file) is ".tags"
                 try
-                    filepath = path.join(folder, file)
-                    tags = fs.readFileSync filepath, "UTF-8"
+                    tagsfile = path.join(folder, file)
+                    tags = fs.readFileSync tagsfile, "UTF-8"
                     tags = JSON.parse tags
 
-                    toDelete.push filepath if tags.adult? and tags.adult > score
-                    toDelete.push filepath if tags.violence? and tags.violence > score
+                    # Set default tags.
+                    tags.adult = 0 if not tags.adult?
+                    tags.violence = 0 if not tags.violence?
+
+                    if parseFloat(tags.adult) > score or parseFloat(tags.violence) > score
+                        imgfile = tagsfile.replace(".tags", "")
+                        toDelete.push tagsfile
+                        toDelete.push imgfile
+                        console.log imgfile, "- adult: #{tags.adult}, violence: #{tags.violence}"
                 catch ex
-                    console.error filepath, ex
+                    console.error tagsfile, ex
 
     # Delete unsafe files.
     for file in toDelete
-        do (file) ->
-            fs.unlink file, (err) ->
-                if err?
-                    console.error file, err
-                else
-                    console.log file, "deleted!"
+        try
+            result = fs.unlinkSync file
+            console.log file, "- deleted"
+        catch ex
+            console.error file, ex
+
+    console.log ""
+    console.log "FINSHED!"
+    console.log ""
+
+catch ex
+    console.error ex
