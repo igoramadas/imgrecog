@@ -1,3 +1,7 @@
+#####################################################################
+### IMGRecog.js
+#####################################################################
+
 async = require "async"
 fs = require "fs"
 os = require "os"
@@ -129,7 +133,7 @@ scanFile = (filepath, callback) ->
             console.log filepath, "already processed, overwrite" if options.verbose
         else
             console.log filepath, "already processed, skip" if options.verbose
-            return
+            callback()
 
     # Detect labels?
     if options.labels
@@ -158,10 +162,11 @@ scanFile = (filepath, callback) ->
 
             # Add landmarks as tags.
             for r in result
-                for land in r.landmarks
-                    score = land.score.toFixed options.decimals
-                    logtext.push "#{land.description}:#{score}"
-                    tags[land.description] = score
+                if r.landmarks
+                    for land in r.landmarks
+                        score = land.score.toFixed options.decimals
+                        logtext.push "#{land.description}:#{score}"
+                        tags[land.description] = score
 
             if options.verbose and logtext.length > 0
                 console.log filepath, "landmarks", logtext.join(", ")
@@ -215,9 +220,10 @@ scanFile = (filepath, callback) ->
             else
                 console.log filepath, "processed #{Object.keys(tags).length} tags"
 
-            callback()
+            callback err
     catch ex
         console.error filepath, "write file", ex
+        callback ex
 
 # Scan a folder to match duplicates.
 scanFolder = (folder, callback) ->

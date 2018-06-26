@@ -1,4 +1,8 @@
 (function() {
+  //####################################################################
+  //#################################################################
+  /* IMGRecog.js
+  */
   var async, client, currentFolder, executableFolder, fileQueue, finished, folders, fs, getParams, homeFolder, images, likelyhood, options, os, path, queueProcessor, run, scanFile, scanFolder, showHelp, startTime, vision;
 
   async = require("async");
@@ -163,7 +167,7 @@
         if (options.verbose) {
           console.log(filepath, "already processed, skip");
         }
-        return;
+        callback();
       }
     }
     // Detect labels?
@@ -196,12 +200,14 @@
 // Add landmarks as tags.
         for (k = 0, len1 = result.length; k < len1; k++) {
           r = result[k];
-          ref = r.landmarks;
-          for (l = 0, len2 = ref.length; l < len2; l++) {
-            land = ref[l];
-            score = land.score.toFixed(options.decimals);
-            logtext.push(`${land.description}:${score}`);
-            tags[land.description] = score;
+          if (r.landmarks) {
+            ref = r.landmarks;
+            for (l = 0, len2 = ref.length; l < len2; l++) {
+              land = ref[l];
+              score = land.score.toFixed(options.decimals);
+              logtext.push(`${land.description}:${score}`);
+              tags[land.description] = score;
+            }
           }
         }
         if (options.verbose && logtext.length > 0) {
@@ -264,11 +270,12 @@
         } else {
           console.log(filepath, `processed ${(Object.keys(tags).length)} tags`);
         }
-        return callback();
+        return callback(err);
       });
     } catch (error) {
       ex = error;
-      return console.error(filepath, "write file", ex);
+      console.error(filepath, "write file", ex);
+      return callback(ex);
     }
   };
 
