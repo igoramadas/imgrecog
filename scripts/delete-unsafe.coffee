@@ -39,7 +39,7 @@ try
                         imgfile = tagsfile.replace(".tags", "")
                         toDelete.push tagsfile
                         toDelete.push imgfile
-                        console.log imgfile, "- adult: #{tags.adult}, violence: #{tags.violence}"
+                        console.log "#{imgfile} - adult: #{tags.adult}, violence: #{tags.violence}"
                 catch ex
                     console.error tagsfile, ex
 
@@ -47,7 +47,7 @@ try
     for file in toDelete
         try
             result = fs.unlinkSync file
-            console.log file, "- deleted"
+            console.log "#{file} - deleted"
         catch ex
             console.error file, ex
 
