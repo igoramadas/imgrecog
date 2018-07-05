@@ -2,6 +2,7 @@
 
 fs = require "fs"
 path = require "path"
+utils = require "./utils.coffee"
 
 console.log ""
 console.log "#######################################################"
@@ -19,29 +20,22 @@ try
     params = Array::slice.call process.argv, 2
 
     for folder in params
-        console.log ""
-        console.log "Folder: #{folder}"
 
-        files = fs.readdirSync folder
+        folderTags = utils.getFolderTags folder
 
-        for file in files
-            if path.extname(file) is ".tags"
-                try
-                    tagsfile = path.join(folder, file)
-                    tags = fs.readFileSync tagsfile, "UTF-8"
-                    tags = JSON.parse tags
+        for file, tags of folderTags
+            try
+                tags.adult = 0 if not tags.adult?
+                tags.violence = 0 if not tags.violence?
 
-                    # Set default tags.
-                    tags.adult = 0 if not tags.adult?
-                    tags.violence = 0 if not tags.violence?
+                if parseFloat(tags.adult) > score or parseFloat(tags.violence) > score
+                    tagsfile = file + ".tags"
+                    toDelete.push file
+                    toDelete.push tagsfile
 
-                    if parseFloat(tags.adult) > score or parseFloat(tags.violence) > score
-                        imgfile = tagsfile.replace(".tags", "")
-                        toDelete.push tagsfile
-                        toDelete.push imgfile
-                        console.log "#{imgfile} - adult: #{tags.adult}, violence: #{tags.violence}"
-                catch ex
-                    console.error tagsfile, ex
+                    console.log "#{imgfile} - adult: #{tags.adult}, violence: #{tags.violence}"
+            catch ex
+                console.error file, ex
 
     # Delete unsafe files.
     for file in toDelete

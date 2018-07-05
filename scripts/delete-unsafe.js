@@ -1,10 +1,12 @@
 (function() {
   // This script will delete all images that have
-  var ex, file, files, folder, fs, i, imgfile, j, k, len, len1, len2, params, path, result, score, tags, tagsfile, toDelete;
+  var ex, file, folder, folderTags, fs, i, j, len, len1, params, path, result, score, tags, tagsfile, toDelete, utils;
 
   fs = require("fs");
 
   path = require("path");
+
+  utils = require("./utils.coffee");
 
   console.log("");
 
@@ -26,39 +28,31 @@
     params = Array.prototype.slice.call(process.argv, 2);
     for (i = 0, len = params.length; i < len; i++) {
       folder = params[i];
-      console.log("");
-      console.log(`Folder: ${folder}`);
-      files = fs.readdirSync(folder);
-      for (j = 0, len1 = files.length; j < len1; j++) {
-        file = files[j];
-        if (path.extname(file) === ".tags") {
-          try {
-            tagsfile = path.join(folder, file);
-            tags = fs.readFileSync(tagsfile, "UTF-8");
-            tags = JSON.parse(tags);
-            if (tags.adult == null) {
-              // Set default tags.
-              tags.adult = 0;
-            }
-            if (tags.violence == null) {
-              tags.violence = 0;
-            }
-            if (parseFloat(tags.adult) > score || parseFloat(tags.violence) > score) {
-              imgfile = tagsfile.replace(".tags", "");
-              toDelete.push(tagsfile);
-              toDelete.push(imgfile);
-              console.log(`${imgfile} - adult: ${tags.adult}, violence: ${tags.violence}`);
-            }
-          } catch (error) {
-            ex = error;
-            console.error(tagsfile, ex);
+      folderTags = utils.getFolderTags(folder);
+      for (file in folderTags) {
+        tags = folderTags[file];
+        try {
+          if (tags.adult == null) {
+            tags.adult = 0;
           }
+          if (tags.violence == null) {
+            tags.violence = 0;
+          }
+          if (parseFloat(tags.adult) > score || parseFloat(tags.violence) > score) {
+            tagsfile = file + ".tags";
+            toDelete.push(file);
+            toDelete.push(tagsfile);
+            console.log(`${imgfile} - adult: ${tags.adult}, violence: ${tags.violence}`);
+          }
+        } catch (error) {
+          ex = error;
+          console.error(file, ex);
         }
       }
     }
 // Delete unsafe files.
-    for (k = 0, len2 = toDelete.length; k < len2; k++) {
-      file = toDelete[k];
+    for (j = 0, len1 = toDelete.length; j < len1; j++) {
+      file = toDelete[j];
       try {
         result = fs.unlinkSync(file);
         console.log(`${file} - deleted`);
