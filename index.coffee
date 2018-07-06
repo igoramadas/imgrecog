@@ -2,7 +2,7 @@
 ### IMGRecog.js
 #####################################################################
 
-async = require "async"
+asyncLib = require "async"
 fs = require "fs"
 os = require "os"
 path = require "path"
@@ -22,7 +22,7 @@ folders = []
 
 # Create file processor queue  to parse files against Google Vision.
 queueProcessor = (filepath, callback) -> scanFile filepath, callback
-fileQueue = async.queue queueProcessor, 4
+fileQueue = asyncLib.queue queueProcessor, 4
 
 # File processor queue will drain once we have processed all files.
 fileQueue.drain = -> finished()
@@ -31,15 +31,17 @@ fileQueue.drain = -> finished()
 options = {
     decimals: 2
     extensions: ["png", "jpg", "jpeg", "gif", "bpm", "raw", "webp"]
+    limit: 10000
+    overwrite: false
+    verbose: false
+    # Below are the available identification commands.
     labels: false
     landmarks: false
     logos: false
-    overwrite: false
     safe: false
-    verbose: false
 }
 
-# Transforms safe search strings to score.
+# Transforms safe search strings to scores.
 likelyhood = {
     VERY_UNLIKELY: 0
     UNLIKELY: 0.15
@@ -84,7 +86,7 @@ getParams = ->
         showHelp()
         return process.exit 0
 
-    # Check params...
+    # Parse parameters...
     for p in params
         switch p
             when "-help"
@@ -120,6 +122,15 @@ getParams = ->
             console.log "Abort! Invalid option: #{f}. Use -help to get a list of available options."
             return process.exit 0
 
+# Call the Vision API and return result so we can process tags.
+apiResult = (filepath, method, key) ->
+    return new Promise (resolve, reject) ->
+        try
+            result = await method filepath
+            resolve result[0][key]
+        catch ex
+            reject ex
+
 # Scan and process image file.
 scanFile = (filepath, callback) ->
     outputPath = filepath + ".tags"
@@ -138,8 +149,7 @@ scanFile = (filepath, callback) ->
     # Detect labels?
     if options.labels
         try
-            result = await client.labelDetection filepath
-            result = result[0].labelAnnotations
+            result = await apiResult filepath, client.labelDetection, "labelAnnotations"
             logtext = []
 
             # Add labels as tags.
@@ -156,8 +166,7 @@ scanFile = (filepath, callback) ->
     # Detect landmarks?
     if options.landmarks
         try
-            result = await client.landmarkDetection filepath
-            result = result[0].landmarkAnnotations
+            result = await apiResult filepath, client.landmarkDetection, "landmarkAnnotations"
             logtext = []
 
             # Add landmarks as tags.
@@ -176,8 +185,7 @@ scanFile = (filepath, callback) ->
     # Detect logos?
     if options.logos
         try
-            result = await client.logoDetection filepath
-            result = result[0].logoAnnotations
+            result = await apiResult filepath, client.logoDetection, "logoAnnotations"
             logtext = []
 
             # Add logos as tags.
@@ -194,8 +202,7 @@ scanFile = (filepath, callback) ->
     # Detect safe search?
     if options.safe
         try
-            result = await client.safeSearchDetection filepath
-            result = result[0].safeSearchAnnotation
+            result = await apiResult filepath, client.safeSearchDetection, "safeSearchAnnotation"
             logtext = []
 
             # Add safe search labels as tags.
@@ -286,6 +293,32 @@ run = ->
     console.log "#######################################################"
     console.log ""
 
+    # Get valid filenames for the configuration and key files.
+    configExecutable = path.join currentFolder, "imgrecog.config.json"
+    configHome = path.join currentFolder, "imgrecog.config.json"
+    configCurrent = path.join currentFolder, "imgrecog.config.json"
+    credentialsExecutable = path.join executableFolder, "imgrecog.auth.json"
+    credentialsHome = path.join homeFolder, "imgrecog.auth.json"
+    credentialsCurrent = path.join currentFolder, "imgrecog.auth.json"
+
+    # Load options from config file?
+    try
+        if fs.existsSync configCurrent
+            configPath = configCurrent
+         else if fs.existsSync configHome
+            configPath = configHome
+        else if fs.existsSync configExecutable
+            configPath = configExecutable
+
+        if configPath?
+            console.log "Loading config from #{configPath}"
+            configJson = fs.readFileSync configPath, "utf8"
+            configJson = JSON.parse configJson
+            options[key] = value for key, value of configJson
+
+    catch ex
+        console.error "Can't load #{configPath}", ex
+
     # First we get the parameters. If -help, it will end here.
     getParams()
 
@@ -295,10 +328,6 @@ run = ->
         arr.push "#{key}: #{value}"
 
     console.log "Options: #{arr.join(" | ")}"
-
-    credentialsExecutable = executableFolder + "imgrecog.json"
-    credentialsHome = homeFolder + "imgrecog.json"
-    credentialsCurrent = currentFolder + "imgrecog.json"
 
     # Create client, checking if a credentials.json file exists.
     try
@@ -328,7 +357,7 @@ run = ->
     console.log ""
 
     # Run folder scanning tasks in parallel.
-    async.parallelLimit folderTasks, 2
+    asyncLib.parallelLimit folderTasks, 2
 
 # Unhandled rejections goes here.
 process.on "unhandledRejection", (reason, p) ->

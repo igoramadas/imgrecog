@@ -3,9 +3,9 @@
   //#################################################################
   /* IMGRecog.js
   */
-  var async, client, currentFolder, executableFolder, fileQueue, finished, folders, fs, getParams, homeFolder, images, likelyhood, options, os, path, queueProcessor, run, scanFile, scanFolder, showHelp, startTime, vision;
+  var apiResult, asyncLib, client, currentFolder, executableFolder, fileQueue, finished, folders, fs, getParams, homeFolder, images, likelyhood, options, os, path, queueProcessor, run, scanFile, scanFolder, showHelp, startTime, vision;
 
-  async = require("async");
+  asyncLib = require("async");
 
   fs = require("fs");
 
@@ -35,7 +35,7 @@
     return scanFile(filepath, callback);
   };
 
-  fileQueue = async.queue(queueProcessor, 4);
+  fileQueue = asyncLib.queue(queueProcessor, 4);
 
   // File processor queue will drain once we have processed all files.
   fileQueue.drain = function() {
@@ -46,15 +46,17 @@
   options = {
     decimals: 2,
     extensions: ["png", "jpg", "jpeg", "gif", "bpm", "raw", "webp"],
+    limit: 10000,
+    overwrite: false,
+    verbose: false,
+    // Below are the available identification commands.
     labels: false,
     landmarks: false,
     logos: false,
-    overwrite: false,
-    safe: false,
-    verbose: false
+    safe: false
   };
 
-  // Transforms safe search strings to score.
+  // Transforms safe search strings to scores.
   likelyhood = {
     VERY_UNLIKELY: 0,
     UNLIKELY: 0.15,
@@ -100,7 +102,7 @@
       showHelp();
       return process.exit(0);
     }
-// Check params...
+// Parse parameters...
     for (j = 0, len = params.length; j < len; j++) {
       p = params[j];
       switch (p) {
@@ -151,6 +153,20 @@
     }
   };
 
+  // Call the Vision API and return result so we can process tags.
+  apiResult = function(filepath, method, key) {
+    return new Promise(async function(resolve, reject) {
+      var ex, result;
+      try {
+        result = (await method(filepath));
+        return resolve(result[0][key]);
+      } catch (error) {
+        ex = error;
+        return reject(ex);
+      }
+    });
+  };
+
   // Scan and process image file.
   scanFile = async function(filepath, callback) {
     var ex, exists, j, k, key, l, label, land, len, len1, len2, len3, logo, logtext, m, outputData, outputPath, r, ref, result, score, tags, value;
@@ -173,8 +189,7 @@
     // Detect labels?
     if (options.labels) {
       try {
-        result = (await client.labelDetection(filepath));
-        result = result[0].labelAnnotations;
+        result = (await apiResult(filepath, client.labelDetection, "labelAnnotations"));
         logtext = [];
 // Add labels as tags.
         for (j = 0, len = result.length; j < len; j++) {
@@ -194,8 +209,7 @@
     // Detect landmarks?
     if (options.landmarks) {
       try {
-        result = (await client.landmarkDetection(filepath));
-        result = result[0].landmarkAnnotations;
+        result = (await apiResult(filepath, client.landmarkDetection, "landmarkAnnotations"));
         logtext = [];
 // Add landmarks as tags.
         for (k = 0, len1 = result.length; k < len1; k++) {
@@ -221,8 +235,7 @@
     // Detect logos?
     if (options.logos) {
       try {
-        result = (await client.logoDetection(filepath));
-        result = result[0].logoAnnotations;
+        result = (await apiResult(filepath, client.logoDetection, "logoAnnotations"));
         logtext = [];
 // Add logos as tags.
         for (m = 0, len3 = result.length; m < len3; m++) {
@@ -242,8 +255,7 @@
     // Detect safe search?
     if (options.safe) {
       try {
-        result = (await client.safeSearchDetection(filepath));
-        result = result[0].safeSearchAnnotation;
+        result = (await apiResult(filepath, client.safeSearchDetection, "safeSearchAnnotation"));
         logtext = [];
 // Add safe search labels as tags.
         for (key in result) {
@@ -345,12 +357,41 @@
 
   // Run it!
   run = function() {
-    var arr, credentialsCurrent, credentialsExecutable, credentialsHome, ex, folder, folderTasks, j, key, len, value;
+    var arr, configCurrent, configExecutable, configHome, configJson, configPath, credentialsCurrent, credentialsExecutable, credentialsHome, ex, folder, folderTasks, j, key, len, value;
     console.log("");
     console.log("#######################################################");
     console.log("###                 - IMGRecog.js -                 ###");
     console.log("#######################################################");
     console.log("");
+    // Get valid filenames for the configuration and key files.
+    configExecutable = path.join(currentFolder, "imgrecog.config.json");
+    configHome = path.join(currentFolder, "imgrecog.config.json");
+    configCurrent = path.join(currentFolder, "imgrecog.config.json");
+    credentialsExecutable = path.join(executableFolder, "imgrecog.auth.json");
+    credentialsHome = path.join(homeFolder, "imgrecog.auth.json");
+    credentialsCurrent = path.join(currentFolder, "imgrecog.auth.json");
+    try {
+      // Load options from config file?
+      if (fs.existsSync(configCurrent)) {
+        configPath = configCurrent;
+      } else if (fs.existsSync(configHome)) {
+        configPath = configHome;
+      } else if (fs.existsSync(configExecutable)) {
+        configPath = configExecutable;
+      }
+      if (configPath != null) {
+        console.log(`Loading config from ${configPath}`);
+        configJson = fs.readFileSync(configPath, "utf8");
+        configJson = JSON.parse(configJson);
+        for (key in configJson) {
+          value = configJson[key];
+          options[key] = value;
+        }
+      }
+    } catch (error) {
+      ex = error;
+      console.error(`Can't load ${configPath}`, ex);
+    }
     // First we get the parameters. If -help, it will end here.
     getParams();
     // Passed options.
@@ -360,9 +401,6 @@
       arr.push(`${key}: ${value}`);
     }
     console.log(`Options: ${arr.join(" | ")}`);
-    credentialsExecutable = executableFolder + "imgrecog.json";
-    credentialsHome = homeFolder + "imgrecog.json";
-    credentialsCurrent = currentFolder + "imgrecog.json";
     try {
       // Create client, checking if a credentials.json file exists.
       if (fs.existsSync(credentialsCurrent)) {
@@ -402,7 +440,7 @@
     }
     console.log("");
     // Run folder scanning tasks in parallel.
-    return async.parallelLimit(folderTasks, 2);
+    return asyncLib.parallelLimit(folderTasks, 2);
   };
 
   // Unhandled rejections goes here.
