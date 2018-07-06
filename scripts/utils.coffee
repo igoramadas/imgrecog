@@ -1,4 +1,4 @@
-# Script common utilities.
+# Common utilities to be used within scripts.
 
 fs = require "fs"
 path = require "path"
@@ -17,7 +17,7 @@ Utils = {
                 try
                     tagsfile = file.substring 0, file.lastIndexOf(".tags")
                     tagsfile = path.join folder, file
-                    tags = fs.readFileSync tagsfile, "UTF-8"
+                    tags = fs.readFileSync tagsfile, "utf8"
                     tags = JSON.parse tags
 
                     result[tagsfile] = tags

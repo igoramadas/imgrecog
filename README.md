@@ -15,7 +15,7 @@ To install please use NPM:
 Then download your Google Cloud Vision API credentials file from the Google Cloud Console.
 If you need help please follow [these instructions](https://cloud.google.com/vision/docs/auth).
 
-Save the credentials file as `imgrecog.json`. The tool will look for it the following locations:
+Save the credentials file as `imgrecog.auth.json`. The tool will look for it the following locations:
 
 * where the tool is installed
 * current user's home folder

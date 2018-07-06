@@ -3,7 +3,7 @@
   //#################################################################
   /* IMGRecog.js
   */
-  var apiResult, asyncLib, client, currentFolder, executableFolder, fileQueue, finished, folders, fs, getParams, homeFolder, images, likelyhood, options, os, path, queueProcessor, run, scanFile, scanFolder, showHelp, startTime, vision;
+  var apiResult, asyncLib, client, currentFolder, executableFolder, fileQueue, finishedQueue, folders, fs, getParams, getScripts, homeFolder, likelyhood, options, os, path, queueProcessor, run, scanFile, scanFolder, scripts, showHelp, startTime, vision;
 
   asyncLib = require("async");
 
@@ -24,11 +24,11 @@
 
   executableFolder = path.dirname(require.main.filename) + "/";
 
-  // Collection of image models.
-  images = {};
-
   // Collection of folders to scan.
   folders = [];
+
+  // Collection of available scripts.
+  scripts = {};
 
   // Create file processor queue  to parse files against Google Vision.
   queueProcessor = function(filepath, callback) {
@@ -39,7 +39,7 @@
 
   // File processor queue will drain once we have processed all files.
   fileQueue.drain = function() {
-    return finished();
+    return finishedQueue();
   };
 
   // Default options.
@@ -53,16 +53,18 @@
     labels: false,
     landmarks: false,
     logos: false,
-    safe: false
+    safe: false,
+    // Scripts to run after processing.
+    scripts: []
   };
 
   // Transforms safe search strings to scores.
   likelyhood = {
-    VERY_UNLIKELY: 0,
-    UNLIKELY: 0.15,
-    POSSIBLE: 0.45,
-    LIKELY: 0.75,
-    VERY_LIKELY: 0.95
+    VERY_UNLIKELY: 0.005,
+    UNLIKELY: 0.155,
+    POSSIBLE: 0.455,
+    LIKELY: 0.755,
+    VERY_LIKELY: 0.955
   };
 
   // Set start time (Unix timestamp).
@@ -70,7 +72,6 @@
 
   // Show help on command line (imgrecog.js -help).
   showHelp = function() {
-    console.log("");
     console.log("imgrecog.js <options> <folders>");
     console.log("");
     console.log("  -labels            detect labels");
@@ -82,6 +83,7 @@
     console.log("  -verbose     -v    enable verbose");
     console.log("  -help        -h    help me (this screen)");
     console.log("");
+    console.log(".............................................................................");
     console.log("");
     console.log("Examples:");
     console.log("");
@@ -90,12 +92,44 @@
     console.log("");
     console.log("Detect everything and overwrite tags on specific directories");
     console.log("  $ imgrecog.js -all -w /home/someuser/images /home/someuser/photos");
+    console.log("");
+    console.log(".............................................................................");
+    console.log("");
+    console.log("The Google Vision API credentials must be set on a imgrecog.auth.json file.");
+    console.log("If you wish to change the tool options, create a imgrecog.config.json file.");
+    console.log("Current options:");
+    console.log("");
+    console.log(`  decimals (${options.decimals})`);
+    console.log(`  extensions (${options.extensions.join(' ')})`);
+    console.log(`  limit (${options.limit})`);
+    console.log(`  overwrite (${options.overwrite})`);
+    console.log(`  verbose (${options.verbose})`);
+    console.log("");
+    console.log("#############################################################################");
     return console.log("");
+  };
+
+  // Load scripts from /scripts folder.
+  getScripts = function() {
+    var filename, files, j, len, results, s, scriptsPath;
+    scriptsPath = path.join(__dirname, "scripts");
+    files = fs.readdirSync(scriptsPath);
+    results = [];
+    for (j = 0, len = files.length; j < len; j++) {
+      s = files[j];
+      if (path.extname(s) === ".js") {
+        filename = s.substring(0, s.lastIndexOf(".js"));
+        results.push(scripts[filename] = require(`./scripts/${s}`));
+      } else {
+        results.push(void 0);
+      }
+    }
+    return results;
   };
 
   // Get parameters from command line.
   getParams = function() {
-    var f, j, k, len, len1, p, params;
+    var f, filename, j, k, len, len1, p, params;
     params = Array.prototype.slice.call(process.argv, 2);
     // No parameters? Show help.
     if (params.length === 0) {
@@ -136,18 +170,23 @@
           options.safe = true;
           break;
         default:
-          folders.push(p);
+          filename = p.substring(1);
+          if (scripts[filename] != null) {
+            options.scripts.push(filename);
+          } else {
+            folders.push(p);
+          }
       }
     }
-    // Exit if no folders were passed, search on current directory.
+    // If no folders were passed, search on current directory.
     if (folders.length < 1) {
       folders.push(currentFolder);
-      return process.exit(0);
     }
     for (k = 0, len1 = folders.length; k < len1; k++) {
       f = folders[k];
       if (f.substring(0, 1) === "-") {
         console.log(`Abort! Invalid option: ${f}. Use -help to get a list of available options.`);
+        console.log("");
         return process.exit(0);
       }
     }
@@ -345,12 +384,23 @@
     }
   };
 
-  // Finished!
-  finished = function(err, result) {
-    var duration;
+  // Finished processing file queue.
+  finishedQueue = async function(err, result) {
+    var duration, j, len, ref, s, scriptResult;
     duration = (Date.now() - startTime) / 1000;
     console.log("");
-    console.log(`Finished after ${duration} seconds!`);
+    console.log(`Finished processing images after ${duration} seconds`);
+    if (options.scripts.length > 0) {
+      ref = options.scripts;
+      for (j = 0, len = ref.length; j < len; j++) {
+        s = ref[j];
+        console.log("");
+        console.log(`Running script ${s}`);
+        scriptResult = (await scripts[s](folders));
+      }
+      console.log("");
+      console.log("Finished running scripts");
+    }
     // Bye!
     return console.log("");
   };
@@ -359,9 +409,9 @@
   run = function() {
     var arr, configCurrent, configExecutable, configHome, configJson, configPath, credentialsCurrent, credentialsExecutable, credentialsHome, ex, folder, folderTasks, j, key, len, value;
     console.log("");
-    console.log("#######################################################");
-    console.log("###                 - IMGRecog.js -                 ###");
-    console.log("#######################################################");
+    console.log("#############################################################################");
+    console.log("# IMGRecog.js");
+    console.log("#############################################################################");
     console.log("");
     // Get valid filenames for the configuration and key files.
     configExecutable = path.join(currentFolder, "imgrecog.config.json");
@@ -380,7 +430,8 @@
         configPath = configExecutable;
       }
       if (configPath != null) {
-        console.log(`Loading config from ${configPath}`);
+        console.log(`Using config from ${configPath}`);
+        console.log("");
         configJson = fs.readFileSync(configPath, "utf8");
         configJson = JSON.parse(configJson);
         for (key in configJson) {
@@ -391,8 +442,11 @@
     } catch (error) {
       ex = error;
       console.error(`Can't load ${configPath}`, ex);
+      console.log("");
     }
-    // First we get the parameters. If -help, it will end here.
+    // Load available scripts.
+    getScripts();
+    // Get the passed parameters. If -help, it will end here.
     getParams();
     // Passed options.
     arr = [];
@@ -401,46 +455,51 @@
       arr.push(`${key}: ${value}`);
     }
     console.log(`Options: ${arr.join(" | ")}`);
-    try {
-      // Create client, checking if a credentials.json file exists.
-      if (fs.existsSync(credentialsCurrent)) {
-        client = new vision.ImageAnnotatorClient({
-          keyFilename: credentialsCurrent
-        });
-        console.log(`Using credentials from ${credentialsCurrent}`);
-      } else if (fs.existsSync(credentialsHome)) {
-        client = new vision.ImageAnnotatorClient({
-          keyFilename: credentialsHome
-        });
-        console.log(`Using credentials from ${credentialsHome}`);
-      } else if (fs.existsSync(credentialsExecutable)) {
-        client = new vision.ImageAnnotatorClient({
-          keyFilename: credentialsExecutable
-        });
-        console.log(`Using credentials from ${credentialsExecutable}`);
-      } else {
-        client = new vision.ImageAnnotatorClient();
-        console.log("Using credentials from environment variables");
+    // Create client, checking if a credentials.json file exists.
+    // Only if any of the identification commmands was passed.
+    if (options.labels || options.landmarks || options.logos || options.safe) {
+      try {
+        if (fs.existsSync(credentialsCurrent)) {
+          client = new vision.ImageAnnotatorClient({
+            keyFilename: credentialsCurrent
+          });
+          console.log(`Using credentials from ${credentialsCurrent}`);
+        } else if (fs.existsSync(credentialsHome)) {
+          client = new vision.ImageAnnotatorClient({
+            keyFilename: credentialsHome
+          });
+          console.log(`Using credentials from ${credentialsHome}`);
+        } else if (fs.existsSync(credentialsExecutable)) {
+          client = new vision.ImageAnnotatorClient({
+            keyFilename: credentialsExecutable
+          });
+          console.log(`Using credentials from ${credentialsExecutable}`);
+        } else {
+          client = new vision.ImageAnnotatorClient();
+          console.log("Using credentials from environment variables");
+        }
+      } catch (error) {
+        ex = error;
+        console.error("Could not create a Vision API client, make sure you have defined credentials on a imgrecog.json file or environment variables.", ex);
       }
-    } catch (error) {
-      ex = error;
-      console.error("Could not create a Vision API client, make sure you have defined credentials on a imgrecog.json file or environment variables.", ex);
-    }
-    console.log("");
-    folderTasks = [];
+      console.log("");
+      folderTasks = [];
 // Iterate and scan search folders.
-    for (j = 0, len = folders.length; j < len; j++) {
-      folder = folders[j];
-      console.log(folder);
-      (function(folder) {
-        return folderTasks.push(function(callback) {
-          return scanFolder(folder, callback);
-        });
-      })(folder);
+      for (j = 0, len = folders.length; j < len; j++) {
+        folder = folders[j];
+        console.log(folder);
+        (function(folder) {
+          return folderTasks.push(function(callback) {
+            return scanFolder(folder, callback);
+          });
+        })(folder);
+      }
+      console.log("");
+      // Run folder scanning tasks in parallel.
+      return asyncLib.parallelLimit(folderTasks, 2);
+    } else {
+      return finishedQueue();
     }
-    console.log("");
-    // Run folder scanning tasks in parallel.
-    return asyncLib.parallelLimit(folderTasks, 2);
   };
 
   // Unhandled rejections goes here.

@@ -14,18 +14,18 @@ currentFolder = process.cwd() + "/"
 homeFolder = os.homedir() + "/"
 executableFolder = path.dirname(require.main.filename) + "/"
 
-# Collection of image models.
-images = {}
-
 # Collection of folders to scan.
 folders = []
+
+# Collection of available scripts.
+scripts = {}
 
 # Create file processor queue  to parse files against Google Vision.
 queueProcessor = (filepath, callback) -> scanFile filepath, callback
 fileQueue = asyncLib.queue queueProcessor, 4
 
 # File processor queue will drain once we have processed all files.
-fileQueue.drain = -> finished()
+fileQueue.drain = -> finishedQueue()
 
 # Default options.
 options = {
@@ -39,15 +39,17 @@ options = {
     landmarks: false
     logos: false
     safe: false
+    # Scripts to run after processing.
+    scripts: []
 }
 
 # Transforms safe search strings to scores.
 likelyhood = {
-    VERY_UNLIKELY: 0
-    UNLIKELY: 0.15
-    POSSIBLE: 0.45
-    LIKELY: 0.75
-    VERY_LIKELY: 0.95
+    VERY_UNLIKELY: 0.005
+    UNLIKELY: 0.155
+    POSSIBLE: 0.455
+    LIKELY: 0.755
+    VERY_LIKELY: 0.955
 }
 
 # Set start time (Unix timestamp).
@@ -55,7 +57,6 @@ startTime = Date.now()
 
 # Show help on command line (imgrecog.js -help).
 showHelp = ->
-    console.log ""
     console.log "imgrecog.js <options> <folders>"
     console.log ""
     console.log "  -labels            detect labels"
@@ -67,6 +68,7 @@ showHelp = ->
     console.log "  -verbose     -v    enable verbose"
     console.log "  -help        -h    help me (this screen)"
     console.log ""
+    console.log "............................................................................."
     console.log ""
     console.log "Examples:"
     console.log ""
@@ -76,6 +78,30 @@ showHelp = ->
     console.log "Detect everything and overwrite tags on specific directories"
     console.log "  $ imgrecog.js -all -w /home/someuser/images /home/someuser/photos"
     console.log ""
+    console.log "............................................................................."
+    console.log ""
+    console.log "The Google Vision API credentials must be set on a imgrecog.auth.json file."
+    console.log "If you wish to change the tool options, create a imgrecog.config.json file."
+    console.log "Current options:"
+    console.log ""
+    console.log "  decimals (#{options.decimals})"
+    console.log "  extensions (#{options.extensions.join(' ')})"
+    console.log "  limit (#{options.limit})"
+    console.log "  overwrite (#{options.overwrite})"
+    console.log "  verbose (#{options.verbose})"
+    console.log ""
+    console.log "#############################################################################"
+    console.log ""
+
+# Load scripts from /scripts folder.
+getScripts = ->
+    scriptsPath = path.join __dirname, "scripts"
+    files = fs.readdirSync scriptsPath
+
+    for s in files
+        if path.extname(s) is ".js"
+            filename = s.substring 0, s.lastIndexOf(".js")
+            scripts[filename] = require "./scripts/#{s}"
 
 # Get parameters from command line.
 getParams = ->
@@ -110,16 +136,20 @@ getParams = ->
             when "-safe"
                 options.safe = true
             else
-                folders.push p
+                filename = p.substring 1
+                if scripts[filename]?
+                    options.scripts.push filename
+                else
+                    folders.push p
 
-    # Exit if no folders were passed, search on current directory.
+    # If no folders were passed, search on current directory.
     if folders.length < 1
         folders.push currentFolder
-        return process.exit 0
 
     for f in folders
         if f.substring(0, 1) is "-"
             console.log "Abort! Invalid option: #{f}. Use -help to get a list of available options."
+            console.log ""
             return process.exit 0
 
 # Call the Vision API and return result so we can process tags.
@@ -275,12 +305,21 @@ scanFolder = (folder, callback) ->
         console.error "Error reading #{folder}: #{ex}"
         callback ex if callback?
 
-# Finished!
-finished = (err, result) ->
+# Finished processing file queue.
+finishedQueue = (err, result) ->
     duration = (Date.now() - startTime) / 1000
 
     console.log ""
-    console.log "Finished after #{duration} seconds!"
+    console.log "Finished processing images after #{duration} seconds"
+
+    if options.scripts.length > 0
+        for s in options.scripts
+            console.log ""
+            console.log "Running script #{s}"
+            scriptResult = await scripts[s] folders
+
+        console.log ""
+        console.log "Finished running scripts"
 
     # Bye!
     console.log ""
@@ -288,9 +327,9 @@ finished = (err, result) ->
 # Run it!
 run = ->
     console.log ""
-    console.log "#######################################################"
-    console.log "###                 - IMGRecog.js -                 ###"
-    console.log "#######################################################"
+    console.log "#############################################################################"
+    console.log "# IMGRecog.js"
+    console.log "#############################################################################"
     console.log ""
 
     # Get valid filenames for the configuration and key files.
@@ -311,15 +350,21 @@ run = ->
             configPath = configExecutable
 
         if configPath?
-            console.log "Loading config from #{configPath}"
+            console.log "Using config from #{configPath}"
+            console.log ""
+
             configJson = fs.readFileSync configPath, "utf8"
             configJson = JSON.parse configJson
             options[key] = value for key, value of configJson
 
     catch ex
         console.error "Can't load #{configPath}", ex
+        console.log ""
 
-    # First we get the parameters. If -help, it will end here.
+    # Load available scripts.
+    getScripts()
+
+    # Get the passed parameters. If -help, it will end here.
     getParams()
 
     # Passed options.
@@ -330,34 +375,38 @@ run = ->
     console.log "Options: #{arr.join(" | ")}"
 
     # Create client, checking if a credentials.json file exists.
-    try
-        if fs.existsSync credentialsCurrent
-            client = new vision.ImageAnnotatorClient {keyFilename: credentialsCurrent}
-            console.log "Using credentials from #{credentialsCurrent}"
-         else if fs.existsSync credentialsHome
-            client = new vision.ImageAnnotatorClient {keyFilename: credentialsHome}
-            console.log "Using credentials from #{credentialsHome}"
-        else if fs.existsSync credentialsExecutable
-            client = new vision.ImageAnnotatorClient {keyFilename: credentialsExecutable}
-            console.log "Using credentials from #{credentialsExecutable}"
-        else
-            client = new vision.ImageAnnotatorClient()
-            console.log "Using credentials from environment variables"
-    catch ex
-        console.error "Could not create a Vision API client, make sure you have defined credentials on a imgrecog.json file or environment variables.", ex
+    # Only if any of the identification commmands was passed.
+    if options.labels or options.landmarks or options.logos or options.safe
+        try
+            if fs.existsSync credentialsCurrent
+                client = new vision.ImageAnnotatorClient {keyFilename: credentialsCurrent}
+                console.log "Using credentials from #{credentialsCurrent}"
+            else if fs.existsSync credentialsHome
+                client = new vision.ImageAnnotatorClient {keyFilename: credentialsHome}
+                console.log "Using credentials from #{credentialsHome}"
+            else if fs.existsSync credentialsExecutable
+                client = new vision.ImageAnnotatorClient {keyFilename: credentialsExecutable}
+                console.log "Using credentials from #{credentialsExecutable}"
+            else
+                client = new vision.ImageAnnotatorClient()
+                console.log "Using credentials from environment variables"
+        catch ex
+            console.error "Could not create a Vision API client, make sure you have defined credentials on a imgrecog.json file or environment variables.", ex
 
-    console.log ""
-    folderTasks = []
+        console.log ""
+        folderTasks = []
 
-    # Iterate and scan search folders.
-    for folder in folders
-        console.log folder
-        do (folder) -> folderTasks.push (callback) -> scanFolder folder, callback
+        # Iterate and scan search folders.
+        for folder in folders
+            console.log folder
+            do (folder) -> folderTasks.push (callback) -> scanFolder folder, callback
 
-    console.log ""
+        console.log ""
 
-    # Run folder scanning tasks in parallel.
-    asyncLib.parallelLimit folderTasks, 2
+        # Run folder scanning tasks in parallel.
+        asyncLib.parallelLimit folderTasks, 2
+    else
+        finishedQueue()
 
 # Unhandled rejections goes here.
 process.on "unhandledRejection", (reason, p) ->

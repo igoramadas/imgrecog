@@ -1,53 +1,50 @@
-# This script will delete all images that have
+# Deletes all images that have adult or violence.
 
 fs = require "fs"
 path = require "path"
-utils = require "./utils.coffee"
+utils = require "./utils.js"
 
-console.log ""
-console.log "#######################################################"
-console.log "###         - IMGRecog.js - delete unsafe -         ###"
-console.log "#######################################################"
-console.log ""
+# Script implementation.
+Script = (folders) ->
 
-# Minimum score to consider.
-score = 0.9
+    # Minimum score to consider.
+    score = 0.9
 
-# Array of files to be deleted.
-toDelete = []
+    # Array of files to be deleted.
+    toDelete = []
 
-try
-    params = Array::slice.call process.argv, 2
-
-    for folder in params
-
-        folderTags = utils.getFolderTags folder
-
-        for file, tags of folderTags
-            try
-                tags.adult = 0 if not tags.adult?
-                tags.violence = 0 if not tags.violence?
-
-                if parseFloat(tags.adult) > score or parseFloat(tags.violence) > score
-                    tagsfile = file + ".tags"
-                    toDelete.push file
-                    toDelete.push tagsfile
-
-                    console.log "#{imgfile} - adult: #{tags.adult}, violence: #{tags.violence}"
-            catch ex
-                console.error file, ex
-
-    # Delete unsafe files.
-    for file in toDelete
+    return new Promise(resolve, reject) ->
         try
-            result = fs.unlinkSync file
-            console.log "#{file} - deleted"
+            for folder in folders
+
+                folderTags = utils.getFolderTags folder
+
+                for file, tags of folderTags
+                    try
+                        tags.adult = 0 if not tags.adult?
+                        tags.violence = 0 if not tags.violence?
+
+                        if parseFloat(tags.adult) > score or parseFloat(tags.violence) > score
+                            tagsfile = file + ".tags"
+                            toDelete.push file
+                            toDelete.push tagsfile
+
+                            console.log "#{imgfile} - adult: #{tags.adult}, violence: #{tags.violence}"
+                    catch ex
+                        console.error file, ex
+
+            # Delete unsafe files.
+            for file in toDelete
+                try
+                    result = fs.unlinkSync file
+                    console.log "#{file} - deleted"
+                catch ex
+                    console.error file, ex
+
         catch ex
-            console.error file, ex
+            console.error ex
 
-    console.log ""
-    console.log "FINSHED!"
-    console.log ""
+        resolve true
 
-catch ex
-    console.error ex
+# Export!
+module.exports = Script

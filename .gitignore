@@ -4,5 +4,6 @@
 .idea/
 .vscode/
 coverage/
-imgrecog.json
 node_modules/
+imgrecog.auth.json
+imgrecog.config.json

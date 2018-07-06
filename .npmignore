@@ -1,10 +1,9 @@
 .DS_Store
-.history
-.idea
 .git*
+.history/
+.idea/
 .vscode/
 docs/
-imgrecog.json
-index.html
-index.coffee
-scripts/
+imgrecog.auth.json
+imgrecog.config.json
+*.coffee
