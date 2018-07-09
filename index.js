@@ -3,7 +3,7 @@
   //#################################################################
   /* IMGRecog.js
   */
-  var apiResult, asyncLib, client, currentFolder, executableFolder, fileQueue, finishedQueue, folders, fs, getParams, getScripts, homeFolder, likelyhood, options, os, path, queueProcessor, run, scanFile, scanFolder, scripts, showHelp, startTime, vision;
+  var apiResult, asyncLib, client, counter, currentFolder, executableFolder, fileQueue, finishedQueue, folders, fs, getParams, getScripts, homeFolder, likelyhood, options, os, path, queueProcessor, run, scanFile, scanFolder, scripts, showHelp, startTime, vision;
 
   asyncLib = require("async");
 
@@ -29,6 +29,9 @@
 
   // Collection of available scripts.
   scripts = {};
+
+  // File scan count.
+  counter = 0;
 
   // Create file processor queue  to parse files against Google Vision.
   queueProcessor = function(filepath, callback) {
@@ -60,11 +63,11 @@
 
   // Transforms safe search strings to scores.
   likelyhood = {
-    VERY_UNLIKELY: 0.005,
-    UNLIKELY: 0.155,
-    POSSIBLE: 0.455,
-    LIKELY: 0.755,
-    VERY_LIKELY: 0.955
+    VERY_UNLIKELY: 0.05,
+    UNLIKELY: 0.25,
+    POSSIBLE: 0.55,
+    LIKELY: 0.75,
+    VERY_LIKELY: 0.95
   };
 
   // Set start time (Unix timestamp).
@@ -222,8 +225,16 @@
         if (options.verbose) {
           console.log(filepath, "already processed, skip");
         }
-        callback();
+        return callback();
       }
+    }
+    // Increase scan counter.
+    counter++;
+    if (counter === options.limit) {
+      console.log(`Limit ${counter} reached! Will NOT process more files...`);
+      return callback();
+    } else if (counter > options.limit) {
+      return callback();
     }
     // Detect labels?
     if (options.labels) {
@@ -348,7 +359,9 @@
           return scanFolder(filepath);
         } else {
           if (options.extensions.indexOf(ext) >= 0) {
-            return fileQueue.push(filepath);
+            if (counter < options.limit) {
+              return fileQueue.push(filepath);
+            }
           } else if (options.verbose) {
             return console.log(filepath, "extensions not included, skip");
           }

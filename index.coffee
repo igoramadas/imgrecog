@@ -20,6 +20,9 @@ folders = []
 # Collection of available scripts.
 scripts = {}
 
+# File scan count.
+counter = 0
+
 # Create file processor queue  to parse files against Google Vision.
 queueProcessor = (filepath, callback) -> scanFile filepath, callback
 fileQueue = asyncLib.queue queueProcessor, 4
@@ -45,11 +48,11 @@ options = {
 
 # Transforms safe search strings to scores.
 likelyhood = {
-    VERY_UNLIKELY: 0.005
-    UNLIKELY: 0.155
-    POSSIBLE: 0.455
-    LIKELY: 0.755
-    VERY_LIKELY: 0.955
+    VERY_UNLIKELY: 0.05
+    UNLIKELY: 0.25
+    POSSIBLE: 0.55
+    LIKELY: 0.75
+    VERY_LIKELY: 0.95
 }
 
 # Set start time (Unix timestamp).
@@ -174,7 +177,16 @@ scanFile = (filepath, callback) ->
             console.log filepath, "already processed, overwrite" if options.verbose
         else
             console.log filepath, "already processed, skip" if options.verbose
-            callback()
+            return callback()
+
+    # Increase scan counter.
+    counter++
+
+    if counter is options.limit
+        console.log "Limit #{counter} reached! Will NOT process more files..."
+        return callback()
+    else if counter > options.limit
+        return callback()
 
     # Detect labels?
     if options.labels
@@ -280,7 +292,8 @@ scanFolder = (folder, callback) ->
                 scanFolder filepath
             else
                 if options.extensions.indexOf(ext) >= 0
-                    fileQueue.push filepath
+                    if counter < options.limit
+                        fileQueue.push filepath
                 else if options.verbose
                     console.log filepath, "extensions not included, skip"
         catch ex
