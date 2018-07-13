@@ -30,7 +30,7 @@
               if (tags.violence == null) {
                 tags.violence = 0;
               }
-              if (parseFloat(tags.adult) > score || parseFloat(tags.violence) > score) {
+              if (parseFloat(tags.adult) >= score || parseFloat(tags.violence) >= score) {
                 tagsfile = file + ".tags";
                 toDelete.push(file);
                 toDelete.push(tagsfile);

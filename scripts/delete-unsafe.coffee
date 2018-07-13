@@ -24,7 +24,7 @@ Script = (folders) ->
                         tags.adult = 0 if not tags.adult?
                         tags.violence = 0 if not tags.violence?
 
-                        if parseFloat(tags.adult) > score or parseFloat(tags.violence) > score
+                        if parseFloat(tags.adult) >= score or parseFloat(tags.violence) >= score
                             tagsfile = file + ".tags"
                             toDelete.push file
                             toDelete.push tagsfile
