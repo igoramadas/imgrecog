@@ -9,7 +9,6 @@ Utils = {
     # -------------------------------------------------------------------------
     getFolderTags: (folder) ->
         result = {}
-
         files = fs.readdirSync folder
 
         for file in files
@@ -23,6 +22,8 @@ Utils = {
                     result[tagsfile] = tags
                 catch ex
                     console.error tagsfile, ex
+
+        return result
 }
 
 module.exports = Utils

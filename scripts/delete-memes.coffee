@@ -1,4 +1,4 @@
-# Deletes all images that have adult or violence.
+# Deletes all images that are memes or screenshots.
 
 fs = require "fs"
 path = require "path"
@@ -20,15 +20,15 @@ Script = (folders) ->
 
             for file, tags of folderTags
                 try
-                    tags.adult = 0 if not tags.adult?
-                    tags.violence = 0 if not tags.violence?
+                    tags.meme = 0 if not tags.meme?
+                    tags.screenshot = 0 if not tags.screenshot?
 
-                    if parseFloat(tags.adult) > score or parseFloat(tags.violence) > score
+                    if parseFloat(tags.meme) > score or parseFloat(tags.screenshot) > score
                         tagsfile = file + ".tags"
                         toDelete.push file
                         toDelete.push tagsfile
 
-                        console.log "#{imgfile} - adult: #{tags.adult}, violence: #{tags.violence}"
+                        console.log "#{imgfile} - meme: #{tags.meme}, screenshot: #{tags.screenshot}"
                 catch ex
                     console.error file, ex
 

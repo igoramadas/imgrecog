@@ -4,6 +4,9 @@ else
 	DOCCO:= ./node_modules/.bin/betterdocco
 endif
 
+build:
+	coffee -c index.coffee
+	coffee -c -o scripts/ scripts/
 docs:
 	$(DOCCO) -o docs README.MD index.coffee
 clean:

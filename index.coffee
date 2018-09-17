@@ -329,7 +329,10 @@ finishedQueue = (err, result) ->
         for s in options.scripts
             console.log ""
             console.log "Running script #{s}"
-            scriptResult = await scripts[s] folders
+            try
+                scriptResult = await scripts[s] folders
+            catch ex
+                console.error "Error running #{s}", ex
 
         console.log ""
         console.log "Finished running scripts"
