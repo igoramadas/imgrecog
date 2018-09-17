@@ -50,7 +50,7 @@
   options = {
     decimals: 2,
     extensions: ["png", "jpg", "jpeg", "gif", "bpm", "raw", "webp"],
-    limit: 10000,
+    limit: 1000,
     overwrite: false,
     verbose: false,
     // Below are the available identification commands.
