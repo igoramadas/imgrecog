@@ -35,7 +35,7 @@ options = {
     decimals: 2
     extensions: ["png", "jpg", "jpeg", "gif", "bpm", "raw", "webp"]
     limit: 1000
-    overwrite: false
+    force: false
     verbose: false
     # Below are the available identification commands.
     labels: false
@@ -60,16 +60,23 @@ startTime = Date.now()
 
 # Show help on command line (imgrecog.js -help).
 showHelp = ->
-    console.log "imgrecog.js <options> <folders>"
+    console.log "imgrecog.js <options|script> <folders>"
+    console.log ""
+    console.log "Options:"
     console.log ""
     console.log "  -labels            detect labels"
     console.log "  -landmarks         detect landmarks"
     console.log "  -logos             detect logos"
     console.log "  -safe              detect safe search"
     console.log "  -all               detect all (same as enabling everything above)"
-    console.log "  -overwrite   -w    reprocess existing files / overwrite tags"
+    console.log "  -force       -f    reprocess existing files / overwrite tags"
     console.log "  -verbose     -v    enable verbose"
     console.log "  -help        -h    help me (this screen)"
+    console.log ""
+    console.log "Scripts:"
+    console.log ""
+    console.log "  -delete-memes      delete previously processed memes and screenshots"
+    console.log "  -delete-unsafe     delete previously processed adult and violent images"
     console.log ""
     console.log "............................................................................."
     console.log ""
@@ -79,7 +86,10 @@ showHelp = ->
     console.log "  $ imgrecog.js -labels -safe"
     console.log ""
     console.log "Detect everything and overwrite tags on specific directories"
-    console.log "  $ imgrecog.js -all -w /home/someuser/images /home/someuser/photos"
+    console.log "  $ imgrecog.js -all -f /home/someuser/images /home/someuser/photos"
+    console.log ""
+    console.log "Execute scripts to delete memes and unsafe images"
+    console.log "  $ imgrecog.js -delete-memes -delete-unsafe /home/someuser/photos"
     console.log ""
     console.log "............................................................................."
     console.log ""
@@ -90,7 +100,7 @@ showHelp = ->
     console.log "  decimals (#{options.decimals})"
     console.log "  extensions (#{options.extensions.join(' ')})"
     console.log "  limit (#{options.limit})"
-    console.log "  overwrite (#{options.overwrite})"
+    console.log "  force (#{options.force})"
     console.log "  verbose (#{options.verbose})"
     console.log ""
     console.log "#############################################################################"
@@ -123,8 +133,8 @@ getParams = ->
                 return process.exit 0
             when "-v", "-verbose"
                 options.verbose = true
-            when "-w", "-overwrite"
-                options.overwrite = true
+            when "-f", "-force"
+                options.force = true
             when "-all"
                 options.labels = true
                 options.landmarks = true
@@ -173,8 +183,8 @@ scanFile = (filepath, callback) ->
     exists = fs.existsSync outputPath
 
     if exists
-        if options.overwrite
-            console.log filepath, "already processed, overwrite" if options.verbose
+        if options.force
+            console.log filepath, "already processed, force overwrite" if options.verbose
         else
             console.log filepath, "already processed, skip" if options.verbose
             return callback()
