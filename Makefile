@@ -5,13 +5,22 @@ else
 endif
 
 build:
+	rm -rf *.js
+	rm -rf scripts/*.js
 	coffee -c index.coffee
 	coffee -c -o scripts/ scripts/
+
 docs:
 	$(DOCCO) -o docs README.MD index.coffee
+
 clean:
 	rm -rf ./node_modules
 	rm -rf ./logs/*.log
 
-.PHONY: test
-.PHONY: docs
+publish:
+	clean
+	npm update
+	build
+	npm publish
+
+.PHONY: build docs clean publish
