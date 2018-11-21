@@ -86,9 +86,9 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
         
           <div class='highlight'><pre>options = {
     decimals: <span class="hljs-number">2</span>
-    extensions: [<span class="hljs-string">"png"</span>, <span class="hljs-string">"jpg"</span>, <span class="hljs-string">"jpeg"</span>, <span class="hljs-string">"gif"</span>, <span class="hljs-string">"bpm"</span>, <span class="hljs-string">"raw"</span>, <span class="hljs-string">"webp"</span>]
+    extensions: [<span class="hljs-string">"png"</span>, <span class="hljs-string">"jpg"</span>, <span class="hljs-string">"jpeg"</span>, <span class="hljs-string">"gif"</span>, <span class="hljs-string">"bmp"</span>]
     limit: <span class="hljs-number">1000</span>
-    overwrite: <span class="hljs-literal">false</span>
+    force: <span class="hljs-literal">false</span>
     verbose: <span class="hljs-literal">false</span></pre></div>
         
       
@@ -135,16 +135,23 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
 
         
           <div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">showHelp</span> = -&gt;</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"imgrecog.js &lt;options&gt; &lt;folders&gt;"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"imgrecog.js &lt;options|script&gt; &lt;folders&gt;"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Options:"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -labels            detect labels"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -landmarks         detect landmarks"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -logos             detect logos"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -safe              detect safe search"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -all               detect all (same as enabling everything above)"</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -overwrite   -w    reprocess existing files / overwrite tags"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -force       -f    reprocess existing files / overwrite tags"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -verbose     -v    enable verbose"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -help        -h    help me (this screen)"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Scripts:"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -delete-memes      delete previously processed memes and screenshots"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  -delete-unsafe     delete previously processed adult and violent images"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"............................................................................."</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
@@ -154,7 +161,10 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  $ imgrecog.js -labels -safe"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Detect everything and overwrite tags on specific directories"</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  $ imgrecog.js -all -w /home/someuser/images /home/someuser/photos"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  $ imgrecog.js -all -f /home/someuser/images /home/someuser/photos"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Execute scripts to delete memes and unsafe images"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  $ imgrecog.js -delete-memes -delete-unsafe /home/someuser/photos"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"............................................................................."</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
@@ -165,7 +175,7 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  decimals (<span class="hljs-subst">#{options.decimals}</span>)"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  extensions (<span class="hljs-subst">#{options.extensions.join(<span class="hljs-string">' '</span>)}</span>)"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  limit (<span class="hljs-subst">#{options.limit}</span>)"</span>
-    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  overwrite (<span class="hljs-subst">#{options.overwrite}</span>)"</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  force (<span class="hljs-subst">#{options.force}</span>)"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  verbose (<span class="hljs-subst">#{options.verbose}</span>)"</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"#############################################################################"</span>
@@ -214,8 +224,8 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
                 <span class="hljs-keyword">return</span> process.exit <span class="hljs-number">0</span>
             <span class="hljs-keyword">when</span> <span class="hljs-string">"-v"</span>, <span class="hljs-string">"-verbose"</span>
                 options.verbose = <span class="hljs-literal">true</span>
-            <span class="hljs-keyword">when</span> <span class="hljs-string">"-w"</span>, <span class="hljs-string">"-overwrite"</span>
-                options.overwrite = <span class="hljs-literal">true</span>
+            <span class="hljs-keyword">when</span> <span class="hljs-string">"-f"</span>, <span class="hljs-string">"-force"</span>
+                options.force = <span class="hljs-literal">true</span>
             <span class="hljs-keyword">when</span> <span class="hljs-string">"-all"</span>
                 options.labels = <span class="hljs-literal">true</span>
                 options.landmarks = <span class="hljs-literal">true</span>
@@ -255,10 +265,10 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
         <p>Call the Vision API and return result so we can process tags.</p>
 
         
-          <div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">apiResult</span> = <span class="hljs-params">(filepath, method, key)</span> -&gt;</span>
+          <div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">apiResult</span> = <span class="hljs-params">(filepath, apiMethod, key)</span> -&gt;</span>
     <span class="hljs-keyword">return</span> <span class="hljs-keyword">new</span> Promise (resolve, reject) -&gt;
         <span class="hljs-keyword">try</span>
-            result = <span class="hljs-keyword">await</span> method filepath
+            result = <span class="hljs-keyword">await</span> client[apiMethod] filepath
             resolve result[<span class="hljs-number">0</span>][key]
         <span class="hljs-keyword">catch</span> ex
             reject ex</pre></div>
@@ -280,10 +290,10 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
           <div class='highlight'><pre>    exists = fs.existsSync outputPath
 
     <span class="hljs-keyword">if</span> exists
-        <span class="hljs-keyword">if</span> options.overwrite
-            <span class="hljs-built_in">console</span>.log filepath, <span class="hljs-string">"already processed, overwrite"</span> <span class="hljs-keyword">if</span> options.verbose
+        <span class="hljs-keyword">if</span> options.force
+            <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  <span class="hljs-subst">#{filepath}</span>"</span>, <span class="hljs-string">"already processed, force overwrite"</span> <span class="hljs-keyword">if</span> options.verbose
         <span class="hljs-keyword">else</span>
-            <span class="hljs-built_in">console</span>.log filepath, <span class="hljs-string">"already processed, skip"</span> <span class="hljs-keyword">if</span> options.verbose
+            <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  <span class="hljs-subst">#{filepath}</span>"</span>, <span class="hljs-string">"already processed, skip"</span> <span class="hljs-keyword">if</span> options.verbose
             <span class="hljs-keyword">return</span> callback()</pre></div>
         
       
@@ -294,6 +304,7 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
           <div class='highlight'><pre>    counter++
 
     <span class="hljs-keyword">if</span> counter <span class="hljs-keyword">is</span> options.limit
+        <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
         <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Limit <span class="hljs-subst">#{counter}</span> reached! Will NOT process more files..."</span>
         <span class="hljs-keyword">return</span> callback()
     <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> counter &gt; options.limit
@@ -306,7 +317,7 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
         
           <div class='highlight'><pre>    <span class="hljs-keyword">if</span> options.labels
         <span class="hljs-keyword">try</span>
-            result = <span class="hljs-keyword">await</span> apiResult filepath, client.labelDetection, <span class="hljs-string">"labelAnnotations"</span>
+            result = <span class="hljs-keyword">await</span> apiResult filepath, <span class="hljs-string">"labelDetection"</span>, <span class="hljs-string">"labelAnnotations"</span>
             logtext = []</pre></div>
         
       
@@ -331,7 +342,7 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
         
           <div class='highlight'><pre>    <span class="hljs-keyword">if</span> options.landmarks
         <span class="hljs-keyword">try</span>
-            result = <span class="hljs-keyword">await</span> apiResult filepath, client.landmarkDetection, <span class="hljs-string">"landmarkAnnotations"</span>
+            result = <span class="hljs-keyword">await</span> apiResult filepath, <span class="hljs-string">"landmarkDetection"</span>, <span class="hljs-string">"landmarkAnnotations"</span>
             logtext = []</pre></div>
         
       
@@ -358,7 +369,7 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
         
           <div class='highlight'><pre>    <span class="hljs-keyword">if</span> options.logos
         <span class="hljs-keyword">try</span>
-            result = <span class="hljs-keyword">await</span> apiResult filepath, client.logoDetection, <span class="hljs-string">"logoAnnotations"</span>
+            result = <span class="hljs-keyword">await</span> apiResult filepath, <span class="hljs-string">"logoDetection"</span>, <span class="hljs-string">"logoAnnotations"</span>
             logtext = []</pre></div>
         
       
@@ -383,7 +394,7 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
         
           <div class='highlight'><pre>    <span class="hljs-keyword">if</span> options.safe
         <span class="hljs-keyword">try</span>
-            result = <span class="hljs-keyword">await</span> apiResult filepath, client.safeSearchDetection, <span class="hljs-string">"safeSearchAnnotation"</span>
+            result = <span class="hljs-keyword">await</span> apiResult filepath, <span class="hljs-string">"safeSearchDetection"</span>, <span class="hljs-string">"safeSearchAnnotation"</span>
             logtext = []</pre></div>
         
       
@@ -431,16 +442,7 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
 
         
           <div class='highlight'><pre><span class="hljs-function"><span class="hljs-title">scanFolder</span> = <span class="hljs-params">(folder, callback)</span> -&gt;</span>
-    <span class="hljs-keyword">if</span> options.verbose
-        <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
-        <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Scanning <span class="hljs-subst">#{folder}</span> ..."</span></pre></div>
-        
-      
-        
-        <p>Helper to scan folder contents (directories and files).</p>
-
-        
-          <div class='highlight'><pre><span class="hljs-function">    <span class="hljs-title">scanner</span> = <span class="hljs-params">(file)</span> -&gt;</span>
+<span class="hljs-function">    <span class="hljs-title">scanner</span> = <span class="hljs-params">(file)</span> -&gt;</span>
         filepath = path.join folder, file
         ext = path.extname(filepath).toLowerCase().replace <span class="hljs-string">"."</span>, <span class="hljs-string">""</span>
 
@@ -453,8 +455,8 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
                 <span class="hljs-keyword">if</span> options.extensions.indexOf(ext) &gt;= <span class="hljs-number">0</span>
                     <span class="hljs-keyword">if</span> counter &lt; options.limit
                         fileQueue.push filepath
-                <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> options.verbose
-                    <span class="hljs-built_in">console</span>.log filepath, <span class="hljs-string">"extensions not included, skip"</span>
+                <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> options.verbose <span class="hljs-keyword">and</span> ext <span class="hljs-keyword">isnt</span> <span class="hljs-string">"tags"</span>
+                    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"  <span class="hljs-subst">#{filepath}</span>"</span>, <span class="hljs-string">"skip (invalid extension)"</span>
         <span class="hljs-keyword">catch</span> ex
             <span class="hljs-built_in">console</span>.error <span class="hljs-string">"Error reading <span class="hljs-subst">#{filepath}</span>: <span class="hljs-subst">#{ex}</span>"</span></pre></div>
         
@@ -468,8 +470,11 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
     <span class="hljs-keyword">try</span>
         contents = fs.readdirSync folder
 
+        <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
+        <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Scanning <span class="hljs-subst">#{folder}</span>"</span>
+
         <span class="hljs-keyword">if</span> options.verbose
-            <span class="hljs-built_in">console</span>.log <span class="hljs-string">"<span class="hljs-subst">#{folder}</span> has <span class="hljs-subst">#{contents.length}</span> itens"</span>
+            <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Found <span class="hljs-subst">#{contents.length}</span> files"</span>
 
         i = <span class="hljs-number">0</span>
         <span class="hljs-keyword">while</span> i &lt; contents.length
@@ -495,7 +500,7 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
     <span class="hljs-keyword">if</span> options.scripts.length &gt; <span class="hljs-number">0</span>
         <span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> options.scripts
             <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
-            <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Running script <span class="hljs-subst">#{s}</span>"</span>
+            <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Running script <span class="hljs-subst">#{s}</span> ..."</span>
             <span class="hljs-keyword">try</span>
                 scriptResult = <span class="hljs-keyword">await</span> scripts[s] folders
             <span class="hljs-keyword">catch</span> ex
@@ -509,7 +514,8 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
         <p>Bye!</p>
 
         
-          <div class='highlight'><pre>    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span></pre></div>
+          <div class='highlight'><pre>    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
+    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span></pre></div>
         
       
         
@@ -550,15 +556,13 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
 
         <span class="hljs-keyword">if</span> configPath?
             <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Using config from <span class="hljs-subst">#{configPath}</span>"</span>
-            <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
 
             configJson = fs.readFileSync configPath, <span class="hljs-string">"utf8"</span>
             configJson = JSON.parse configJson
             options[key] = value <span class="hljs-keyword">for</span> key, value <span class="hljs-keyword">of</span> configJson
 
     <span class="hljs-keyword">catch</span> ex
-        <span class="hljs-built_in">console</span>.error <span class="hljs-string">"Can't load <span class="hljs-subst">#{configPath}</span>"</span>, ex
-        <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span></pre></div>
+        <span class="hljs-built_in">console</span>.error <span class="hljs-string">"Can't load <span class="hljs-subst">#{configPath}</span>"</span>, ex</pre></div>
         
       
         
@@ -581,7 +585,10 @@ fileQueue = asyncLib.queue queueProcessor, <span class="hljs-number">4</span></p
         
           <div class='highlight'><pre>    arr = []
     <span class="hljs-keyword">for</span> key, value <span class="hljs-keyword">of</span> options
-        arr.push <span class="hljs-string">"<span class="hljs-subst">#{key}</span>: <span class="hljs-subst">#{value}</span>"</span>
+        <span class="hljs-keyword">if</span> value <span class="hljs-keyword">is</span> <span class="hljs-literal">true</span>
+            arr.push key
+        <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> value <span class="hljs-keyword">isnt</span> <span class="hljs-literal">false</span>
+            arr.push <span class="hljs-string">"<span class="hljs-subst">#{key}</span>: <span class="hljs-subst">#{value}</span>"</span>
 
     <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Options: <span class="hljs-subst">#{arr.join(<span class="hljs-string">" | "</span>)}</span>"</span></pre></div>
         
@@ -607,8 +614,9 @@ Only if any of the identification commmands was passed.</p>
                 <span class="hljs-built_in">console</span>.log <span class="hljs-string">"Using credentials from environment variables"</span>
         <span class="hljs-keyword">catch</span> ex
             <span class="hljs-built_in">console</span>.error <span class="hljs-string">"Could not create a Vision API client, make sure you have defined credentials on a imgrecog.json file or environment variables."</span>, ex
+            <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
+            process.exit <span class="hljs-number">0</span>
 
-        <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
         folderTasks = []</pre></div>
         
       
@@ -617,17 +625,21 @@ Only if any of the identification commmands was passed.</p>
 
         
           <div class='highlight'><pre>        <span class="hljs-keyword">for</span> folder <span class="hljs-keyword">in</span> folders
-            <span class="hljs-built_in">console</span>.log folder
-            <span class="hljs-keyword">do</span> (folder) -&gt; folderTasks.push (callback) -&gt; scanFolder folder, callback
-
-        <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span></pre></div>
+            <span class="hljs-keyword">do</span> (folder) -&gt; folderTasks.push (callback) -&gt; scanFolder folder, callback</pre></div>
         
       
         
-        <p>Run folder scanning tasks in parallel.</p>
+        <p>Run folder scanning tasks in parallel after 1 second so we have time to confirm client credentials.</p>
 
         
-          <div class='highlight'><pre>        asyncLib.parallelLimit folderTasks, <span class="hljs-number">2</span>
+          <div class='highlight'><pre><span class="hljs-function">        <span class="hljs-title">delayedScan</span> = -&gt;</span>
+            asyncLib.parallelLimit folderTasks, <span class="hljs-number">2</span>, <span class="hljs-function">-&gt;</span>
+                <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> fileQueue.started
+                    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
+                    <span class="hljs-built_in">console</span>.log <span class="hljs-string">"No valid images were found!"</span>
+                    <span class="hljs-built_in">console</span>.log <span class="hljs-string">""</span>
+
+        setTimeout delayedScan, <span class="hljs-number">1200</span>
     <span class="hljs-keyword">else</span>
         finishedQueue()</pre></div>
         
