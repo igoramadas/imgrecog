@@ -33,7 +33,7 @@ fileQueue.drain = -> finishedQueue()
 # Default options.
 options = {
     decimals: 2
-    extensions: ["png", "jpg", "jpeg", "gif", "bpm", "raw", "webp"]
+    extensions: ["png", "jpg", "jpeg", "gif", "bmp"]
     limit: 1000
     force: false
     verbose: false
@@ -287,11 +287,6 @@ scanFile = (filepath, callback) ->
 
 # Scan a folder to match duplicates.
 scanFolder = (folder, callback) ->
-    if options.verbose
-        console.log ""
-        console.log "Scanning #{folder} ..."
-
-    # Helper to scan folder contents (directories and files).
     scanner = (file) ->
         filepath = path.join folder, file
         ext = path.extname(filepath).toLowerCase().replace ".", ""
@@ -306,7 +301,7 @@ scanFolder = (folder, callback) ->
                     if counter < options.limit
                         fileQueue.push filepath
                 else if options.verbose and ext isnt "tags"
-                    console.log "  #{filepath}", "extensions not included, skip"
+                    console.log "  #{filepath}", "skip (invalid extension)"
         catch ex
             console.error "Error reading #{filepath}: #{ex}"
 
@@ -316,8 +311,11 @@ scanFolder = (folder, callback) ->
     try
         contents = fs.readdirSync folder
 
+        console.log ""
+        console.log "Scanning #{folder}"
+
         if options.verbose
-            console.log "#{folder} has #{contents.length} itens"
+            console.log "Found #{contents.length} files"
 
         i = 0
         while i < contents.length
@@ -350,6 +348,7 @@ finishedQueue = (err, result) ->
 
     # Bye!
     console.log ""
+    console.log ""
 
 # Run it!
 run = ->
@@ -378,7 +377,6 @@ run = ->
 
         if configPath?
             console.log "Using config from #{configPath}"
-            console.log ""
 
             configJson = fs.readFileSync configPath, "utf8"
             configJson = JSON.parse configJson
@@ -386,7 +384,6 @@ run = ->
 
     catch ex
         console.error "Can't load #{configPath}", ex
-        console.log ""
 
     # Load available scripts.
     getScripts()
@@ -397,7 +394,10 @@ run = ->
     # Passed options.
     arr = []
     for key, value of options
-        arr.push "#{key}: #{value}"
+        if value is true
+            arr.push key
+        else if value isnt false
+            arr.push "#{key}: #{value}"
 
     console.log "Options: #{arr.join(" | ")}"
 
@@ -419,21 +419,24 @@ run = ->
                 console.log "Using credentials from environment variables"
         catch ex
             console.error "Could not create a Vision API client, make sure you have defined credentials on a imgrecog.json file or environment variables.", ex
-            process.exit()
+            console.log ""
+            process.exit 0
 
-        console.log ""
         folderTasks = []
 
         # Iterate and scan search folders.
         for folder in folders
-            console.log folder
             do (folder) -> folderTasks.push (callback) -> scanFolder folder, callback
 
-        console.log ""
-
         # Run folder scanning tasks in parallel after 1 second so we have time to confirm client credentials.
-        callback = -> asyncLib.parallelLimit folderTasks, 2
-        setTimeout callback, 1200
+        delayedScan = ->
+            asyncLib.parallelLimit folderTasks, 2, ->
+                if not fileQueue.started
+                    console.log ""
+                    console.log "No valid images were found!"
+                    console.log ""
+
+        setTimeout delayedScan, 1200
     else
         finishedQueue()
 

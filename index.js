@@ -49,7 +49,7 @@
   // Default options.
   options = {
     decimals: 2,
-    extensions: ["png", "jpg", "jpeg", "gif", "bpm", "raw", "webp"],
+    extensions: ["png", "jpg", "jpeg", "gif", "bmp"],
     limit: 1000,
     force: false,
     verbose: false,
@@ -356,11 +356,6 @@
   // Scan a folder to match duplicates.
   scanFolder = function(folder, callback) {
     var contents, ex, i, scanner;
-    if (options.verbose) {
-      console.log("");
-      console.log(`Scanning ${folder} ...`);
-    }
-    // Helper to scan folder contents (directories and files).
     scanner = function(file) {
       var ex, ext, filepath, stats;
       filepath = path.join(folder, file);
@@ -375,7 +370,7 @@
               return fileQueue.push(filepath);
             }
           } else if (options.verbose && ext !== "tags") {
-            return console.log(`  ${filepath}`, "extensions not included, skip");
+            return console.log(`  ${filepath}`, "skip (invalid extension)");
           }
         }
       } catch (error) {
@@ -389,8 +384,10 @@
     }
     try {
       contents = fs.readdirSync(folder);
+      console.log("");
+      console.log(`Scanning ${folder}`);
       if (options.verbose) {
-        console.log(`${folder} has ${contents.length} itens`);
+        console.log(`Found ${contents.length} files`);
       }
       i = 0;
       while (i < contents.length) {
@@ -432,12 +429,13 @@
       console.log("Finished running scripts");
     }
     // Bye!
+    console.log("");
     return console.log("");
   };
 
   // Run it!
   run = function() {
-    var arr, callback, configCurrent, configExecutable, configHome, configJson, configPath, credentialsCurrent, credentialsExecutable, credentialsHome, ex, folder, folderTasks, j, key, len, value;
+    var arr, configCurrent, configExecutable, configHome, configJson, configPath, credentialsCurrent, credentialsExecutable, credentialsHome, delayedScan, ex, folder, folderTasks, j, key, len, value;
     console.log("");
     console.log("#############################################################################");
     console.log("# IMGRecog.js");
@@ -461,7 +459,6 @@
       }
       if (configPath != null) {
         console.log(`Using config from ${configPath}`);
-        console.log("");
         configJson = fs.readFileSync(configPath, "utf8");
         configJson = JSON.parse(configJson);
         for (key in configJson) {
@@ -472,7 +469,6 @@
     } catch (error) {
       ex = error;
       console.error(`Can't load ${configPath}`, ex);
-      console.log("");
     }
     // Load available scripts.
     getScripts();
@@ -482,7 +478,11 @@
     arr = [];
     for (key in options) {
       value = options[key];
-      arr.push(`${key}: ${value}`);
+      if (value === true) {
+        arr.push(key);
+      } else if (value !== false) {
+        arr.push(`${key}: ${value}`);
+      }
     }
     console.log(`Options: ${arr.join(" | ")}`);
     // Create client, checking if a credentials.json file exists.
@@ -511,26 +511,30 @@
       } catch (error) {
         ex = error;
         console.error("Could not create a Vision API client, make sure you have defined credentials on a imgrecog.json file or environment variables.", ex);
-        process.exit();
+        console.log("");
+        process.exit(0);
       }
-      console.log("");
       folderTasks = [];
 // Iterate and scan search folders.
       for (j = 0, len = folders.length; j < len; j++) {
         folder = folders[j];
-        console.log(folder);
         (function(folder) {
           return folderTasks.push(function(callback) {
             return scanFolder(folder, callback);
           });
         })(folder);
       }
-      console.log("");
       // Run folder scanning tasks in parallel after 1 second so we have time to confirm client credentials.
-      callback = function() {
-        return asyncLib.parallelLimit(folderTasks, 2);
+      delayedScan = function() {
+        return asyncLib.parallelLimit(folderTasks, 2, function() {
+          if (!fileQueue.started) {
+            console.log("");
+            console.log("No valid images were found!");
+            return console.log("");
+          }
+        });
       };
-      return setTimeout(callback, 1200);
+      return setTimeout(delayedScan, 1200);
     } else {
       return finishedQueue();
     }
