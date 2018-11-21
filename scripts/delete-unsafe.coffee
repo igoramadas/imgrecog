@@ -8,7 +8,7 @@ utils = require "./utils.js"
 Script = (folders) ->
 
     # Minimum score to consider.
-    score = 0.001
+    score = 0.8
 
     # Array of files to be deleted.
     toDelete = []

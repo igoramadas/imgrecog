@@ -13,7 +13,7 @@
   Script = async function(folders) {
     var ex, file, folder, folderTags, i, imgfile, j, len, len1, result, score, tags, toDelete;
     // Minimum score to consider.
-    score = 0.001;
+    score = 0.8;
     // Array of files to be deleted.
     toDelete = [];
     try {
