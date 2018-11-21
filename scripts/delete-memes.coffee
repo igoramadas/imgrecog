@@ -24,21 +24,25 @@ Script = (folders) ->
                     tags.screenshot = 0 if not tags.screenshot?
 
                     if parseFloat(tags.meme) > score or parseFloat(tags.screenshot) > score
-                        tagsfile = file + ".tags"
+                        imgfile = file.substring(0, file.length - 5)
+                        toDelete.push imgfile
                         toDelete.push file
-                        toDelete.push tagsfile
 
-                        console.log "#{imgfile} - meme: #{tags.meme}, screenshot: #{tags.screenshot}"
+                        console.log "  #{imgfile} - meme: #{tags.meme}, screenshot: #{tags.screenshot}"
+                    else
+                        console.log "  #{imgfile} - not a meme / screenshot"
                 catch ex
                     console.error file, ex
+
+            console.log ""
 
         # Delete unsafe files.
         for file in toDelete
             try
                 result = fs.unlinkSync file
-                console.log "#{file} - deleted"
+                console.log "  #{file} - deleted"
             catch ex
-                console.error file, ex
+                console.error "  #{file}", ex
 
         return await true
 

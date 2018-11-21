@@ -166,10 +166,10 @@ getParams = ->
             return process.exit 0
 
 # Call the Vision API and return result so we can process tags.
-apiResult = (filepath, method, key) ->
+apiResult = (filepath, apiMethod, key) ->
     return new Promise (resolve, reject) ->
         try
-            result = await method filepath
+            result = await client[apiMethod] filepath
             resolve result[0][key]
         catch ex
             reject ex
@@ -184,15 +184,16 @@ scanFile = (filepath, callback) ->
 
     if exists
         if options.force
-            console.log filepath, "already processed, force overwrite" if options.verbose
+            console.log "  #{filepath}", "already processed, force overwrite" if options.verbose
         else
-            console.log filepath, "already processed, skip" if options.verbose
+            console.log "  #{filepath}", "already processed, skip" if options.verbose
             return callback()
 
     # Increase scan counter.
     counter++
 
     if counter is options.limit
+        console.log ""
         console.log "Limit #{counter} reached! Will NOT process more files..."
         return callback()
     else if counter > options.limit
@@ -201,7 +202,7 @@ scanFile = (filepath, callback) ->
     # Detect labels?
     if options.labels
         try
-            result = await apiResult filepath, client.labelDetection, "labelAnnotations"
+            result = await apiResult filepath, "labelDetection", "labelAnnotations"
             logtext = []
 
             # Add labels as tags.
@@ -218,7 +219,7 @@ scanFile = (filepath, callback) ->
     # Detect landmarks?
     if options.landmarks
         try
-            result = await apiResult filepath, client.landmarkDetection, "landmarkAnnotations"
+            result = await apiResult filepath, "landmarkDetection", "landmarkAnnotations"
             logtext = []
 
             # Add landmarks as tags.
@@ -237,7 +238,7 @@ scanFile = (filepath, callback) ->
     # Detect logos?
     if options.logos
         try
-            result = await apiResult filepath, client.logoDetection, "logoAnnotations"
+            result = await apiResult filepath, "logoDetection", "logoAnnotations"
             logtext = []
 
             # Add logos as tags.
@@ -254,7 +255,7 @@ scanFile = (filepath, callback) ->
     # Detect safe search?
     if options.safe
         try
-            result = await apiResult filepath, client.safeSearchDetection, "safeSearchAnnotation"
+            result = await apiResult filepath, "safeSearchDetection", "safeSearchAnnotation"
             logtext = []
 
             # Add safe search labels as tags.
@@ -304,8 +305,8 @@ scanFolder = (folder, callback) ->
                 if options.extensions.indexOf(ext) >= 0
                     if counter < options.limit
                         fileQueue.push filepath
-                else if options.verbose
-                    console.log filepath, "extensions not included, skip"
+                else if options.verbose and ext isnt "tags"
+                    console.log "  #{filepath}", "extensions not included, skip"
         catch ex
             console.error "Error reading #{filepath}: #{ex}"
 
@@ -338,7 +339,7 @@ finishedQueue = (err, result) ->
     if options.scripts.length > 0
         for s in options.scripts
             console.log ""
-            console.log "Running script #{s}"
+            console.log "Running script #{s} ..."
             try
                 scriptResult = await scripts[s] folders
             catch ex
@@ -418,6 +419,7 @@ run = ->
                 console.log "Using credentials from environment variables"
         catch ex
             console.error "Could not create a Vision API client, make sure you have defined credentials on a imgrecog.json file or environment variables.", ex
+            process.exit()
 
         console.log ""
         folderTasks = []
@@ -429,8 +431,9 @@ run = ->
 
         console.log ""
 
-        # Run folder scanning tasks in parallel.
-        asyncLib.parallelLimit folderTasks, 2
+        # Run folder scanning tasks in parallel after 1 second so we have time to confirm client credentials.
+        callback = -> asyncLib.parallelLimit folderTasks, 2
+        setTimeout callback, 1200
     else
         finishedQueue()
 

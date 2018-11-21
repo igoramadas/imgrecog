@@ -2,8 +2,10 @@
 .coveralls.yml
 .history/
 .idea/
+.python-version
 .vscode/
 coverage/
 node_modules/
 imgrecog.auth.json
 imgrecog.config.json
+imgtest

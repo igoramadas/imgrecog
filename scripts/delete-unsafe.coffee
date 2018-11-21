@@ -8,7 +8,7 @@ utils = require "./utils.js"
 Script = (folders) ->
 
     # Minimum score to consider.
-    score = 0.8
+    score = 0.001
 
     # Array of files to be deleted.
     toDelete = []
@@ -24,21 +24,25 @@ Script = (folders) ->
                     tags.violence = 0 if not tags.violence?
 
                     if parseFloat(tags.adult) > score or parseFloat(tags.violence) > score
-                        tagsfile = file + ".tags"
+                        imgfile = file.substring(0, file.length - 5)
+                        toDelete.push imgfile
                         toDelete.push file
-                        toDelete.push tagsfile
 
-                        console.log "#{imgfile} - adult: #{tags.adult}, violence: #{tags.violence}"
+                        console.log "  #{imgfile} - adult: #{tags.adult}, violence: #{tags.violence}"
+                    else
+                        console.log "  #{imgfile} - safe"
                 catch ex
                     console.error file, ex
+
+            console.log ""
 
         # Delete unsafe files.
         for file in toDelete
             try
                 result = fs.unlinkSync file
-                console.log "#{file} - deleted"
+                console.log "  #{file} - deleted"
             catch ex
-                console.error file, ex
+                console.error "  #{file}", ex
 
         return await true
 
