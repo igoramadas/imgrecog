@@ -7,8 +7,9 @@ utils = require "./utils.js"
 # Script implementation.
 Script = (folders) ->
 
-    # Anything above this total score is considered bloat.
-    totalScore = 1.2
+    # Anything above these single / total score is considered bloat.
+    singleScore = 0.85
+    totalScore = 1.25
 
     # Array of files to be deleted.
     toDelete = []
@@ -25,16 +26,18 @@ Script = (folders) ->
             for file, tags of folderTags
                 try
                     imgTotalScore = 0
+                    hasBloat = false
 
                     for bt in bloatTags
                         tags[bt] = 0 if not tags[bt]?
                         imgTotalScore += tags[bt]
+                        hasBloat = true if tags[bt] > singleScore
 
                     for et in extraTags
                         tags[et] = 0 if not tags[et]?
                         imgTotalScore += (tags[et] / 3)
 
-                    if imgTotalScore > totalScore
+                    if hasBloat or imgTotalScore > totalScore
                         imgfile = file.substring(0, file.length - 5)
                         toDelete.push imgfile
                         toDelete.push file
