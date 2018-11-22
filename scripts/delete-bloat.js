@@ -11,9 +11,10 @@
 
   // Script implementation.
   Script = async function(folders) {
-    var bloatTags, bt, et, ex, extraTags, file, folder, folderTags, i, imgTotalScore, imgfile, j, k, l, len, len1, len2, len3, result, tags, toDelete, totalScore;
-    // Anything above this total score is considered bloat.
-    totalScore = 1.2;
+    var bloatTags, bt, et, ex, extraTags, file, folder, folderTags, hasBloat, i, imgTotalScore, imgfile, j, k, l, len, len1, len2, len3, result, singleScore, tags, toDelete, totalScore;
+    // Anything above these single / total score is considered bloat.
+    singleScore = 0.85;
+    totalScore = 1.25;
     // Array of files to be deleted.
     toDelete = [];
     // Tags to consider.
@@ -27,12 +28,16 @@
           tags = folderTags[file];
           try {
             imgTotalScore = 0;
+            hasBloat = false;
             for (j = 0, len1 = bloatTags.length; j < len1; j++) {
               bt = bloatTags[j];
               if (tags[bt] == null) {
                 tags[bt] = 0;
               }
               imgTotalScore += tags[bt];
+              if (tags[bt] > singleScore) {
+                hasBloat = true;
+              }
             }
             for (k = 0, len2 = extraTags.length; k < len2; k++) {
               et = extraTags[k];
@@ -41,7 +46,7 @@
               }
               imgTotalScore += tags[et] / 3;
             }
-            if (imgTotalScore > totalScore) {
+            if (hasBloat || imgTotalScore > totalScore) {
               imgfile = file.substring(0, file.length - 5);
               toDelete.push(imgfile);
               toDelete.push(file);
