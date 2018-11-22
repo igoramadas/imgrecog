@@ -1,4 +1,4 @@
-# Deletes all images that have adult or violence.
+# Deletes all images that are very likely adult, violence, or a good mix of unsafe categories.
 
 fs = require "fs"
 path = require "path"
@@ -7,8 +7,10 @@ utils = require "./utils.js"
 # Script implementation.
 Script = (folders) ->
 
-    # Minimum score to consider.
-    score = 0.8
+    # Maximum safe single / total scores to consider.
+    # Anything above these values is considered unsafe.
+    singleScore = 0.8
+    totalScore = 1.5
 
     # Array of files to be deleted.
     toDelete = []
@@ -21,16 +23,19 @@ Script = (folders) ->
             for file, tags of folderTags
                 try
                     tags.adult = 0 if not tags.adult?
+                    tags.spoof = 0 if not tags.spoof?
+                    tags.medical = 0 if not tags.medical?
+                    tags.racy = 0 if not tags.racy?
                     tags.violence = 0 if not tags.violence?
 
-                    if parseFloat(tags.adult) > score or parseFloat(tags.violence) > score
+                    imgTotalScore = tags.adult + tags.spoof + tags.medical + tags.racy + tags.violence
+
+                    if tags.adult > singleScore or tags.violence > singleScore or imgTotalScore > totalScore
                         imgfile = file.substring(0, file.length - 5)
                         toDelete.push imgfile
                         toDelete.push file
 
-                        console.log "  #{imgfile} - adult: #{tags.adult}, violence: #{tags.violence}"
-                    else
-                        console.log "  #{imgfile} - safe"
+                        console.log "  #{imgfile} marked as unsafe"
                 catch ex
                     console.error file, ex
 

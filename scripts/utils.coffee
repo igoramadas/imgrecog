@@ -19,6 +19,9 @@ Utils = {
                     tags = fs.readFileSync tagsfile, "utf8"
                     tags = JSON.parse tags
 
+                    # Make sure all scores are float!
+                    tags[key] = parseFloat value for key, value of tags
+
                     result[tagsfile] = tags
                 catch ex
                     console.error tagsfile, ex

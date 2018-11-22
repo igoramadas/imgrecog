@@ -64,11 +64,11 @@
 
   // Transforms safe search strings to scores.
   likelyhood = {
-    VERY_UNLIKELY: 0.05,
-    UNLIKELY: 0.25,
-    POSSIBLE: 0.55,
-    LIKELY: 0.75,
-    VERY_LIKELY: 0.95
+    VERY_UNLIKELY: "0.00",
+    UNLIKELY: "0.20",
+    POSSIBLE: "0.50",
+    LIKELY: "0.70",
+    VERY_LIKELY: "0.90"
   };
 
   // Set start time (Unix timestamp).

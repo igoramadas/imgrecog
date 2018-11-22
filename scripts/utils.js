@@ -11,7 +11,7 @@
     // Returns a object filenames as keys and tags as value objects.
     // -------------------------------------------------------------------------
     getFolderTags: function(folder) {
-      var ex, file, files, i, len, result, tags, tagsfile;
+      var ex, file, files, i, key, len, result, tags, tagsfile, value;
       result = {};
       files = fs.readdirSync(folder);
       for (i = 0, len = files.length; i < len; i++) {
@@ -22,6 +22,11 @@
             tagsfile = path.join(folder, file);
             tags = fs.readFileSync(tagsfile, "utf8");
             tags = JSON.parse(tags);
+            for (key in tags) {
+              value = tags[key];
+              // Make sure all scores are float!
+              tags[key] = parseFloat(value);
+            }
             result[tagsfile] = tags;
           } catch (error) {
             ex = error;

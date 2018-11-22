@@ -1,4 +1,4 @@
-# Deletes all images that are memes or screenshots.
+# Deletes all images that are bloat (memes, screenshots, non relevant graphs etc).
 
 fs = require "fs"
 path = require "path"
@@ -7,11 +7,15 @@ utils = require "./utils.js"
 # Script implementation.
 Script = (folders) ->
 
-    # Minimum score to consider.
-    score = 0.8
+    # Anything above this total score is considered bloat.
+    totalScore = 1.2
 
     # Array of files to be deleted.
     toDelete = []
+
+    # Tags to consider.
+    bloatTags = ["meme", "photo caption", "screenshot", "spoof", "website"]
+    extraTags = ["advertising", "document", "map", "text"]
 
     try
         for folder in folders
@@ -20,17 +24,22 @@ Script = (folders) ->
 
             for file, tags of folderTags
                 try
-                    tags.meme = 0 if not tags.meme?
-                    tags.screenshot = 0 if not tags.screenshot?
+                    imgTotalScore = 0
 
-                    if parseFloat(tags.meme) > score or parseFloat(tags.screenshot) > score
+                    for bt in bloatTags
+                        tags[bt] = 0 if not tags[bt]?
+                        imgTotalScore += tags[bt]
+
+                    for et in extraTags
+                        tags[et] = 0 if not tags[et]?
+                        imgTotalScore += (tags[et] / 3)
+
+                    if imgTotalScore > totalScore
                         imgfile = file.substring(0, file.length - 5)
                         toDelete.push imgfile
                         toDelete.push file
 
-                        console.log "  #{imgfile} - meme: #{tags.meme}, screenshot: #{tags.screenshot}"
-                    else
-                        console.log "  #{imgfile} - not a meme / screenshot"
+                        console.log "  #{imgfile} marked as bloat (score #{imgTotalScore})"
                 catch ex
                     console.error file, ex
 

@@ -1,6 +1,6 @@
 {
     "name": "imgrecog.js",
-    "version": "0.9.9",
+    "version": "1.0.0",
     "description": "Node.js utility to detect and tag images on a folder using Google Vision AI.",
     "homepage": "http://github.com/igoramadas/imgrecog.js",
     "author": "Igor Ramadas <igor@devv.com>",
