@@ -1,9 +1,7 @@
 .DS_Store
 .git*
 .history/
-.idea/
 .python-version
-.vscode/
 docs/
 imgrecog.auth.json
 imgrecog.config.json

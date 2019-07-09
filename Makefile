@@ -15,12 +15,14 @@ docs:
 
 clean:
 	rm -rf ./node_modules
-	rm -rf ./logs/*.log
+	rm -rf package-lock.json
 
 publish:
-	clean
-	npm update
 	build
 	npm publish
+
+update:
+	ncu -u
+	npm install
 
 .PHONY: build docs clean publish

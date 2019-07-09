@@ -88,8 +88,8 @@ showHelp = ->
     console.log "Detect everything and overwrite tags on specific directories"
     console.log "  $ imgrecog.js -all -f /home/someuser/images /home/someuser/photos"
     console.log ""
-    console.log "Execute scripts to delete memes and unsafe images"
-    console.log "  $ imgrecog.js -delete-memes -delete-unsafe /home/someuser/photos"
+    console.log "Detect and execute scripts to delete memes and unsafe images"
+    console.log "  $ imgrecog.js -safe -delete-memes -delete-unsafe /home/someuser/photos"
     console.log ""
     console.log "............................................................................."
     console.log ""
@@ -150,6 +150,7 @@ getParams = ->
                 options.safe = true
             else
                 filename = p.substring 1
+
                 if scripts[filename]?
                     options.scripts.push filename
                 else
