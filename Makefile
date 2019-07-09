@@ -18,7 +18,6 @@ clean:
 	rm -rf package-lock.json
 
 publish:
-	build
 	npm publish
 
 update:
