@@ -194,8 +194,11 @@ scanFile = (filepath, callback) ->
     counter++
 
     if counter is options.limit
-        console.log ""
-        console.log "Limit #{counter} reached! Will NOT process more files..."
+        delayedFinish = ->
+            console.log "Limit #{counter} reached! Will NOT process more files..."
+            console.log ""
+            finishedQueue()
+        setTimeout delayedFinish, 2000
         return callback()
     else if counter > options.limit
         return callback()
@@ -339,6 +342,8 @@ finishedQueue = (err, result) ->
         for s in options.scripts
             console.log ""
             console.log "Running script #{s} ..."
+            console.log ""
+
             try
                 scriptResult = await scripts[s] folders
             catch ex
