@@ -1,11 +1,7 @@
 .DS_Store
-.coveralls.yml
-.history/
-.idea/
-.python-version
-.vscode/
-coverage/
+.history
+.vscode
+lib/
 node_modules/
 imgrecog.auth.json
-imgrecog.config.json
-imgtest
+imgrecog.options.json

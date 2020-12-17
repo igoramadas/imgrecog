@@ -1,9 +1,9 @@
 .DS_Store
+.history
+.vscode
 .git*
-.history/
-.python-version
 docs/
+node_modules/
+src/
 imgrecog.auth.json
-imgrecog.config.json
-imgtest
-*.coffee
+imgrecog.options.json

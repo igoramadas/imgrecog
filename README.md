@@ -20,22 +20,22 @@ Save the credentials file as `imgrecog.auth.json`. The tool will look for it the
 
 ## Usage
 
-    $ imgrecog.js [options] [folders]
+    $ imgrecog.js -[options] --[actions] folders
 
 ### Examples
 
-Detect logos on the current directory.
+Detect logos on the current directory:
 
-    $ imgrecog.js -logos
+    $ imgrecog.js --logos .
 
-Detect everything on the some user's home folder.
+Detect and delete unsafe images on /var/photos and /user/photos:
 
-    $ imgrecog.js -all /home/someuser
+    $ imgrecog.js -del-unsafe /var/photos /user/photos
 
-Detect and delete unsafe images on /var/photos
+Delete unsafe, and delete bloat images on user's home directory:
 
-    $ imgrecog.js -safe -delete-unsafe /var/photos
+    $ imgrecog.js --unsafe -del-bloat ./~
 
-For docs and more samples, please execute:
+For docs and more samples:
 
-    $ imgrecog.js -help
+    $ imgrecog.js --help

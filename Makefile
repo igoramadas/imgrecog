@@ -1,27 +1,30 @@
-ifeq ($(OS),Windows_NT)
-	DOCCO:= node_modules/.bin/betterdocco.cmd
-else
-	DOCCO:= ./node_modules/.bin/betterdocco
-endif
+TYPEDOC:= ./node_modules/.bin/typedoc
+TSC:= ./node_modules/.bin/tsc
 
-build:
-	rm -rf *.js
-	rm -rf scripts/*.js
-	coffee -c index.coffee
-	coffee -c -o scripts/ scripts/
-
-docs:
-	$(DOCCO) -o docs README.MD index.coffee
-
+# Clean compiled resources and dependencies
 clean:
 	rm -rf ./node_modules
-	rm -rf package-lock.json
+	rm -f package-lock.json
 
+# Compile and build resources
+build:
+	$(TSC)
+
+# Generate TypeScript docs
+docs:
+	rm -rf ./docs/assets
+	rm -rf ./docs/classes
+	rm -rf ./docs/interfaces
+	rm -rf ./docs/modules
+	$(TYPEDOC) --disableOutputCheck
+
+# Update dependencies
+update:
+	-ncu -u
+	npm install
+
+# Publish to NPM
 publish:
 	npm publish
 
-update:
-	ncu -u
-	npm install
-
-.PHONY: build docs clean publish
+.PHONY: docs
