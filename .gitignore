@@ -3,5 +3,7 @@
 .vscode
 lib/
 node_modules/
+test/images/
 imgrecog.auth.json
 imgrecog.options.json
+imgrecog.results.json

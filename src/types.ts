@@ -10,14 +10,24 @@ interface Options {
     extensions?: string[]
     /** Full path to the output file, default is imgrecog.results.json. */
     output?: string
-    /** Limit amount of identified images. Default is 1000. */
+    /** Limit amount of calls to the Vision API. Default is 1000. */
     limit?: number
-    /** How many images should be scanned in parallel? Default is 2. */
+    /** How many images should be scanned in parallel? Default is 4. */
     parallel?: number
+    /** Deep, also scan subfolders. */
+    deep?: boolean
     /** Activate extra logging. */
     verbose?: boolean
+    /** Log output to the console? When calling via command line this is true by default. */
+    console?: boolean
     /** Path to the credentials file to be used for the authentication on Google. */
     authfile?: string
+    /** Sightengine API user. */
+    sightengineUser?: string
+    /** Sightengine API secret. */
+    sightengineSecret?: string
+    /** Detect objects and things on the scanned images. */
+    objects?: boolean
     /** Detect labels and tags on the scanned images. */
     labels?: boolean
     /** Detect landmarks on scanned images. */
@@ -39,18 +49,9 @@ interface Options {
  */
 interface ImageResult {
     /** Full path to the image file. */
-    path: string
+    file: string
     /** Tags and scores. */
-    tags: {[id: string]: number}
-}
-
-/**
- * Likelyhood texts matched with a numeric score.
- */
-enum Likelyhood {
-    VERY_UNLIKELY = "0.05",
-    UNLIKELY = "0.25",
-    POSSIBLE = "0.55",
-    LIKELY = "0.75",
-    VERY_LIKELY = "0.95"
+    tags?: {[id: string]: string}
+    /** File properties, mostly taken out of the EXIF tags.  */
+    details?: {[id: string]: number | string}
 }

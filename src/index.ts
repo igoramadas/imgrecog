@@ -1,27 +1,31 @@
 // IMGRECOG INDEX
 
-import {logError} from "./utils"
-import {deleteBloat, deleteUnsafe} from "./actions"
+import {logDebug, logError, logInfo, logWarn, getEXIF} from "./utils"
+import {deleteBloat, deleteUnsafe, moveImages} from "./actions"
+import sightengine from "./sightengine"
 import vision from "./vision"
 import asyncLib = require("async")
+import logger = require("anyhow")
 import fs = require("fs")
 import path = require("path")
-
-// Unhandled rejections goes here.
-process.on("unhandledRejection", (err) => {
-    console.error("FATAL ERROR!")
-    console.error(err)
-    return process.exit(0)
-})
 
 /**
  * IMGRecog.js main module.
  */
 export class IMGRecog {
+    constructor(options: Options) {
+        this.options = options
+
+        // Make sure the logger is set.
+        if (options.verbose) {
+            logger.levels.push("debug")
+        }
+    }
+
     /**
-     * List of processed folders on the last run.
+     * Program options.
      */
-    folders = {}
+    options: Options
 
     /**
      * List of scanned images with their results.
@@ -29,195 +33,268 @@ export class IMGRecog {
     results: ImageResult[]
 
     /**
-     * Run the thing!
-     * @param options Program options.
+     * File scanning queue.
      */
-    run = (options: Options) => {
-        if (!options.folders || options.folders.length < 1) {
+    queue: asyncLib.QueueObject<any>
+
+    /**
+     * If running, when did the process start.
+     */
+    startTime: Date
+
+    /**
+     * Run the thing!
+     */
+    run = async (): Promise<void> => {
+        if (!this.options.folders || this.options.folders.length < 1) {
             throw new Error("No folders were passed")
         }
 
-        // Reset results.
+        // Reset state.
         this.results = []
+        this.startTime = new Date()
 
-        if (options.verbose) {
-            const logOptions = Object.entries(options).map((opt) => `${opt[0]}: ${opt[1]}`)
-            console.log(`Options: ${logOptions.join(" | ")}`)
+        const logOptions = Object.entries(this.options).map((opt) => `${opt[0]}: ${opt[1]}`)
+        logDebug(this.options, `Options: ${logOptions.join(" | ")}`)
+
+        // Implied options.
+        if (this.options.deleteBloat) {
+            if (!this.options.labels) {
+                logDebug(this.options, "Action deleteBloat implies 'labels' detection")
+            }
+            this.options.labels = true
+        }
+        if (this.options.deleteUnsafe) {
+            if (!this.options.unsafe) {
+                logDebug(this.options, "Action deleteUnsafe implies 'unsafe' detection")
+            }
+            this.options.unsafe = true
         }
 
         // Prepare the Vision API client.
-        vision.prepare(options)
+        await vision.prepare(this.options)
 
-        // Create file processor queue to parse images against Google Vision.
-        const queueProcessor = (filepath, callback) => this.scanFile(options, filepath, callback)
-        const fileQueue = asyncLib.queue(queueProcessor, options.parallel)
-        const folderTasks = []
+        // Create the images scanning queue.
+        this.queue = asyncLib.queue(this.scanFile, this.options.parallel)
 
-        // Add folders to the scanning queue.
-        for (let folder of options.folders) {
-            const pusher = (f) => folderTasks.push((callback) => this.scanFolder(options, f, fileQueue, callback))
-            pusher(folder)
+        // Scan image files on the specified folders.
+        for (let folder of this.options.folders) {
+            this.scanFolder(folder)
         }
 
-        // File processor queue will drain once we have processed all files.
-        fileQueue.drain = async (err?) => {
-            if (err) {
-                console.error(err)
-            }
-
-            const duration = (Date.now() - startTime) / 1000
-
-            console.log("")
-            console.log(`Scanned ${this.results.length} images after ${duration} seconds`)
-
-            // Delete bloat images?
-            if (options.deleteBloat) {
-                await deleteBloat(options, this.results)
-            }
-
-            // Delete unsafe images?
-            if (options.deleteUnsafe) {
-                await deleteUnsafe(options, this.results)
-            }
-
-            // Bye!
-            console.log("")
+        // Run file scanning tasks in parallel.
+        try {
+            await this.queue.drain()
+            this.end()
+        } catch (ex) {
+            logError(this.options, `Failure  processing images`, ex)
         }
-
-        // Set start time (Unix timestamp).
-        const startTime = Date.now()
-
-        // Run folder scanning tasks in parallel after 1 second so we have time to confirm client credentials.
-        const delayedScan = () =>
-            asyncLib.parallelLimit(folderTasks, options.parallel, function () {
-                if (!fileQueue.started) {
-                    console.log("")
-                    console.log("No valid images were found!")
-                    console.log("")
-                    return
-                }
-            })
-
-        return setTimeout(delayedScan, 1000)
     }
 
     /**
-     * Scan the specified image file.
-     * @param options Program options.
-     * @param filepath Image file path.
-     * @param queue File processing queue.
-     * @param callback Callback method.
+     * End the scanning tasks.
+     * @param kill Force kill the scanning queue.
      */
-    scanFolder = (options: Options, folder: string, queue, callback?) => {
-        const scanner = (file: string) => {
-            const filepath = path.join(folder, file)
-            const ext = path.extname(filepath).toLowerCase().replace(".", "")
+    end = async (kill?: boolean) => {
+        try {
+            if (kill) {
+                this.queue.kill()
+            }
+
+            const duration = (Date.now() - this.startTime.valueOf()) / 1000
+            logInfo(this.options, `Scanned ${this.results.length} images in ${duration} seconds`)
+
+            await this.executeActions()
+            await this.saveOutput()
+
+            if (this.options.console) {
+                console.log("")
+            }
+        } catch (ex) {
+            logError(this.options, `Failure ending the processing queue`, ex)
+        }
+    }
+
+    /**
+     * Get image files for the specified folder.
+     * @param folder Image file path.
+     */
+    scanFolder = (folder: string) => {
+        const scanner = (scanpath: string) => {
+            const filepath = path.join(folder, scanpath)
 
             try {
                 const stats = fs.statSync(filepath)
 
                 if (stats.isDirectory()) {
-                    return this.scanFolder(options, filepath, queue)
+                    if (this.options.deep) {
+                        this.scanFolder(filepath)
+                    }
                 } else {
-                    if (options.extensions.indexOf(ext) >= 0) {
-                        if (this.results.length < options.limit) {
-                            return queue.push(filepath)
-                        }
-                    } else if (options.verbose && ext !== "tags") {
-                        return console.log(`  ${filepath}`, "skip (invalid extension)")
+                    const ext = path.extname(filepath).toLowerCase().replace(".", "")
+
+                    if (this.options.extensions.indexOf(ext) >= 0) {
+                        logDebug(this.options, `${filepath} added to queue`)
+                        this.queue.push(filepath)
                     }
                 }
             } catch (ex) {
-                return console.error(`Error reading ${filepath}: ${ex}`)
+                logError(this.options, `Error reading ${filepath}`, ex)
             }
         }
 
         // Make sure we have the correct folder path.
         if (!path.isAbsolute(folder)) {
-            folder = process.cwd() + "/" + folder
+            folder = path.join(process.cwd(), folder)
         }
+
+        logInfo(this.options, `Scanning ${folder}`)
 
         try {
             const contents = fs.readdirSync(folder)
-
-            console.log("")
-            console.log(`Scanning ${folder}`)
-
-            if (options.verbose) {
-                console.log(`Found ${contents.length} files`)
-            }
+            logDebug(this.options, `Found ${contents.length} files`)
 
             for (let filepath of contents) {
                 scanner(filepath)
             }
-
-            if (callback != null) {
-                return callback(null)
-            }
         } catch (ex) {
-            logError(`Error reading ${folder}`, ex, options.verbose)
-
-            if (callback != null) {
-                return callback(ex)
-            }
+            logError(this.options, `Error reading ${folder}`, ex)
         }
     }
 
     /**
      * Scan the specified image file.
-     * @param options Program options.
      * @param filepath Image file path.
      * @param callback Callback method.
      */
-    scanFile = async (options: Options, filepath: string, callback) => {
+    scanFile = async (filepath: string, callback: Function): Promise<void> => {
         const result: ImageResult = {
-            path: filepath,
+            file: filepath,
+            details: {},
             tags: {}
         }
 
-        if (this.results.length === options.limit) {
-            const delayedFinish = function () {
-                console.log(`Limit ${options.limit} reached! Will NOT process more files...`)
-                console.log("")
-                return this.finishedQueue()
+        // Do not proceed if file was already scanned before.
+        if (this.results[filepath]) {
+            logWarn(this.options, `File ${filepath} was already scanned`)
+        }
+
+        // Stop here once we have reached the API calls limit.
+        if (vision.apiCalls >= this.options.limit) {
+            if (vision.apiCalls === this.options.limit) {
+                logInfo(this.options, `Limit of ${this.options.limit} API calls reached! Will NOT process more files...`)
             }
 
-            setTimeout(delayedFinish, 2000)
-
+            this.end(true)
             return callback()
         }
 
-        // Over the limit?
-        if (this.results.length > options.limit) {
-            return callback()
+        const extension = path.extname(filepath).toLowerCase()
+
+        // Get file stats.
+        try {
+            const stat = fs.statSync(filepath)
+            result.details.size = stat.size
+            result.details.date = stat.mtime.toISOString()
+        } catch (ex) {
+            logError(this.options, `Can't get filestat for ${filepath}`, ex)
+        }
+
+        logDebug(this.options, `${filepath}: size ${result.details.size}, date ${result.details.date}`)
+
+        // Extract EXIF tags.
+        if (extension == ".jpg" || extension == ".jpeg") {
+            const exif = await getEXIF(this.options, filepath)
+            result.details = Object.assign(result.details, exif)
+        }
+
+        // Detect objects?
+        if (this.options.objects) {
+            const dResult = await vision.detectObjects(this.options, filepath)
+            if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
         }
 
         // Detect labels?
-        if (options.labels) {
-            const dResult = await vision.detectLabels(options, filepath)
-            result.tags = Object.assign(result.tags, dResult.tags)
+        if (this.options.labels) {
+            const dResult = await vision.detectLabels(this.options, filepath)
+            if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
         }
 
         // Detect landmarks?
-        if (options.landmarks) {
-            const dResult = await vision.detectLandmarks(options, filepath)
-            result.tags = Object.assign(result.tags, dResult.tags)
+        if (this.options.landmarks) {
+            const dResult = await vision.detectLandmarks(this.options, filepath)
+            if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
         }
 
         // Detect logos?
-        if (options.logos) {
-            const dResult = await vision.detectLogos(options, filepath)
-            result.tags = Object.assign(result.tags, dResult.tags)
+        if (this.options.logos) {
+            const dResult = await vision.detectLogos(this.options, filepath)
+            if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
         }
 
         // Detect safe search?
-        if (options.unsafe) {
-            const dResult = await vision.detectUnsafe(options, filepath)
-            result.tags = Object.assign(result.tags, dResult.tags)
+        if (this.options.unsafe) {
+            const dResult = await vision.detectUnsafe(this.options, filepath)
+            if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
+        }
+
+        // Sightengine detection?
+        if (this.options.sightengineUser && this.options.sightengineSecret) {
+            const dResult = await sightengine.detect(this.options, filepath)
+            if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
         }
 
         this.results.push(result)
+        return callback()
+    }
+
+    /**
+     * Execute actions after all passed images have been scanned.
+     */
+    executeActions = async (): Promise<void> => {
+        let executedActions = []
+        const startTime = Date.now()
+
+        // Delete bloat images?
+        if (this.options.deleteBloat) {
+            executedActions.push("deleteBloat")
+            await deleteBloat(this.options, this.results)
+        }
+
+        // Delete unsafe images?
+        if (this.options.deleteUnsafe) {
+            await deleteUnsafe(this.options, this.results)
+        }
+
+        // Move scanned files to specific directory?
+        if (this.options.move) {
+            await moveImages(this.options, this.results)
+        }
+
+        const duration = (Date.now() - startTime) / 1000
+
+        // Log duration.
+        if (executedActions.length > 0) {
+            logDebug(this.options, `Executed actions ${executedActions.join(", ")} in ${duration} seconds`)
+        } else {
+            logDebug(this.options, `No extra actions were executed`)
+        }
+    }
+
+    /**
+     * Save the execution output results to a file.
+     */
+    saveOutput = async (): Promise<void> => {
+        const executableFolder = path.dirname(require.main.filename) + "/"
+        const target = path.isAbsolute(this.options.output) ? this.options.output : path.join(executableFolder, this.options.output)
+
+        try {
+            fs.writeFileSync(target, JSON.stringify(this.results, null, 2))
+            logInfo(this.options, `Saved results to ${target}`)
+        } catch (ex) {
+            logError(this.options, `Could not save output to ${target}`, ex)
+        }
     }
 }
 
-export default new IMGRecog()
+export default IMGRecog
