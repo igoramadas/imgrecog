@@ -1,14 +1,13 @@
 # IMGRecog.js
 
-This is a small Node.js tool to scan and tag images using the Google Vision and Sightengine APIs.
+This is a small Node.js tool to scan and tag images using the [Google Vision](https://cloud.google.com/vision/docs) and [Sightengine](https://sightengine.com) APIs.
 
 ## Features
 
 - uses Google Vision API by default, can be complemented with the Sightengine API
-- detect objects, labels, landmarks, logos and unsafe content
-- all results are handled as simple tags with a tag name and tag score (from 0 to 1)
-- aditional actions to delete or move images
-- results are saved as a single JSON file
+- results (JSON) are handled as simple tags with a tag name and score (from 0 to 1)
+- can detect objects, labels, landmarks, logos, brands and unsafe content
+- actions to delete or move images according to certain criterias
 - can be used via the command line or programatically
 
 ## Setup
@@ -29,23 +28,23 @@ Save the credentials file as `imgrecog.auth.json`. The tool will look for it in 
 - current user's home folder
 - current executing directory
 
+If you wish to complement the results with Sightengine, please get your API user and secret from your [Dashboard](https://dashboard.sightengine.com/api-credentials). Set them via the options `sightengineUser` and `sightengineSecret`, or via the command line args `--steuser` and `--stesecret`.
+
 ## Usage
 
     $ imgrecog.js -[options] --[actions] folders
 
-### Examples
-
-Detect logos on the current directory:
+Detect logos on images in the current directory:
 
     $ imgrecog.js --logos .
 
-Detect and delete unsafe images on /var/photos and /user/photos:
+Delete unsafe and bloat images on user's home directory:
 
-    $ imgrecog.js -del-unsafe /var/photos /user/photos
+    $ imgrecog.js --delunsafe --delbloat ~/
 
-Delete unsafe, and delete bloat images on user's home directory:
+Detect everything, high API limits, and then move images to the "processed" folder.
 
-    $ imgrecog.js --unsafe -del-bloat ./~
+    $ imgrecog.js --deep --objects --labels --logos --landmarks --unsafe --limit 999999 --move ~/photos/processed ~/photos/camera
 
 For help and the full list of options, ask for help:
 
@@ -61,7 +60,7 @@ The tool will look for a `imgrecog.options.json` file on the following places:
 
 If not found, it will assume all the default options.
 
-When running from the command line, all options must be passed as arguments.
+When running from the command line, all options should be passed as arguments, or via environment variables with the "IMGRECOG_" prefix (examples: `IMGRECOG_LIMIT`, `IMGRECOG_VERBOSE` etc).
 
 ### extensions *`-e`*
 
@@ -139,3 +138,7 @@ This will delete images:
 ### move *`--move`*
 
 This will move all the scanned images to the specified folder, replicating their original path. For example if you set move to `/var/photos/scanned`, then an image `/home/someuser/photos/dsc123.jpg` will be moved to `/var/photos/scanned/home/someuser/photos/dsc123.jpg`.
+
+## Real world use cases
+
+Coming soon...
