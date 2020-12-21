@@ -41,7 +41,7 @@ export = async function () {
         logos: {type: "boolean", describe: "Detect logos and brands"},
         unsafe: {type: "boolean", describe: "Detect unsafe and explicit images"},
         all: {type: "boolean", describe: "Detect everything (all of the above)"},
-        delbloat: {type: "boolean", describe: "Delete bloat images (memes, screenshots, thumbnails etc...)"},
+        delbloat: {type: "boolean", describe: "Delete bloat images (lowres, memes, screenshots, thumbnails etc)"},
         delunsafe: {type: "boolean", describe: "Delete violent, adult and generally NSFW images"},
         move: {type: "string", describe: "Move images to the specified folder after scanning"}
     })

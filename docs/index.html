@@ -113,14 +113,13 @@
 				<p>Detect unsafe images under the user&#39;s home folder, using Clarifai and Sightengine:</p>
 				<pre><code>$ <span class="hljs-string">imgrecog</span> <span class="hljs-built_in">--unsafe</span> <span class="hljs-built_in">--clakey</span> <span class="hljs-string">&quot;123&quot;</span> <span class="hljs-built_in">--steuser</span> <span class="hljs-string">&quot;abc&quot;</span> <span class="hljs-built_in">--stesecret</span> <span class="hljs-string">&quot;abc1234&quot;</span> ~/</code></pre>
 				<p>Detect everything on camera and downloads folder, limiting to 15k API calls, and then move images to the processed-photos folder.</p>
-				<pre><code>$ imgrecog <span class="hljs-params">--objects</span> <span class="hljs-params">--labels</span> <span class="hljs-params">--landmarks</span> <span class="hljs-params">--logos</span> <span class="hljs-params">--unsafe</span> \
+				<pre><code>$ imgrecog <span class="hljs-params">--all</span> <span class="hljs-params">--deep</span> \
            <span class="hljs-params">--glgkeyfile</span> <span class="hljs-string">&quot;mycredentials.json&quot;</span> \
            <span class="hljs-params">--clakey</span> <span class="hljs-string">&quot;123&quot;</span> \
            <span class="hljs-params">--steuser</span> <span class="hljs-string">&quot;abc&quot;</span> \
            <span class="hljs-params">--stesecret</span> <span class="hljs-string">&quot;abc1234&quot;</span> \
            <span class="hljs-params">--limit</span> 15000 \
            <span class="hljs-params">--move</span> ~<span class="hljs-string">/processed-photos</span> \
-           <span class="hljs-params">--deep</span> \
            ~<span class="hljs-string">/camera</span> ~<span class="hljs-string">/downloads</span></code></pre>
 				<p>For help and the full list of options, ask for help:</p>
 				<pre><code><span class="hljs-meta">$</span><span class="bash"> imgrecog --<span class="hljs-built_in">help</span></span></code></pre>
@@ -215,6 +214,10 @@
 					<h3>unsafe <em><code>--unsafe</code></em></h3>
 				</a>
 				<p>Detect unsafe images with explicit content (adult, violence, medical, racy, spoof).</p>
+				<a href="#--all" id="--all" style="color: inherit; text-decoration: none;">
+					<h3><em><code>--all</code></em></h3>
+				</a>
+				<p>Shortcut to enable all detections via the command line.</p>
 				<a href="#actions" id="actions" style="color: inherit; text-decoration: none;">
 					<h2>Actions</h2>
 				</a>
