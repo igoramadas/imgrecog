@@ -18,11 +18,11 @@ There are tons of great libraries and tools out there doing computer vision with
 
 To install globally on your machine please use:
 
-    $ npm install -g imgrecog.js
+    $ npm install -g imgrecog
 
 Or to install locally on your current project:
 
-    $ npm install imgrecog.js --save
+    $ npm install imgrecog --save
 
 ### Using the Google Vision API
 
@@ -46,28 +46,32 @@ If you want to process images with the Sightengine API, please get your API user
 
 ## Command line usage
 
-    $ imgrecog.js -[options] --[actions] folders
+    $ imgrecog -[options] --[actions] folders
 
 Detect logos on images in the current directory:
 
-    $ imgrecog.js --logos .
+    $ imgrecog --logos .
 
 Delete unsafe and bloat images on user's home directory:
 
-    $ imgrecog.js --delunsafe --delbloat ~/
+    $ imgrecog --delunsafe --delbloat ~/
 
 Detect everything, high API limits, and then move images to the "processed" folder.
 
-    $ imgrecog.js --deep --objects --labels --logos --landmarks --unsafe --limit 999999 --move ~/photos/processed ~/photos/camera
+    $ imgrecog --deep --objects --labels --logos --landmarks --unsafe --limit 999999 --move ~/photos/processed ~/photos/camera
 
 For help and the full list of options, ask for help:
 
-    $ imgrecog.js --help
+    $ imgrecog --help
 
 ## Importing as a library
 
-    import ImgRecog from "imgrecog.js"
-    // const ImgRecog = require("imgrecog.js")
+    import ImgRecog from "imgrecog"
+    // const ImgRecog = require("imgrecog").default
+
+    const options = {
+        
+    }
 
 ## Options
 

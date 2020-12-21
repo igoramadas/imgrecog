@@ -5,7 +5,7 @@
     "homepage": "http://github.com/igoramadas/imgrecog",
     "author": "Igor Ramadas <igor@devv.com>",
     "license": "Apache-2.0",
-    "subdomain": "imgrecog.js",
+    "subdomain": "imgrecog",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
     "domains": [
