@@ -46,7 +46,7 @@ export = async function () {
         p: {alias: "parallel", type: "number", default: 4, describe: "How many API calls in parallel"},
         d: {alias: "deep", type: "boolean", default: false, describe: "Deep scan, include subdirectories of the passed folders."},
         v: {alias: "verbose", type: "boolean", default: false, describe: "Verbose mode with extra logging"},
-        a: {alias: "auth", type: "string", describe: "Custom path to the auth keyfilename from Google"},
+        glgkey: {type: "string", describe: "Custom path to the auth keyfilename for Google Vision"},
         steuser: {type: "string", describe: "Sightengine API user"},
         stesecret: {type: "string", describe: "Sightengine API secret"},
         objects: {type: "boolean", default: false, describe: "Detect objects and things"},
@@ -61,7 +61,8 @@ export = async function () {
 
     // Command line options.
     argOptions.env("IMGRECOG")
-    argOptions.implies("dbl", "lb")
+    argOptions.implies("delbloat", "labels")
+    argOptions.implies("delunsafe", "unsafe")
     argOptions.demandCommand(1)
 
     // Examples.
@@ -117,14 +118,14 @@ export = async function () {
     }
 
     // Get credentials from the correct file.
-    if (argOptions.argv.a) {
-        options.authfile = argOptions.argv.a
+    if (hasValue(argOptions.argv.glgkey)) {
+        options.googleKeyfile = argOptions.argv.glgkey
     } else if (fs.existsSync(credentialsCurrent)) {
-        options.authfile = credentialsCurrent
+        options.googleKeyfile = credentialsCurrent
     } else if (fs.existsSync(credentialsHome)) {
-        options.authfile = credentialsHome
+        options.googleKeyfile = credentialsHome
     } else if (fs.existsSync(credentialsExecutable)) {
-        options.authfile = credentialsExecutable
+        options.googleKeyfile = credentialsExecutable
     }
 
     // Do it baby!

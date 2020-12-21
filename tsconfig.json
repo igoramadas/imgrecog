@@ -9,7 +9,8 @@
         "esModuleInterop": true,
         "noUnusedParameters": true,
         "noUnusedLocals": true,
-        "declaration": true
+        "declaration": true,
+        "skipLibCheck": true
     },
     "typedocOptions": {
         "excludeExternals": true,

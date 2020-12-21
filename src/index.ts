@@ -3,6 +3,7 @@
 import {logDebug, logError, logInfo, logWarn, getEXIF} from "./utils"
 import {deleteBloat, deleteUnsafe, moveImages} from "./actions"
 import sightengine from "./sightengine"
+import tensorflow from "./tensorflow"
 import vision from "./vision"
 import asyncLib = require("async")
 import logger = require("anyhow")
@@ -71,8 +72,10 @@ export class IMGRecog {
             this.options.unsafe = true
         }
 
-        // Prepare the Vision API client.
-        await vision.prepare(this.options)
+        // Prepare the detection clients.
+        await tensorflow.prepare(this.options)
+        if (this.options.googleKeyfile) await vision.prepare(this.options)
+        if (this.options.sightengineUser && this.options.sightengineSecret) await sightengine.prepare(this.options)
 
         // Create the images scanning queue.
         this.queue = asyncLib.queue(this.scanFile, this.options.parallel)
@@ -202,43 +205,44 @@ export class IMGRecog {
 
         logDebug(this.options, `${filepath}: size ${result.details.size}, date ${result.details.date}`)
 
+        // TensorFlow parsing.
+        await tensorflow.parse(this.options, filepath)
+
         // Extract EXIF tags.
         if (extension == ".jpg" || extension == ".jpeg") {
             const exif = await getEXIF(this.options, filepath)
             result.details = Object.assign(result.details, exif)
         }
 
-        // Detect objects?
-        if (this.options.objects) {
-            const dResult = await vision.detectObjects(this.options, filepath)
-            if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
+        // Google Vision detection.
+        if (this.options.googleKeyfile) {
+            if (this.options.objects) {
+                const dResult = await vision.detectObjects(this.options, filepath)
+                if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
+            }
+
+            if (this.options.labels) {
+                const dResult = await vision.detectLabels(this.options, filepath)
+                if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
+            }
+
+            if (this.options.landmarks) {
+                const dResult = await vision.detectLandmarks(this.options, filepath)
+                if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
+            }
+
+            if (this.options.logos) {
+                const dResult = await vision.detectLogos(this.options, filepath)
+                if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
+            }
+
+            if (this.options.unsafe) {
+                const dResult = await vision.detectUnsafe(this.options, filepath)
+                if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
+            }
         }
 
-        // Detect labels?
-        if (this.options.labels) {
-            const dResult = await vision.detectLabels(this.options, filepath)
-            if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
-        }
-
-        // Detect landmarks?
-        if (this.options.landmarks) {
-            const dResult = await vision.detectLandmarks(this.options, filepath)
-            if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
-        }
-
-        // Detect logos?
-        if (this.options.logos) {
-            const dResult = await vision.detectLogos(this.options, filepath)
-            if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
-        }
-
-        // Detect safe search?
-        if (this.options.unsafe) {
-            const dResult = await vision.detectUnsafe(this.options, filepath)
-            if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
-        }
-
-        // Sightengine detection?
+        // Sightengine detection.
         if (this.options.sightengineUser && this.options.sightengineSecret) {
             const dResult = await sightengine.detect(this.options, filepath)
             if (dResult) result.tags = Object.assign(result.tags, dResult.tags)

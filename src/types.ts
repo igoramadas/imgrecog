@@ -20,8 +20,8 @@ interface Options {
     verbose?: boolean
     /** Log output to the console? When calling via command line this is true by default. */
     console?: boolean
-    /** Path to the credentials file to be used for the authentication on Google. */
-    authfile?: string
+    /** Path to the credentials file to be used for the authentication with Google Vision. */
+    googleKeyfile?: string
     /** Sightengine API user. */
     sightengineUser?: string
     /** Sightengine API secret. */

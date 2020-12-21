@@ -1,10 +1,11 @@
 # IMGRecog.js
 
-This is a small Node.js tool to scan and tag images using the [Google Vision](https://cloud.google.com/vision/docs) and [Sightengine](https://sightengine.com) APIs.
+This is a small Node.js tool to scan and tag images using a local [MobileNet](https://github.com/tensorflow/models/tree/master/research/slim/nets/mobilenet) model, and the [Google Vision](https://cloud.google.com/vision/docs) and [Sightengine](https://sightengine.com) APIs.
 
 ## Features
 
-- uses Google Vision API by default, can be complemented with the Sightengine API
+- basic tags can be achieved using the local and offline TensorFlow / MobileNet model
+- support for the Google Vision and Sightengine APIs to boost the image recognition features
 - results (JSON) are handled as simple tags with a tag name and score (from 0 to 1)
 - can detect objects, labels, landmarks, logos, brands and unsafe content
 - actions to delete or move images according to certain criterias
@@ -20,6 +21,8 @@ Or to install locally on your current project:
 
     $ npm install imgrecog.js --save
 
+### Using the Google Vision API
+
 You'll need to download your Google Cloud Vision API credentials file from the Google Cloud Console. If you need help please follow [these instructions](https://cloud.google.com/vision/docs/auth).
 
 Save the credentials file as `imgrecog.auth.json`. The tool will look for it in the following places:
@@ -27,6 +30,8 @@ Save the credentials file as `imgrecog.auth.json`. The tool will look for it in 
 - where the tool is installed
 - current user's home folder
 - current executing directory
+
+### Using the Sightengine API
 
 If you wish to complement the results with Sightengine, please get your API user and secret from your [Dashboard](https://dashboard.sightengine.com/api-credentials). Set them via the options `sightengineUser` and `sightengineSecret`, or via the command line args `--steuser` and `--stesecret`.
 
