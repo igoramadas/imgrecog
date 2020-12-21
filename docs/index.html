@@ -1,0 +1,296 @@
+<!doctype html>
+<html class="default no-js">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>IMGRecog.js</title>
+	<meta name="description" content="Documentation for IMGRecog.js">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+<header>
+	<div class="tsd-page-toolbar">
+		<div class="container">
+			<div class="table-wrap">
+				<div class="table-cell" id="tsd-search" data-index="assets/js/search.json" data-base=".">
+					<div class="field">
+						<label for="tsd-search-field" class="tsd-widget search no-caption">Search</label>
+						<input id="tsd-search-field" type="text" />
+					</div>
+					<ul class="results">
+						<li class="state loading">Preparing search index...</li>
+						<li class="state failure">The search index is not available</li>
+					</ul>
+					<a href="index.html" class="title">IMGRecog.js</a>
+				</div>
+				<div class="table-cell" id="tsd-widgets">
+					<div id="tsd-filter">
+						<a href="#" class="tsd-widget options no-caption" data-toggle="options">Options</a>
+						<div class="tsd-filter-group">
+							<div class="tsd-select" id="tsd-filter-visibility">
+								<span class="tsd-select-label">All</span>
+								<ul class="tsd-select-list">
+									<li data-value="public">Public</li>
+									<li data-value="protected">Public/Protected</li>
+									<li data-value="private" class="selected">All</li>
+								</ul>
+							</div>
+							<input type="checkbox" id="tsd-filter-inherited" checked />
+							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
+							<input type="checkbox" id="tsd-filter-only-exported" />
+							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
+						</div>
+					</div>
+					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="tsd-page-title">
+		<div class="container">
+			<ul class="tsd-breadcrumb">
+				<li>
+					<a href="globals.html">Globals</a>
+				</li>
+			</ul>
+			<h1>IMGRecog.js</h1>
+		</div>
+	</div>
+</header>
+<div class="container container-main">
+	<div class="row">
+		<div class="col-8 col-content">
+			<div class="tsd-panel tsd-typography">
+				<a href="#imgrecogjs" id="imgrecogjs" style="color: inherit; text-decoration: none;">
+					<h1>IMGRecog.js</h1>
+				</a>
+				<p>This is a small Node.js tool to scan and tag images using <a href="https://cloud.google.com/vision">Google Vision</a>, <a href="https://clarifai.com">Clarifai</a> and <a href="https://sightengine.com">Sightengine</a>.</p>
+				<a href="#features" id="features" style="color: inherit; text-decoration: none;">
+					<h2>Features</h2>
+				</a>
+				<ul>
+					<li>support for 3 different computer vision APIs: Google Vision, Clarifai and Sightengine</li>
+					<li>results (JSON) are handled as simple tags with a tag name and score (from 0 to 1)</li>
+					<li>can detect objects, labels, landmarks, logos, brands and unsafe content</li>
+					<li>actions to delete or move images according to certain criterias</li>
+					<li>can be used via the command line or programatically</li>
+				</ul>
+				<a href="#but-why" id="but-why" style="color: inherit; text-decoration: none;">
+					<h3>But why?</h3>
+				</a>
+				<p>Because (as of December 2020) there are no other Node.js based tools that allow you to easily parse and tag images using more than &quot;free&quot; 1 service. Two is better than one, and three is better than two.</p>
+				<a href="#what-about-tensorflow" id="what-about-tensorflow" style="color: inherit; text-decoration: none;">
+					<h3>What about TensorFlow?</h3>
+				</a>
+				<p>There are tons of great libraries and tools out there doing computer vision with TensorFlow, and the point here is not to reinvent the wheel. Furthermore, adding TensorFlow as a direct dependecy increases the total package by more than 500%. So, for now, IMGRecog.js will focus solely on remote-based APIs.</p>
+				<a href="#setup" id="setup" style="color: inherit; text-decoration: none;">
+					<h2>Setup</h2>
+				</a>
+				<p>To install globally on your machine please use:</p>
+				<pre><code>$ npm <span class="hljs-keyword">install</span> -g imgrecog</code></pre>
+				<p>Or to install locally on your current project:</p>
+				<pre><code>$ npm <span class="hljs-keyword">install</span> imgrecog <span class="hljs-comment">--save</span></code></pre>
+				<a href="#using-the-google-vision-api" id="using-the-google-vision-api" style="color: inherit; text-decoration: none;">
+					<h3>Using the Google Vision API</h3>
+				</a>
+				<p>You&#39;ll need to download your Google Cloud Vision API credentials file from the Google Cloud Console. If you need help please follow <a href="https://cloud.google.com/vision/docs/auth">these instructions</a>.</p>
+				<p>Set the path to the credentials file using the <code>googleKeyfile</code> option, or via the command line arg <code>--glgkeyfile</code>.</p>
+				<a href="#using-the-clarifai-api" id="using-the-clarifai-api" style="color: inherit; text-decoration: none;">
+					<h3>Using the Clarifai API</h3>
+				</a>
+				<p>If you want to process images with the Clarifai API, please get the API key for your app on the <a href="https://portal.clarifai.com">Portal</a>. Set it via the option <code>clarifaiKey</code>, or via the command line arg <code>--clakey</code>.</p>
+				<a href="#using-the-sightengine-api" id="using-the-sightengine-api" style="color: inherit; text-decoration: none;">
+					<h3>Using the Sightengine API</h3>
+				</a>
+				<p>If you want to process images with the Sightengine API, please get your API user and secret from your <a href="https://dashboard.sightengine.com/api-credentials">Dashboard</a>. Set them via the options <code>sightengineUser</code> and <code>sightengineSecret</code>, or via the command line args <code>--steuser</code> and <code>--stesecret</code>.</p>
+				<a href="#command-line-usage" id="command-line-usage" style="color: inherit; text-decoration: none;">
+					<h2>Command line usage</h2>
+				</a>
+				<pre><code><span class="hljs-symbol">$</span> imgrecog -[<span class="hljs-keyword">options</span>] --[actions] folders</code></pre>
+				<p>Detect logos on images in the current directory:</p>
+				<pre><code>$ imgrecog <span class="hljs-comment">--logos .</span></code></pre>
+				<p>Delete unsafe and bloat images on user&#39;s home directory:</p>
+				<pre><code><span class="hljs-comment">$</span> <span class="hljs-comment">imgrecog</span> --<span class="hljs-comment">delunsafe</span> --<span class="hljs-comment">delbloat</span> <span class="hljs-comment">~/</span></code></pre>
+				<p>Detect everything, high API limits, and then move images to the &quot;processed&quot; folder.</p>
+				<pre><code>$ imgrecog <span class="hljs-params">--deep</span> <span class="hljs-params">--objects</span> <span class="hljs-params">--labels</span> <span class="hljs-params">--logos</span> <span class="hljs-params">--landmarks</span> <span class="hljs-params">--unsafe</span> <span class="hljs-params">--limit</span> 999999 <span class="hljs-params">--move</span> ~<span class="hljs-string">/photos/processed</span> ~<span class="hljs-string">/photos/camera</span></code></pre>
+				<p>For help and the full list of options, ask for help:</p>
+				<pre><code><span class="hljs-meta">$</span><span class="bash"> imgrecog --<span class="hljs-built_in">help</span></span></code></pre>
+				<a href="#importing-as-a-library" id="importing-as-a-library" style="color: inherit; text-decoration: none;">
+					<h2>Importing as a library</h2>
+				</a>
+				<pre><code class="language-javascript"><span class="hljs-keyword">import</span> ImgRecog <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;imgrecog&quot;</span>
+<span class="hljs-comment">// const ImgRecog = require(&quot;imgrecog&quot;).default</span>
+
+<span class="hljs-keyword">const</span> options = {
+    <span class="hljs-attr">folders</span>: [<span class="hljs-string">&quot;/home/user1/photos&quot;</span>, <span class="hljs-string">&quot;/home/user2/photos&quot;</span>],
+    <span class="hljs-attr">limit</span>: <span class="hljs-number">5000</span>,
+    <span class="hljs-attr">unsafe</span>: <span class="hljs-literal">true</span>
+}
+
+<span class="hljs-keyword">const</span> processor = <span class="hljs-keyword">new</span> ImgRecog(options)
+<span class="hljs-keyword">await</span> processor.run()
+
+<span class="hljs-built_in">console</span>.dir(processor.results)</code></pre>
+				<a href="#options" id="options" style="color: inherit; text-decoration: none;">
+					<h2>Options</h2>
+				</a>
+				<p>The tool will look for a <code>imgrecog.options.json</code> file on the following places:</p>
+				<ul>
+					<li>where the tool is installed</li>
+					<li>current user&#39;s home folder</li>
+					<li>current executing directory</li>
+				</ul>
+				<p>If not found, it will assume all the default options.</p>
+				<p>When running from the command line, all options should be passed as arguments, or via environment variables with the &quot;IMGRECOG_&quot; prefix (examples: <code>IMGRECOG_LIMIT</code>, <code>IMGRECOG_VERBOSE</code> etc).</p>
+				<a href="#extensions--e" id="extensions--e" style="color: inherit; text-decoration: none;">
+					<h3>extensions <em><code>-e</code></em></h3>
+				</a>
+				<p> File extensions should be scanned. Defaults to common image files: <code>&quot;png&quot;, &quot;jpg&quot;, &quot;jpeg&quot;, &quot;gif&quot;, &quot;bmp&quot;</code></p>
+				<a href="#output--o" id="output--o" style="color: inherit; text-decoration: none;">
+					<h3>output <em><code>-o</code></em></h3>
+				</a>
+				<p>Full path to the output file with the scanning results. Defaults to <code>imgrecog.results.json</code> on the current folder.</p>
+				<a href="#limit--l" id="limit--l" style="color: inherit; text-decoration: none;">
+					<h3>limit <em><code>-l</code></em></h3>
+				</a>
+				<p>Limit API calls to the Google Vision API, as a safe $$ precaution. Defaults to <code>1000</code> calls per execution.</p>
+				<a href="#parallel--p" id="parallel--p" style="color: inherit; text-decoration: none;">
+					<h3>parallel <em><code>-p</code></em></h3>
+				</a>
+				<p>How many tasks can be executed in parallel. Defaults to <code>4</code>.</p>
+				<a href="#deep--d" id="deep--d" style="color: inherit; text-decoration: none;">
+					<h3>deep <em><code>-d</code></em></h3>
+				</a>
+				<p>Include subfolders when scanning. Defaults to <code>false</code>.</p>
+				<a href="#verbose--v" id="verbose--v" style="color: inherit; text-decoration: none;">
+					<h3>verbose <em><code>-v</code></em></h3>
+				</a>
+				<p>Activate verbose mode with extra logging. Defaults to <code>false</code>.</p>
+				<a href="#authfile---auth" id="authfile---auth" style="color: inherit; text-decoration: none;">
+					<h3>authfile <em><code>--auth</code></em></h3>
+				</a>
+				<p> Path to the credentials file to authenticate with the Google Vision API. Defaults to <code>imgrecog.auth.json</code> on common folders.</p>
+				<a href="#sightengineuser---steuser" id="sightengineuser---steuser" style="color: inherit; text-decoration: none;">
+					<h3>sightengineUser <em><code>--steuser</code></em></h3>
+				</a>
+				<p> API user to be used for the Sightengine API. Defaults to none (disable Sightengine).</p>
+				<a href="#sightenginesecret---stesecret" id="sightenginesecret---stesecret" style="color: inherit; text-decoration: none;">
+					<h3>sightengineSecret <em><code>--stesecret</code></em></h3>
+				</a>
+				<p>API secret to be used for the Sightengine API. Defaults to none (disable Sightengine).</p>
+				<a href="#detection-features" id="detection-features" style="color: inherit; text-decoration: none;">
+					<h2>Detection features</h2>
+				</a>
+				<a href="#objects---objects" id="objects---objects" style="color: inherit; text-decoration: none;">
+					<h3>objects <em><code>--objects</code></em></h3>
+				</a>
+				<p>Detect objects and things on the scanned images.</p>
+				<a href="#labels---labels" id="labels---labels" style="color: inherit; text-decoration: none;">
+					<h3>labels <em><code>--labels</code></em></h3>
+				</a>
+				<p>Detect labels and general tags on the scanned images.</p>
+				<a href="#landmarks---landmarks" id="landmarks---landmarks" style="color: inherit; text-decoration: none;">
+					<h3>landmarks <em><code>--landmarks</code></em></h3>
+				</a>
+				<p>Detect landmarks and famous locations on the scanned images.</p>
+				<a href="#logos---logos" id="logos---logos" style="color: inherit; text-decoration: none;">
+					<h3>logos <em><code>--logos</code></em></h3>
+				</a>
+				<p>Detect logos and brands on the scanned images.</p>
+				<a href="#unsafe---unsafe" id="unsafe---unsafe" style="color: inherit; text-decoration: none;">
+					<h3>unsafe <em><code>--unsafe</code></em></h3>
+				</a>
+				<p>Detect unsafe images with explicit content (adult, violence, medical, racy, spoof).</p>
+				<a href="#actions" id="actions" style="color: inherit; text-decoration: none;">
+					<h2>Actions</h2>
+				</a>
+				<a href="#deletebloat---delbloat" id="deletebloat---delbloat" style="color: inherit; text-decoration: none;">
+					<h3>deleteBloat <em><code>--delbloat</code></em></h3>
+				</a>
+				<p>This will delete images:</p>
+				<ul>
+					<li>smaller than 50 KB</li>
+					<li>having a very high score for any of the tags: &quot;meme&quot;, &quot;photo caption&quot;, &quot;screenshot&quot;, &quot;website&quot;, &quot;explicit-spoof&quot;, plus a high conbined score  counting the tags &quot;advertising&quot;, &quot;document&quot;, &quot;map&quot;, &quot;text&quot;</li>
+				</ul>
+				<a href="#deleteunsafe---delunsafe" id="deleteunsafe---delunsafe" style="color: inherit; text-decoration: none;">
+					<h3>deleteUnsafe <em><code>--delunsafe</code></em></h3>
+				</a>
+				<p>This will delete images:</p>
+				<ul>
+					<li>having a very high score for any of the tags: &quot;explicit-adult&quot;, &quot;explicit-violence&quot;, plus a high combined score also counting the tags &quot;explicit-racy&quot;, &quot;explicit-medical&quot;</li>
+				</ul>
+				<a href="#move---move" id="move---move" style="color: inherit; text-decoration: none;">
+					<h3>move <em><code>--move</code></em></h3>
+				</a>
+				<p>This will move all the scanned images to the specified folder, replicating their original path. For example if you set move to <code>/var/photos/scanned</code>, then an image <code>/home/someuser/photos/dsc123.jpg</code> will be moved to <code>/var/photos/scanned/home/someuser/photos/dsc123.jpg</code>.</p>
+				<a href="#need-help" id="need-help" style="color: inherit; text-decoration: none;">
+					<h2>Need help?</h2>
+				</a>
+				<p>Post an issue.</p>
+			</div>
+		</div>
+		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
+			<nav class="tsd-navigation primary">
+				<ul>
+					<li class="globals  ">
+						<a href="globals.html"><em>Globals</em></a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_actions_.html">&quot;src/actions&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_clarifai_.html">&quot;src/clarifai&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_cmd_.html">&quot;src/cmd&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_index_.html">&quot;src/index&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_sightengine_.html">&quot;src/sightengine&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_types_.html">&quot;src/types&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_utils_.html">&quot;src/utils&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_vision_.html">&quot;src/vision&quot;</a>
+					</li>
+				</ul>
+			</nav>
+			<nav class="tsd-navigation secondary menu-sticky">
+				<ul class="before-current">
+				</ul>
+			</nav>
+		</div>
+	</div>
+</div>
+<footer class="with-border-bottom">
+	<div class="container">
+		<h2>Legend</h2>
+		<div class="tsd-legend-group">
+			<ul class="tsd-legend">
+				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
+				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+			</ul>
+		</div>
+	</div>
+</footer>
+<div class="container tsd-generator">
+	<p>Generated using <a href="https://typedoc.org/" target="_blank">TypeDoc</a></p>
+</div>
+<div class="overlay"></div>
+<script src="assets/js/main.js"></script>
+</body>
+</html>

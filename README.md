@@ -10,9 +10,13 @@ This is a small Node.js tool to scan and tag images using [Google Vision](https:
 - actions to delete or move images according to certain criterias
 - can be used via the command line or programatically
 
+### But why?
+
+Because (as of December 2020) there are no other Node.js based tools that allow you to easily parse and tag images using more than "free" 1 service. Two is better than one, and three is better than two.
+
 ### What about TensorFlow?
 
-There are tons of great libraries and tools out there doing computer vision with TensorFlow, and the point here is not to reinvent the wheel.
+There are tons of great libraries and tools out there doing computer vision with TensorFlow, and the point here is not to reinvent the wheel. Furthermore, adding TensorFlow as a direct dependecy increases the total package by more than 500%. So, for now, IMGRecog.js will focus solely on remote-based APIs.
 
 ## Setup
 
@@ -28,13 +32,7 @@ Or to install locally on your current project:
 
 You'll need to download your Google Cloud Vision API credentials file from the Google Cloud Console. If you need help please follow [these instructions](https://cloud.google.com/vision/docs/auth).
 
-By default, the credentials file `imgrecog.auth.json` will be grabbed from the following locations:
-
-- where the tool is installed
-- current user's home folder
-- current executing directory (highest priority)
-
-You can specify the path to the credentials file using the `googleKeyfile` option, or via the command line arg `--glgkeyfile`.
+Set the path to the credentials file using the `googleKeyfile` option, or via the command line arg `--glgkeyfile`.
 
 ### Using the Clarifai API
 
@@ -66,12 +64,21 @@ For help and the full list of options, ask for help:
 
 ## Importing as a library
 
-    import ImgRecog from "imgrecog"
-    // const ImgRecog = require("imgrecog").default
+```javascript
+import ImgRecog from "imgrecog"
+// const ImgRecog = require("imgrecog").default
 
-    const options = {
-        
-    }
+const options = {
+    folders: ["/home/user1/photos", "/home/user2/photos"],
+    limit: 5000,
+    unsafe: true
+}
+
+const processor = new ImgRecog(options)
+await processor.run()
+
+console.dir(processor.results)
+```
 
 ## Options
 
@@ -162,6 +169,6 @@ This will delete images:
 
 This will move all the scanned images to the specified folder, replicating their original path. For example if you set move to `/var/photos/scanned`, then an image `/home/someuser/photos/dsc123.jpg` will be moved to `/var/photos/scanned/home/someuser/photos/dsc123.jpg`.
 
-## Real world use cases
+## Need help?
 
-Coming soon...
+Post an issue.

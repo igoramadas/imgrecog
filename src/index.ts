@@ -1,4 +1,4 @@
-// IMGRECOG INDEX
+// IMGRECOG.JS INDEX
 
 import {logDebug, logError, logInfo, logWarn, getEXIF} from "./utils"
 import {deleteBloat, deleteUnsafe, moveImages} from "./actions"
@@ -10,12 +10,21 @@ import logger = require("anyhow")
 import fs = require("fs")
 import path = require("path")
 
+// Default options.
+const defaultOptions: Options = {
+    extensions: ["png", "jpg", "jpeg", "gif", "bmp"],
+    output: "imgrecog.results.json",
+    limit: 1000,
+    parallel: 4
+}
+
 /**
  * IMGRecog.js main module.
  */
 export class IMGRecog {
     constructor(options: Options) {
-        this.options = options
+        const baseOptions = Object.assign({}, defaultOptions)
+        this.options = Object.assign(baseOptions, options)
 
         // Make sure the logger is set.
         if (options.verbose) {

@@ -1,7 +1,7 @@
 {
     "name": "imgrecog",
-    "version": "2.0.0-alpha1",
-    "description": "Node.js tool to parse and act on images, using the Google Vision and Sightengine APIs.",
+    "version": "2.0.0",
+    "description": "Node.js tool to parse images using the Google Vision, Clarifai and Sightengine APIs.",
     "homepage": "http://github.com/igoramadas/imgrecog",
     "author": "Igor Ramadas <igor@devv.com>",
     "license": "Apache-2.0",

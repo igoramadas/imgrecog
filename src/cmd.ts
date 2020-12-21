@@ -24,9 +24,6 @@ export = async function () {
     const currentFolder = process.cwd() + "/"
     const homeFolder = os.homedir() + "/"
     const executableFolder = path.dirname(require.main.filename) + "/"
-    const credentialsExecutable = path.join(executableFolder, "imgrecog.auth.json")
-    const credentialsHome = path.join(homeFolder, "imgrecog.auth.json")
-    const credentialsCurrent = path.join(currentFolder, "imgrecog.auth.json")
     const configExecutable = path.join(executableFolder, "imgrecog.options.json")
     const configHome = path.join(homeFolder, "imgrecog.options.json")
     const configCurrent = path.join(currentFolder, "imgrecog.options.json")
@@ -40,23 +37,23 @@ export = async function () {
 
     // Command options.
     const argOptions = yargs(process.argv.slice(2)).options({
-        e: {alias: "extensions", type: "array", default: ["png", "jpg", "jpeg", "gif", "bmp"], describe: "Allowed file extensions"},
-        o: {alias: "output", type: "string", default: "imgrecog.results.json", describe: "Full path to the JSON output file"},
-        l: {alias: "limit", type: "number", default: 1000, describe: "Limit API calls"},
-        p: {alias: "parallel", type: "number", default: 4, describe: "How many API calls in parallel"},
-        d: {alias: "deep", type: "boolean", default: false, describe: "Deep scan, include subdirectories of the passed folders."},
-        v: {alias: "verbose", type: "boolean", default: false, describe: "Verbose mode with extra logging"},
-        glgkeyfile: {type: "string", describe: "Custom path to the auth keyfilename for Google Vision"},
+        e: {alias: "extensions", type: "array", default: [], describe: "Allowed file extensions"},
+        o: {alias: "output", type: "string", describe: "Full path to the JSON output file"},
+        l: {alias: "limit", type: "number", describe: "Limit API calls"},
+        p: {alias: "parallel", type: "number", describe: "How many API calls in parallel"},
+        d: {alias: "deep", type: "boolean", describe: "Deep scan, include subdirectories of the passed folders."},
+        v: {alias: "verbose", type: "boolean", describe: "Verbose mode with extra logging"},
+        glgkeyfile: {type: "string", describe: "Custom path to the keyfilename for Google Vision"},
         clakey: {type: "string", describe: "Clarifai API key"},
         steuser: {type: "string", describe: "Sightengine API user"},
         stesecret: {type: "string", describe: "Sightengine API secret"},
-        objects: {type: "boolean", default: false, describe: "Detect objects and things"},
-        labels: {type: "boolean", default: false, describe: "Detect general labels and tags"},
-        landmarks: {type: "boolean", default: false, describe: "Detect landmarks and famous hotspots"},
-        logos: {type: "boolean", default: false, describe: "Detect logos and brands"},
-        unsafe: {type: "boolean", default: false, describe: "Detect violent, adult and unsafe images"},
-        delbloat: {type: "boolean", describe: "Delete bloat images (memes, screenshots etc...), implies 'labels' detection"},
-        delunsafe: {type: "boolean", describe: "Delete violent, adult and unsafe images, implies 'unsafe' detection"},
+        objects: {type: "boolean", describe: "Detect objects and things"},
+        labels: {type: "boolean", describe: "Detect general labels and tags"},
+        landmarks: {type: "boolean", describe: "Detect landmarks and famous places"},
+        logos: {type: "boolean", describe: "Detect logos and brands"},
+        unsafe: {type: "boolean", describe: "Detect unsafe and explicit images"},
+        delbloat: {type: "boolean", describe: "Delete bloat images (memes, screenshots, thumbnails etc...), implies 'labels' detection"},
+        delunsafe: {type: "boolean", describe: "Delete violent, adult and generally NSFW images, implies 'unsafe' detection"},
         move: {type: "string", describe: "Move images to the specified folder after scanning"}
     })
 
@@ -106,6 +103,7 @@ export = async function () {
         limit: hasValue(argOptions.argv.l) ? argOptions.argv.l : configOptions.limit,
         parallel: hasValue(argOptions.argv.p) ? argOptions.argv.p : configOptions.parallel,
         verbose: hasValue(argOptions.argv.v) ? argOptions.argv.v : configOptions.verbose,
+        googleKeyfile: hasValue(argOptions.argv.glgkeyfile) ? argOptions.argv.glgkeyfile : configOptions.googleKeyfile,
         clarifaiKey: hasValue(argOptions.argv.clakey) ? argOptions.argv.clakey : configOptions.clarifaiKey,
         sightengineUser: hasValue(argOptions.argv.steuser) ? argOptions.argv.steuser : configOptions.sightengineUser,
         sightengineSecret: hasValue(argOptions.argv.stesecret) ? argOptions.argv.stesecret : configOptions.sightengineSecret,
@@ -117,17 +115,6 @@ export = async function () {
         deleteBloat: hasValue(argOptions.argv.delbloat) ? argOptions.argv.delbloat : configOptions.deleteBloat,
         deleteUnsafe: hasValue(argOptions.argv.delunsafe) ? argOptions.argv.delunsafe : configOptions.deleteUnsafe,
         move: hasValue(argOptions.argv.move) ? argOptions.argv.move : configOptions.move
-    }
-
-    // Get credentials from the correct file.
-    if (hasValue(argOptions.argv.glgkeyfile)) {
-        options.googleKeyfile = argOptions.argv.glgkeyfile
-    } else if (fs.existsSync(credentialsCurrent)) {
-        options.googleKeyfile = credentialsCurrent
-    } else if (fs.existsSync(credentialsHome)) {
-        options.googleKeyfile = credentialsHome
-    } else if (fs.existsSync(credentialsExecutable)) {
-        options.googleKeyfile = credentialsExecutable
     }
 
     // Do it baby!
