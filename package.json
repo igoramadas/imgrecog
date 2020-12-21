@@ -1,6 +1,6 @@
 {
     "name": "imgrecog",
-    "version": "2.0.0",
+    "version": "2.0.0-beta1",
     "description": "Node.js tool to parse images using the Google Vision, Clarifai and Sightengine APIs.",
     "homepage": "http://github.com/igoramadas/imgrecog",
     "author": "Igor Ramadas <igor@devv.com>",
@@ -23,14 +23,12 @@
     "dependencies": {
         "@google-cloud/vision": "^2.1.2",
         "anyhow": "^2.0.5",
-        "async": "^3.2.0",
         "chalk": "^4.1.0",
         "exif": "^0.6.0",
         "form-data": "^3.0.0",
         "yargs": "^16.2.0"
     },
     "devDependencies": {
-        "@types/async": "^3.2.5",
         "@types/node": "^14.14.14",
         "@types/yargs": "^15.0.12",
         "typedoc": "^0.19.2",
@@ -43,9 +41,11 @@
     "keywords": [
         "ai",
         "cloud vision",
+        "clarifai",
         "sightengine",
         "image detection",
-        "image recognition"
+        "image recognition",
+        "computer vision"
     ],
     "prettier": {
         "trailingComma": "none",

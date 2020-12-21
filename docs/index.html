@@ -70,7 +70,7 @@
 					<h2>Features</h2>
 				</a>
 				<ul>
-					<li>support for 3 different computer vision APIs: Google Vision, Clarifai and Sightengine</li>
+					<li>supports 3 different computer vision APIs: Google Vision, Clarifai and Sightengine</li>
 					<li>results (JSON) are handled as simple tags with a tag name and score (from 0 to 1)</li>
 					<li>can detect objects, labels, landmarks, logos, brands and unsafe content</li>
 					<li>actions to delete or move images according to certain criterias</li>
@@ -88,7 +88,7 @@
 					<h2>Setup</h2>
 				</a>
 				<p>To install globally on your machine please use:</p>
-				<pre><code>$ npm <span class="hljs-keyword">install</span> -g imgrecog</code></pre>
+				<pre><code>$ npm <span class="hljs-keyword">install</span> imgrecog -g</code></pre>
 				<p>Or to install locally on your current project:</p>
 				<pre><code>$ npm <span class="hljs-keyword">install</span> imgrecog <span class="hljs-comment">--save</span></code></pre>
 				<a href="#using-the-google-vision-api" id="using-the-google-vision-api" style="color: inherit; text-decoration: none;">
@@ -108,12 +108,20 @@
 					<h2>Command line usage</h2>
 				</a>
 				<pre><code><span class="hljs-symbol">$</span> imgrecog -[<span class="hljs-keyword">options</span>] --[actions] folders</code></pre>
-				<p>Detect logos on images in the current directory:</p>
-				<pre><code>$ imgrecog <span class="hljs-comment">--logos .</span></code></pre>
-				<p>Delete unsafe and bloat images on user&#39;s home directory:</p>
-				<pre><code><span class="hljs-comment">$</span> <span class="hljs-comment">imgrecog</span> --<span class="hljs-comment">delunsafe</span> --<span class="hljs-comment">delbloat</span> <span class="hljs-comment">~/</span></code></pre>
-				<p>Detect everything, high API limits, and then move images to the &quot;processed&quot; folder.</p>
-				<pre><code>$ imgrecog <span class="hljs-params">--deep</span> <span class="hljs-params">--objects</span> <span class="hljs-params">--labels</span> <span class="hljs-params">--logos</span> <span class="hljs-params">--landmarks</span> <span class="hljs-params">--unsafe</span> <span class="hljs-params">--limit</span> 999999 <span class="hljs-params">--move</span> ~<span class="hljs-string">/photos/processed</span> ~<span class="hljs-string">/photos/camera</span></code></pre>
+				<p>Detect logos in the current directory, using Google Vision, credentials from auth.json file:</p>
+				<pre><code>$ imgrecog <span class="hljs-params">--logos</span> <span class="hljs-params">--glgkeyfile</span> <span class="hljs-string">./auth.json</span> .</code></pre>
+				<p>Detect unsafe images under the user&#39;s home folder, using Clarifai and Sightengine:</p>
+				<pre><code>$ <span class="hljs-string">imgrecog</span> <span class="hljs-built_in">--unsafe</span> <span class="hljs-built_in">--clakey</span> <span class="hljs-string">&quot;123&quot;</span> <span class="hljs-built_in">--steuser</span> <span class="hljs-string">&quot;abc&quot;</span> <span class="hljs-built_in">--stesecret</span> <span class="hljs-string">&quot;abc1234&quot;</span> ~/</code></pre>
+				<p>Detect everything on camera and downloads folder, limiting to 15k API calls, and then move images to the processed-photos folder.</p>
+				<pre><code>$ imgrecog <span class="hljs-params">--objects</span> <span class="hljs-params">--labels</span> <span class="hljs-params">--landmarks</span> <span class="hljs-params">--logos</span> <span class="hljs-params">--unsafe</span> \
+           <span class="hljs-params">--glgkeyfile</span> <span class="hljs-string">&quot;mycredentials.json&quot;</span> \
+           <span class="hljs-params">--clakey</span> <span class="hljs-string">&quot;123&quot;</span> \
+           <span class="hljs-params">--steuser</span> <span class="hljs-string">&quot;abc&quot;</span> \
+           <span class="hljs-params">--stesecret</span> <span class="hljs-string">&quot;abc1234&quot;</span> \
+           <span class="hljs-params">--limit</span> 15000 \
+           <span class="hljs-params">--move</span> ~<span class="hljs-string">/processed-photos</span> \
+           <span class="hljs-params">--deep</span> \
+           ~<span class="hljs-string">/camera</span> ~<span class="hljs-string">/downloads</span></code></pre>
 				<p>For help and the full list of options, ask for help:</p>
 				<pre><code><span class="hljs-meta">$</span><span class="bash"> imgrecog --<span class="hljs-built_in">help</span></span></code></pre>
 				<a href="#importing-as-a-library" id="importing-as-a-library" style="color: inherit; text-decoration: none;">
@@ -126,6 +134,7 @@
     <span class="hljs-attr">folders</span>: [<span class="hljs-string">&quot;/home/user1/photos&quot;</span>, <span class="hljs-string">&quot;/home/user2/photos&quot;</span>],
     <span class="hljs-attr">limit</span>: <span class="hljs-number">5000</span>,
     <span class="hljs-attr">unsafe</span>: <span class="hljs-literal">true</span>
+    <span class="hljs-comment">// more options...</span>
 }
 
 <span class="hljs-keyword">const</span> processor = <span class="hljs-keyword">new</span> ImgRecog(options)
@@ -154,11 +163,11 @@
 				<a href="#limit--l" id="limit--l" style="color: inherit; text-decoration: none;">
 					<h3>limit <em><code>-l</code></em></h3>
 				</a>
-				<p>Limit API calls to the Google Vision API, as a safe $$ precaution. Defaults to <code>1000</code> calls per execution.</p>
+				<p>Limit API calls to the Google Vision API, as a safe $$ precaution. Defaults to <code>1000</code> calls per API / execution.</p>
 				<a href="#parallel--p" id="parallel--p" style="color: inherit; text-decoration: none;">
 					<h3>parallel <em><code>-p</code></em></h3>
 				</a>
-				<p>How many tasks can be executed in parallel. Defaults to <code>4</code>.</p>
+				<p>How many files can be processed in parallel. Defaults to <code>5</code>.</p>
 				<a href="#deep--d" id="deep--d" style="color: inherit; text-decoration: none;">
 					<h3>deep <em><code>-d</code></em></h3>
 				</a>
@@ -167,14 +176,18 @@
 					<h3>verbose <em><code>-v</code></em></h3>
 				</a>
 				<p>Activate verbose mode with extra logging. Defaults to <code>false</code>.</p>
-				<a href="#authfile---auth" id="authfile---auth" style="color: inherit; text-decoration: none;">
-					<h3>authfile <em><code>--auth</code></em></h3>
+				<a href="#googlekeyfile---glgkeyfile" id="googlekeyfile---glgkeyfile" style="color: inherit; text-decoration: none;">
+					<h3>googleKeyfile <em><code>--glgkeyfile</code></em></h3>
 				</a>
-				<p> Path to the credentials file to authenticate with the Google Vision API. Defaults to <code>imgrecog.auth.json</code> on common folders.</p>
+				<p>Path to the credentials keyfile used to authenticate with the Google. Defaults to none (disable Google Vision).</p>
+				<a href="#clarifaikey---clakey" id="clarifaikey---clakey" style="color: inherit; text-decoration: none;">
+					<h3>clarifaiKey <em><code>--clakey</code></em></h3>
+				</a>
+				<p>API key to be used with the Clarifai API. Defaults to none (disable Clarifai).</p>
 				<a href="#sightengineuser---steuser" id="sightengineuser---steuser" style="color: inherit; text-decoration: none;">
 					<h3>sightengineUser <em><code>--steuser</code></em></h3>
 				</a>
-				<p> API user to be used for the Sightengine API. Defaults to none (disable Sightengine).</p>
+				<p>API user to be used with the Sightengine API. Defaults to none (disable Sightengine).</p>
 				<a href="#sightenginesecret---stesecret" id="sightenginesecret---stesecret" style="color: inherit; text-decoration: none;">
 					<h3>sightengineSecret <em><code>--stesecret</code></em></h3>
 				</a>

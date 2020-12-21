@@ -1,11 +1,10 @@
 // IMGRECOG.JS INDEX
 
-import {logDebug, logError, logInfo, logWarn, getEXIF} from "./utils"
+import {logDebug, logError, logInfo, logWarn, getEXIF, hasValue} from "./utils"
 import {deleteBloat, deleteUnsafe, moveImages} from "./actions"
 import clarifai from "./clarifai"
 import sightengine from "./sightengine"
 import vision from "./vision"
-import asyncLib = require("async")
 import logger = require("anyhow")
 import fs = require("fs")
 import path = require("path")
@@ -15,7 +14,7 @@ const defaultOptions: Options = {
     extensions: ["png", "jpg", "jpeg", "gif", "bmp"],
     output: "imgrecog.results.json",
     limit: 1000,
-    parallel: 4
+    parallel: 5
 }
 
 /**
@@ -23,11 +22,24 @@ const defaultOptions: Options = {
  */
 export class IMGRecog {
     constructor(options: Options) {
-        const baseOptions = Object.assign({}, defaultOptions)
-        this.options = Object.assign(baseOptions, options)
+        this.options = options
+
+        // Enforce default options.
+        if (!this.options.extensions || this.options.extensions.length < 0) {
+            this.options.extensions = defaultOptions.extensions
+        }
+        if (!this.options.output || this.options.output.length < 0) {
+            this.options.output = defaultOptions.output
+        }
+        if (!this.options.limit || this.options.limit < 1) {
+            this.options.limit = defaultOptions.limit
+        }
+        if (!this.options.parallel || this.options.parallel < 1) {
+            this.options.parallel = defaultOptions.parallel
+        }
 
         // Make sure the logger is set.
-        if (options.verbose) {
+        if (this.options.verbose) {
             logger.levels.push("debug")
         }
     }
@@ -38,14 +50,14 @@ export class IMGRecog {
     options: Options
 
     /**
+     * List of files to be scanned.
+     */
+    files: string[]
+
+    /**
      * List of scanned images with their results.
      */
     results: ImageResult[]
-
-    /**
-     * File scanning queue.
-     */
-    queue: asyncLib.QueueObject<any>
 
     /**
      * If running, when did the process start.
@@ -61,10 +73,12 @@ export class IMGRecog {
         }
 
         // Reset state.
+        this.files = []
         this.results = []
         this.startTime = new Date()
 
-        const logOptions = Object.entries(this.options).map((opt) => `${opt[0]}: ${opt[1]}`)
+        const arr = Object.entries(this.options).map((opt) => (hasValue(opt[1]) ? `${opt[0]}: ${opt[1]}` : null))
+        const logOptions = arr.filter((opt) => opt !== null)
         logDebug(this.options, `Options: ${logOptions.join(" | ")}`)
 
         // Implied options.
@@ -86,20 +100,21 @@ export class IMGRecog {
         if (this.options.clarifaiKey) await clarifai.prepare(this.options)
         if (this.options.sightengineUser && this.options.sightengineSecret) await sightengine.prepare(this.options)
 
-        // Create the images scanning queue.
-        this.queue = asyncLib.queue(this.scanFile, this.options.parallel)
-
-        // Scan image files on the specified folders.
-        for (let folder of this.options.folders) {
-            this.scanFolder(folder)
-        }
-
-        // Run file scanning tasks in parallel.
+        // Scan folders and then process all files.
         try {
-            await this.queue.drain()
+            for (let folder of this.options.folders) {
+                this.scanFolder(folder)
+            }
+
+            // Process files in chunks (according to the parallel limit).
+            for (let i = 0, j = this.files.length; i < j; i += this.options.parallel) {
+                const chunk = this.files.slice(i, i + this.options.parallel)
+                await Promise.all(chunk.map(async (filepath: string) => await this.scanFile(filepath)))
+            }
+
             this.end()
         } catch (ex) {
-            logError(this.options, `Failure  processing images`, ex)
+            logError(this.options, `Failure processing images`, ex)
         }
     }
 
@@ -107,12 +122,8 @@ export class IMGRecog {
      * End the scanning tasks.
      * @param kill Force kill the scanning queue.
      */
-    end = async (kill?: boolean) => {
+    end = async () => {
         try {
-            if (kill) {
-                this.queue.kill()
-            }
-
             const duration = (Date.now() - this.startTime.valueOf()) / 1000
             logInfo(this.options, `Scanned ${this.results.length} images in ${duration} seconds`)
 
@@ -147,7 +158,7 @@ export class IMGRecog {
 
                     if (this.options.extensions.indexOf(ext) >= 0) {
                         logDebug(this.options, `${filepath} added to queue`)
-                        this.queue.push(filepath)
+                        this.files.push(filepath)
                     }
                 }
             } catch (ex) {
@@ -177,9 +188,8 @@ export class IMGRecog {
     /**
      * Scan the specified image file.
      * @param filepath Image file path.
-     * @param callback Callback method.
      */
-    scanFile = async (filepath: string, callback: Function): Promise<void> => {
+    scanFile = async (filepath: string): Promise<void> => {
         const result: ImageResult = {
             file: filepath,
             details: {},
@@ -189,16 +199,6 @@ export class IMGRecog {
         // Do not proceed if file was already scanned before.
         if (this.results[filepath]) {
             logWarn(this.options, `File ${filepath} was already scanned`)
-        }
-
-        // Stop here once we have reached the API calls limit.
-        if (vision.apiCalls >= this.options.limit) {
-            if (vision.apiCalls === this.options.limit) {
-                logInfo(this.options, `Limit of ${this.options.limit} API calls reached! Will NOT process more files...`)
-            }
-
-            this.end(true)
-            return callback()
         }
 
         const extension = path.extname(filepath).toLowerCase()
@@ -220,48 +220,54 @@ export class IMGRecog {
             result.details = Object.assign(result.details, exif)
         }
 
+        const methods = []
+
         // Google Vision detection.
         if (this.options.googleKeyfile) {
-            if (this.options.objects) {
-                const dResult = await vision.detectObjects(this.options, filepath)
-                if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
-            }
-
-            if (this.options.labels) {
-                const dResult = await vision.detectLabels(this.options, filepath)
-                if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
-            }
-
-            if (this.options.landmarks) {
-                const dResult = await vision.detectLandmarks(this.options, filepath)
-                if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
-            }
-
-            if (this.options.logos) {
-                const dResult = await vision.detectLogos(this.options, filepath)
-                if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
-            }
-
-            if (this.options.unsafe) {
-                const dResult = await vision.detectUnsafe(this.options, filepath)
-                if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
+            if (vision.apiCalls >= this.options.limit) {
+                if (vision.apiCalls === this.options.limit) {
+                    logWarn(this.options, `Limit of ${this.options.limit} API calls reached on Google Vision`)
+                }
+            } else {
+                if (this.options.objects) methods.push(vision.detectObjects)
+                if (this.options.labels) methods.push(vision.detectLabels)
+                if (this.options.landmarks) methods.push(vision.detectLandmarks)
+                if (this.options.logos) methods.push(vision.detectLogos)
+                if (this.options.unsafe) methods.push(vision.detectUnsafe)
             }
         }
 
         // Clarifai detection.
         if (this.options.clarifaiKey) {
-            const dResult = await clarifai.detect(this.options, filepath)
-            if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
+            if (clarifai.apiCalls >= this.options.limit) {
+                if (clarifai.apiCalls === this.options.limit) {
+                    logWarn(this.options, `Limit of ${this.options.limit} API calls reached on Clarifai`)
+                }
+            } else {
+                methods.push(clarifai.detect)
+            }
         }
 
         // Sightengine detection.
         if (this.options.sightengineUser && this.options.sightengineSecret) {
-            const dResult = await sightengine.detect(this.options, filepath)
-            if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
+            if (clarifai.apiCalls >= this.options.limit) {
+                if (clarifai.apiCalls === this.options.limit) {
+                    logWarn(this.options, `Limit of ${this.options.limit} API calls reached on Clarifai`)
+                }
+            } else {
+                methods.push(sightengine.detect)
+            }
         }
 
+        await Promise.all(
+            methods.map(async (method: Function) => {
+                const mResult = await method.call(null, this.options, filepath)
+                if (mResult) result.tags = Object.assign(result.tags, mResult.tags)
+                return mResult
+            })
+        )
+
         this.results.push(result)
-        return callback()
     }
 
     /**

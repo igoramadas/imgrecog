@@ -20,7 +20,7 @@ export class Clarifai {
      * @param options Program options.
      */
     prepare = async (options: Options): Promise<void> => {
-        logDebug(options, `Loaded Clarifai API key`)
+        logDebug(options, `Clarifai API key: ${options.clarifaiKey}`)
     }
 
     /**

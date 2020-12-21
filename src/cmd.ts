@@ -37,10 +37,10 @@ export = async function () {
 
     // Command options.
     const argOptions = yargs(process.argv.slice(2)).options({
-        e: {alias: "extensions", type: "array", default: [], describe: "Allowed file extensions"},
+        e: {alias: "extensions", type: "array", describe: "Allowed file extensions"},
         o: {alias: "output", type: "string", describe: "Full path to the JSON output file"},
-        l: {alias: "limit", type: "number", describe: "Limit API calls"},
-        p: {alias: "parallel", type: "number", describe: "How many API calls in parallel"},
+        l: {alias: "limit", type: "number", describe: "Limit API calls (per service, default 1000)"},
+        p: {alias: "parallel", type: "number", describe: "How many files processed in parallel (default 5)"},
         d: {alias: "deep", type: "boolean", describe: "Deep scan, include subdirectories of the passed folders."},
         v: {alias: "verbose", type: "boolean", describe: "Verbose mode with extra logging"},
         glgkeyfile: {type: "string", describe: "Custom path to the keyfilename for Google Vision"},
@@ -98,7 +98,7 @@ export = async function () {
     let options: Options = {
         console: true,
         folders: argOptions.argv._ as string[],
-        extensions: hasValue(argOptions.argv.e) ? argOptions.argv.e : configOptions.extensions,
+        extensions: hasValue(argOptions.argv.e) ? (argOptions.argv.e as string[]) : configOptions.extensions,
         output: hasValue(argOptions.argv.o) ? argOptions.argv.o : configOptions.output,
         limit: hasValue(argOptions.argv.l) ? argOptions.argv.l : configOptions.limit,
         parallel: hasValue(argOptions.argv.p) ? argOptions.argv.p : configOptions.parallel,

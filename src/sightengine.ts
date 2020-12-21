@@ -20,7 +20,7 @@ export class Sightengine {
      * @param options Program options.
      */
     prepare = async (options: Options): Promise<void> => {
-        logDebug(options, `Loaded Sightengine API user and secret`)
+        logDebug(options, `Sightengine API user ${options.sightengineUser}, secret ${options.sightengineSecret}`)
     }
 
     /**

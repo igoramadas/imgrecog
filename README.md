@@ -4,7 +4,7 @@ This is a small Node.js tool to scan and tag images using [Google Vision](https:
 
 ## Features
 
-- support for 3 different computer vision APIs: Google Vision, Clarifai and Sightengine
+- supports 3 different computer vision APIs: Google Vision, Clarifai and Sightengine
 - results (JSON) are handled as simple tags with a tag name and score (from 0 to 1)
 - can detect objects, labels, landmarks, logos, brands and unsafe content
 - actions to delete or move images according to certain criterias
@@ -22,7 +22,7 @@ There are tons of great libraries and tools out there doing computer vision with
 
 To install globally on your machine please use:
 
-    $ npm install -g imgrecog
+    $ npm install imgrecog -g
 
 Or to install locally on your current project:
 
@@ -46,17 +46,25 @@ If you want to process images with the Sightengine API, please get your API user
 
     $ imgrecog -[options] --[actions] folders
 
-Detect logos on images in the current directory:
+Detect logos in the current directory, using Google Vision, credentials from auth.json file:
 
-    $ imgrecog --logos .
+    $ imgrecog --logos --glgkeyfile ./auth.json .
 
-Delete unsafe and bloat images on user's home directory:
+Detect unsafe images under the user's home folder, using Clarifai and Sightengine:
 
-    $ imgrecog --delunsafe --delbloat ~/
+    $ imgrecog --unsafe --clakey "123" --steuser "abc" --stesecret "abc1234" ~/
 
-Detect everything, high API limits, and then move images to the "processed" folder.
+Detect everything on camera and downloads folder, limiting to 15k API calls, and then move images to the processed-photos folder.
 
-    $ imgrecog --deep --objects --labels --logos --landmarks --unsafe --limit 999999 --move ~/photos/processed ~/photos/camera
+    $ imgrecog --objects --labels --landmarks --logos --unsafe \
+               --glgkeyfile "mycredentials.json" \
+               --clakey "123" \
+               --steuser "abc" \
+               --stesecret "abc1234" \
+               --limit 15000 \
+               --move ~/processed-photos \
+               --deep \
+               ~/camera ~/downloads
 
 For help and the full list of options, ask for help:
 
@@ -72,6 +80,7 @@ const options = {
     folders: ["/home/user1/photos", "/home/user2/photos"],
     limit: 5000,
     unsafe: true
+    // more options...
 }
 
 const processor = new ImgRecog(options)
@@ -102,11 +111,11 @@ Full path to the output file with the scanning results. Defaults to `imgrecog.re
 
 ### limit *`-l`*
 
-Limit API calls to the Google Vision API, as a safe $$ precaution. Defaults to `1000` calls per execution.
+Limit API calls to the Google Vision API, as a safe $$ precaution. Defaults to `1000` calls per API / execution.
 
 ### parallel *`-p`*
 
-How many tasks can be executed in parallel. Defaults to `4`.
+How many files can be processed in parallel. Defaults to `5`.
 
 ### deep *`-d`*
 
@@ -116,13 +125,17 @@ Include subfolders when scanning. Defaults to `false`.
 
 Activate verbose mode with extra logging. Defaults to `false`.
 
-### authfile *`--auth`*
+### googleKeyfile *`--glgkeyfile`*
 
- Path to the credentials file to authenticate with the Google Vision API. Defaults to `imgrecog.auth.json` on common folders.
+Path to the credentials keyfile used to authenticate with the Google. Defaults to none (disable Google Vision).
+
+### clarifaiKey *`--clakey`*
+
+API key to be used with the Clarifai API. Defaults to none (disable Clarifai).
 
 ### sightengineUser *`--steuser`*
 
- API user to be used for the Sightengine API. Defaults to none (disable Sightengine).
+API user to be used with the Sightengine API. Defaults to none (disable Sightengine).
 
 ### sightengineSecret *`--stesecret`*
 

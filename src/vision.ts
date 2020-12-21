@@ -35,7 +35,7 @@ export class Vision {
     prepare = async (options: Options): Promise<void> => {
         try {
             this.client = new vision.ImageAnnotatorClient({keyFilename: options.googleKeyfile})
-            logInfo(options, `Using credentials from file ${options.googleKeyfile}`)
+            logDebug(options, `Google credentials from file ${options.googleKeyfile}`)
         } catch (ex) {
             logError(options, "Could not create the Google Vision API client", ex)
         }
