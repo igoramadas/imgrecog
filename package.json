@@ -1,18 +1,18 @@
 {
-    "name": "imgrecog.js",
-    "version": "2.0.0",
+    "name": "imgrecog",
+    "version": "2.0.0-alpha1",
     "description": "Node.js tool to parse and act on images, using the Google Vision and Sightengine APIs.",
-    "homepage": "http://github.com/igoramadas/imgrecog.js",
+    "homepage": "http://github.com/igoramadas/imgrecog",
     "author": "Igor Ramadas <igor@devv.com>",
     "license": "Apache-2.0",
     "subdomain": "imgrecog.js",
     "main": "lib/index.js",
     "types": "lib/index.d.ts",
     "domains": [
-        "imgrecog.js.devv.com"
+        "imgrecog.devv.com"
     ],
     "bin": {
-        "imgrecog.js": "./bin/imgrecog.js"
+        "imgrecog": "./bin/imgrecog"
     },
     "engines": {
         "node": "*"
@@ -38,7 +38,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/igoramadas/imgrecog.js.git"
+        "url": "https://github.com/igoramadas/imgrecog.git"
     },
     "keywords": [
         "ai",

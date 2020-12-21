@@ -71,7 +71,7 @@ export = async function () {
     argOptions.example("$0 --labels .", "Detect labels for images on the current folder")
     argOptions.example("$0 -d --labels --unsafe .", "Detect labels and unsafe images on current folder, including subfolders")
     argOptions.example("$0 --delbloat --delunsafe ./~", "Delete bloat and unsafe images from user's home folder")
-    argOptions.epilog("Need help? Post an issue at the repo https://github.com/igoramadas/imgrecog.js")
+    argOptions.epilog("Need help? Post an issue at the repo https://github.com/igoramadas/imgrecog")
 
     // Options coming from a JSON config file.
     let configOptions: Options = {}

@@ -1,17 +1,18 @@
 # IMGRecog.js
 
-This is a small Node.js tool to scan and tag images using a local [MobileNet](https://github.com/tensorflow/models/tree/master/research/slim/nets/mobilenet) model, and the [Google Vision](https://cloud.google.com/vision/docs) and [Sightengine](https://sightengine.com) APIs.
-
-The MobileNet model is relatively good for very basic use cases, like detecting websites, things and shapes on images. But it's not particularly effective to tag images with explicit content )
+This is a small Node.js tool to scan and tag images using [Google Vision](https://cloud.google.com/vision), [Clarifai](https://clarifai.com) and [Sightengine](https://sightengine.com).
 
 ## Features
 
-- basic tags can be detected using the local and offline TensorFlow / MobileNet model
-- support for the Google Vision and Sightengine APIs to boost the image recognition features
+- support for 3 different computer vision APIs: Google Vision, Clarifai and Sightengine
 - results (JSON) are handled as simple tags with a tag name and score (from 0 to 1)
 - can detect objects, labels, landmarks, logos, brands and unsafe content
 - actions to delete or move images according to certain criterias
 - can be used via the command line or programatically
+
+### What about TensorFlow?
+
+There are tons of great libraries and tools out there doing computer vision with TensorFlow, and the point here is not to reinvent the wheel.
 
 ## Setup
 
@@ -27,17 +28,23 @@ Or to install locally on your current project:
 
 You'll need to download your Google Cloud Vision API credentials file from the Google Cloud Console. If you need help please follow [these instructions](https://cloud.google.com/vision/docs/auth).
 
-Save the credentials file as `imgrecog.auth.json`. The tool will look for it in the following places:
+By default, the credentials file `imgrecog.auth.json` will be grabbed from the following locations:
 
 - where the tool is installed
 - current user's home folder
-- current executing directory
+- current executing directory (highest priority)
+
+You can specify the path to the credentials file using the `googleKeyfile` option, or via the command line arg `--glgkeyfile`.
+
+### Using the Clarifai API
+
+If you want to process images with the Clarifai API, please get the API key for your app on the [Portal](https://portal.clarifai.com). Set it via the option `clarifaiKey`, or via the command line arg `--clakey`.
 
 ### Using the Sightengine API
 
-If you wish to complement the results with Sightengine, please get your API user and secret from your [Dashboard](https://dashboard.sightengine.com/api-credentials). Set them via the options `sightengineUser` and `sightengineSecret`, or via the command line args `--steuser` and `--stesecret`.
+If you want to process images with the Sightengine API, please get your API user and secret from your [Dashboard](https://dashboard.sightengine.com/api-credentials). Set them via the options `sightengineUser` and `sightengineSecret`, or via the command line args `--steuser` and `--stesecret`.
 
-## Usage
+## Command line usage
 
     $ imgrecog.js -[options] --[actions] folders
 
@@ -56,6 +63,11 @@ Detect everything, high API limits, and then move images to the "processed" fold
 For help and the full list of options, ask for help:
 
     $ imgrecog.js --help
+
+## Importing as a library
+
+    import ImgRecog from "imgrecog.js"
+    // const ImgRecog = require("imgrecog.js")
 
 ## Options
 
