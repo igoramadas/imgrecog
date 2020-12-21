@@ -16,6 +16,14 @@ export class Sightengine {
     apiCalls: number
 
     /**
+     * Prepare the Sightengine client.
+     * @param options Program options.
+     */
+    prepare = async (options: Options): Promise<void> => {
+        logDebug(options, `Loaded Sightengine API user and secret`)
+    }
+
+    /**
      * Sightengine image detection.
      * @param options Program options.
      * @param filepath Image file to be scanned.
@@ -79,15 +87,16 @@ export class Sightengine {
 
                             // Got good results?
                             if (data.status == "success") {
-                                logInfo(options, `${filepath} parsed at Sightengine`)
-
-                                // Has nudity?
                                 if (data.nudity && data.nudity.raw) {
                                     const key = normalizeTag("explicit-adult")
                                     const score = data.nudity.raw.toFixed(2)
                                     logtext.push(`${key}:${score}`)
                                     tags[key] = score
                                 }
+
+                                const details = logtext.length > 0 ? logtext.join(", ") : "NONE"
+                                const logDetails = `${filepath}: tags - ${details}`
+                                logInfo(options, logDetails)
                             }
 
                             // Results are ready.
