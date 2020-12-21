@@ -56,14 +56,13 @@ Detect unsafe images under the user's home folder, using Clarifai and Sightengin
 
 Detect everything on camera and downloads folder, limiting to 15k API calls, and then move images to the processed-photos folder.
 
-    $ imgrecog --objects --labels --landmarks --logos --unsafe \
+    $ imgrecog --all --deep \
                --glgkeyfile "mycredentials.json" \
                --clakey "123" \
                --steuser "abc" \
                --stesecret "abc1234" \
                --limit 15000 \
                --move ~/processed-photos \
-               --deep \
                ~/camera ~/downloads
 
 For help and the full list of options, ask for help:
@@ -162,6 +161,10 @@ Detect logos and brands on the scanned images.
 ### unsafe *`--unsafe`*
 
 Detect unsafe images with explicit content (adult, violence, medical, racy, spoof).
+
+### *`--all`*
+
+Shortcut to enable all detections via the command line.
 
 ## Actions
 

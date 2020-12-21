@@ -68,6 +68,10 @@ export class IMGRecog {
      * Run the thing!
      */
     run = async (): Promise<void> => {
+        logInfo(defaultOptions, "###############")
+        logInfo(defaultOptions, "# IMGRecog.js #")
+        logInfo(defaultOptions, "###############")
+
         if (!this.options.folders || this.options.folders.length < 1) {
             throw new Error("No folders were passed")
         }
