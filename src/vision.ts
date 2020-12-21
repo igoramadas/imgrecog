@@ -1,6 +1,6 @@
 // GOOGLE VISION
 
-import {logDebug, logError, logInfo, normalizeTag} from "./utils"
+import {logDebug, logError, logInfo, normalizeScore, normalizeTag} from "./utils"
 import vision = require("@google-cloud/vision")
 
 // Likelyhood texts matched with a numeric score.
@@ -63,13 +63,16 @@ export class Vision {
             // Add objects as tags.
             for (let obj of apiResult) {
                 const key = normalizeTag(obj.name)
-                const score = obj.score.toFixed(2)
-                logtext.push(`${key}:${score}`)
-                tags[key] = score
+                const score = normalizeScore(obj.score)
+
+                if (score) {
+                    logtext.push(`${key}:${score}`)
+                    tags[key] = score
+                }
             }
 
             const objects = logtext.length > 0 ? logtext.join(", ") : "NONE"
-            const logDetails = `${filepath}: objects - ${objects}`
+            const logDetails = `${filepath}: ${objects}`
             logInfo(options, logDetails)
 
             return {
@@ -101,13 +104,16 @@ export class Vision {
             // Add labels as tags.
             for (let label of apiResult) {
                 const key = normalizeTag(label.description)
-                const score = label.score.toFixed(2)
-                logtext.push(`${key}:${score}`)
-                tags[key] = score
+                const score = normalizeScore(label.score)
+
+                if (score) {
+                    logtext.push(`${key}:${score}`)
+                    tags[key] = score
+                }
             }
 
             const labels = logtext.length > 0 ? logtext.join(", ") : "NONE"
-            const logDetails = `${filepath}: labels - ${labels}`
+            const logDetails = `${filepath}: ${labels}`
             logInfo(options, logDetails)
 
             return {
@@ -139,13 +145,16 @@ export class Vision {
             // Add landmarks as tags.
             for (let land of apiResult) {
                 const key = normalizeTag(land.description)
-                const score = land.score.toFixed(2)
-                logtext.push(`${key}:${score}`)
-                tags[key] = score
+                const score = normalizeScore(land.score)
+
+                if (score) {
+                    logtext.push(`${key}:${score}`)
+                    tags[key] = score
+                }
             }
 
             const landmarks = logtext.length > 0 ? logtext.join(", ") : "NONE"
-            const logDetails = `${filepath}: labels - ${landmarks}`
+            const logDetails = `${filepath}: ${landmarks}`
             logInfo(options, logDetails)
 
             return {
@@ -177,13 +186,16 @@ export class Vision {
             // Add logos as tags.
             for (let logo of apiResult) {
                 const key = normalizeTag(`logo-${logo.description}`)
-                const score = logo.score.toFixed(2)
-                logtext.push(`${key}:${score}`)
-                tags[key] = score
+                const score = normalizeScore(logo.score)
+
+                if (score) {
+                    logtext.push(`${key}:${score}`)
+                    tags[key] = score
+                }
             }
 
             const logos = logtext.length > 0 ? logtext.join(", ") : "NONE"
-            const logDetails = `${filepath}: labels - ${logos}`
+            const logDetails = `${filepath}: ${logos}`
             logInfo(options, logDetails)
 
             return {
@@ -218,18 +230,17 @@ export class Vision {
             for (let unsafeKey of apiKeys) {
                 if (unsafeKey.indexOf("Confidence") > 0) continue
                 const value = apiResult[unsafeKey]
-                const score = likelyhood[value].toFixed(2)
-
-                // Do not add if image got a VERY_UNLIKELY score.
-                if (score == 0) continue
-
                 const key = normalizeTag(`explicit-${unsafeKey}`)
-                logtext.push(`${key}:${score}`)
-                tags[key] = score
+                const score = normalizeScore(likelyhood[value])
+
+                if (score) {
+                    logtext.push(`${key}:${score}`)
+                    tags[key] = score
+                }
             }
 
             const unsafe = logtext.length > 0 ? logtext.join(", ") : "NONE"
-            const logDetails = `${filepath}: labels - ${unsafe}`
+            const logDetails = `${filepath}: ${unsafe}`
             logInfo(options, logDetails)
 
             return {

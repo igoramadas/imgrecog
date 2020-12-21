@@ -2,9 +2,11 @@
 
 This is a small Node.js tool to scan and tag images using a local [MobileNet](https://github.com/tensorflow/models/tree/master/research/slim/nets/mobilenet) model, and the [Google Vision](https://cloud.google.com/vision/docs) and [Sightengine](https://sightengine.com) APIs.
 
+The MobileNet model is relatively good for very basic use cases, like detecting websites, things and shapes on images. But it's not particularly effective to tag images with explicit content )
+
 ## Features
 
-- basic tags can be achieved using the local and offline TensorFlow / MobileNet model
+- basic tags can be detected using the local and offline TensorFlow / MobileNet model
 - support for the Google Vision and Sightengine APIs to boost the image recognition features
 - results (JSON) are handled as simple tags with a tag name and score (from 0 to 1)
 - can detect objects, labels, landmarks, logos, brands and unsafe content

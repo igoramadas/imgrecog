@@ -1,6 +1,6 @@
 // SIGHTENGINE
 
-import {logDebug, logError, logInfo, normalizeTag} from "./utils"
+import {logDebug, logError, logInfo, normalizeScore, normalizeTag} from "./utils"
 import FormData = require("form-data")
 import fs = require("fs")
 
@@ -57,6 +57,7 @@ export class Sightengine {
                 form.append("media", fs.createReadStream(filepath))
 
                 logDebug(options, `${filepath} - posting to Sightengine now`)
+
                 form.submit("https://api.sightengine.com/1.0/check.json", (err, res) => {
                     if (err) {
                         logError(options, `${filepath} - error detecting ${models.join(", ")}`, err)
@@ -89,13 +90,16 @@ export class Sightengine {
                             if (data.status == "success") {
                                 if (data.nudity && data.nudity.raw) {
                                     const key = normalizeTag("explicit-adult")
-                                    const score = data.nudity.raw.toFixed(2)
-                                    logtext.push(`${key}:${score}`)
-                                    tags[key] = score
+                                    const score = normalizeScore(data.nudity.raw)
+
+                                    if (score) {
+                                        logtext.push(`${key}:${score}`)
+                                        tags[key] = score
+                                    }
                                 }
 
                                 const details = logtext.length > 0 ? logtext.join(", ") : "NONE"
-                                const logDetails = `${filepath}: tags - ${details}`
+                                const logDetails = `${filepath}: ${details}`
                                 logInfo(options, logDetails)
                             }
 

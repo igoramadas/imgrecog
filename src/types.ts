@@ -22,6 +22,8 @@ interface Options {
     console?: boolean
     /** Path to the credentials file to be used for the authentication with Google Vision. */
     googleKeyfile?: string
+    /** Clarifai API key. */
+    clarifaiKey?: string
     /** Sightengine API user. */
     sightengineUser?: string
     /** Sightengine API secret. */

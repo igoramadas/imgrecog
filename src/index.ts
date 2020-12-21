@@ -2,8 +2,8 @@
 
 import {logDebug, logError, logInfo, logWarn, getEXIF} from "./utils"
 import {deleteBloat, deleteUnsafe, moveImages} from "./actions"
+import clarifai from "./clarifai"
 import sightengine from "./sightengine"
-import tensorflow from "./tensorflow"
 import vision from "./vision"
 import asyncLib = require("async")
 import logger = require("anyhow")
@@ -73,8 +73,8 @@ export class IMGRecog {
         }
 
         // Prepare the detection clients.
-        await tensorflow.prepare(this.options)
         if (this.options.googleKeyfile) await vision.prepare(this.options)
+        if (this.options.clarifaiKey) await clarifai.prepare(this.options)
         if (this.options.sightengineUser && this.options.sightengineSecret) await sightengine.prepare(this.options)
 
         // Create the images scanning queue.
@@ -205,9 +205,6 @@ export class IMGRecog {
 
         logDebug(this.options, `${filepath}: size ${result.details.size}, date ${result.details.date}`)
 
-        // TensorFlow parsing.
-        await tensorflow.parse(this.options, filepath)
-
         // Extract EXIF tags.
         if (extension == ".jpg" || extension == ".jpeg") {
             const exif = await getEXIF(this.options, filepath)
@@ -240,6 +237,12 @@ export class IMGRecog {
                 const dResult = await vision.detectUnsafe(this.options, filepath)
                 if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
             }
+        }
+
+        // Clarifai detection.
+        if (this.options.clarifaiKey) {
+            const dResult = await clarifai.detect(this.options, filepath)
+            if (dResult) result.tags = Object.assign(result.tags, dResult.tags)
         }
 
         // Sightengine detection.

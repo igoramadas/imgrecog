@@ -46,7 +46,8 @@ export = async function () {
         p: {alias: "parallel", type: "number", default: 4, describe: "How many API calls in parallel"},
         d: {alias: "deep", type: "boolean", default: false, describe: "Deep scan, include subdirectories of the passed folders."},
         v: {alias: "verbose", type: "boolean", default: false, describe: "Verbose mode with extra logging"},
-        glgkey: {type: "string", describe: "Custom path to the auth keyfilename for Google Vision"},
+        glgkeyfile: {type: "string", describe: "Custom path to the auth keyfilename for Google Vision"},
+        clakey: {type: "string", describe: "Clarifai API key"},
         steuser: {type: "string", describe: "Sightengine API user"},
         stesecret: {type: "string", describe: "Sightengine API secret"},
         objects: {type: "boolean", default: false, describe: "Detect objects and things"},
@@ -105,6 +106,7 @@ export = async function () {
         limit: hasValue(argOptions.argv.l) ? argOptions.argv.l : configOptions.limit,
         parallel: hasValue(argOptions.argv.p) ? argOptions.argv.p : configOptions.parallel,
         verbose: hasValue(argOptions.argv.v) ? argOptions.argv.v : configOptions.verbose,
+        clarifaiKey: hasValue(argOptions.argv.clakey) ? argOptions.argv.clakey : configOptions.clarifaiKey,
         sightengineUser: hasValue(argOptions.argv.steuser) ? argOptions.argv.steuser : configOptions.sightengineUser,
         sightengineSecret: hasValue(argOptions.argv.stesecret) ? argOptions.argv.stesecret : configOptions.sightengineSecret,
         objects: hasValue(argOptions.argv.objects) ? argOptions.argv.objects : configOptions.objects,
@@ -118,8 +120,8 @@ export = async function () {
     }
 
     // Get credentials from the correct file.
-    if (hasValue(argOptions.argv.glgkey)) {
-        options.googleKeyfile = argOptions.argv.glgkey
+    if (hasValue(argOptions.argv.glgkeyfile)) {
+        options.googleKeyfile = argOptions.argv.glgkeyfile
     } else if (fs.existsSync(credentialsCurrent)) {
         options.googleKeyfile = credentialsCurrent
     } else if (fs.existsSync(credentialsHome)) {

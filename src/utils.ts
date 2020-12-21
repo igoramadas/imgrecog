@@ -74,6 +74,15 @@ export function normalizeTag(value: string): string {
 }
 
 /**
+ * Helper to get a score with 3 decimal places.
+ * @param value Label or description.
+ */
+export function normalizeScore(value: number): string {
+    if (value < 0.001) return null
+    else return value.toFixed(3)
+}
+
+/**
  * Detet the EXIF tags of the passed image.
  * @param options Program options.
  * @param filepath Image file to be scanned.
