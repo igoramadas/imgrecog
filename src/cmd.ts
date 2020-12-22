@@ -46,6 +46,12 @@ export = async function () {
         move: {type: "string", describe: "Move images to the specified folder after scanning"}
     })
 
+    // Option grouping.
+    argOptions.group(["e", "o", "l", "p", "d", "v"], "Options:")
+    argOptions.group(["glgkeyfile", "clakey", "steuser", "stesecret"], "Authentication:")
+    argOptions.group(["objects", "labels", "logos", "unsafe", "all"], "Detection:")
+    argOptions.group(["delbloat", "delunsafe", "move"], "Actions:")
+
     // Command line options.
     argOptions.env("IMGRECOG")
     argOptions.wrap(Math.min(100, yargs.terminalWidth()))
