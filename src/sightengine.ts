@@ -30,13 +30,16 @@ export class Sightengine {
      */
     detect = async (options: Options, filepath: string): Promise<ImageResult> => {
         return new Promise((resolve) => {
-            this.apiCalls++
-
-            // Image overal properties are always detected.
+            const logtext = []
             const models = ["properties"]
+            const result: ImageResult = {
+                file: filepath,
+                tags: {}
+            }
 
             try {
                 const form = new FormData()
+                let chunks: string = ""
 
                 // Detect unsafe?
                 if (options.unsafe) {
@@ -61,10 +64,9 @@ export class Sightengine {
                 form.submit("https://api.sightengine.com/1.0/check.json", (err, res) => {
                     if (err) {
                         logError(options, `${filepath} - error detecting ${models.join(", ")}`, err)
-                        return resolve(null)
+                        result.error = err.message || err.toString()
+                        return resolve(result)
                     }
-
-                    let chunks: string = ""
 
                     // Receive response chucks from the API.
                     res.on("data", (chunk) => {
@@ -73,17 +75,16 @@ export class Sightengine {
 
                     // Response complete.
                     res.on("end", function () {
-                        try {
-                            const logtext = []
-                            const tags = {}
+                        this.apiCalls++
 
-                            // Parse response data as JSON.
+                        try {
                             const data: any = JSON.parse(chunks)
 
                             // API returned an error?
                             if (data.error && data.status && data.status == "failure") {
                                 logError(options, `${filepath} - error parsing`, new Error(data.error.message))
-                                return resolve(null)
+                                result.error = data.error.message
+                                return resolve(result)
                             }
 
                             // Got good results?
@@ -94,7 +95,7 @@ export class Sightengine {
 
                                     if (score) {
                                         logtext.push(`${key}:${score}`)
-                                        tags[key] = score
+                                        result.tags[key] = score
                                     }
                                 }
 
@@ -104,19 +105,18 @@ export class Sightengine {
                             }
 
                             // Results are ready.
-                            return resolve({
-                                file: filepath,
-                                tags: tags
-                            })
-                        } catch (ex) {
-                            logError(options, `${filepath} - error parsing response for ${models.join(", ")}`, ex)
-                            return resolve(null)
+                            return resolve(result)
+                        } catch (resEx) {
+                            logError(options, `${filepath} - error parsing response for ${models.join(", ")}`, resEx)
+                            result.error = resEx.message || resEx.toString()
+                            return resolve(result)
                         }
                     })
                 })
             } catch (ex) {
                 logError(options, `${filepath} - error detecting ${models.join(", ")}`, ex)
-                return resolve(null)
+                result.error = ex.message || ex.toString()
+                return resolve(result)
             }
         })
     }

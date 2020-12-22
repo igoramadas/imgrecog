@@ -50,15 +50,19 @@ export class Vision {
      * @param filepath Image file to be scanned.
      */
     detectObjects = async (options: Options, filepath: string): Promise<ImageResult> => {
-        this.apiCalls++
+        const logtext = []
+        const result: ImageResult = {
+            file: filepath,
+            tags: {}
+        }
 
         try {
             const apiCall = await this.client.objectLocalization(filepath)
+            this.apiCalls++
+
+            // Get the object annotations from the result.
             const apiResult = apiCall[0].localizedObjectAnnotations
             logDebug(options, `${filepath} got ${apiResult.length} objects`)
-
-            const logtext = []
-            let tags: any = {}
 
             // Add objects as tags.
             for (let obj of apiResult) {
@@ -67,22 +71,19 @@ export class Vision {
 
                 if (score) {
                     logtext.push(`${key}:${score}`)
-                    tags[key] = score
+                    result.tags[key] = score
                 }
             }
 
             const objects = logtext.length > 0 ? logtext.join(", ") : "NONE"
             const logDetails = `${filepath}: ${objects}`
             logInfo(options, logDetails)
-
-            return {
-                file: filepath,
-                tags: tags
-            }
         } catch (ex) {
             logError(options, `${filepath} - error detecting objects`, ex)
-            return null
+            result.error = ex.message || ex.toString()
         }
+
+        return result
     }
 
     /**
@@ -91,15 +92,19 @@ export class Vision {
      * @param filepath Image file to be scanned.
      */
     detectLabels = async (options: Options, filepath: string): Promise<ImageResult> => {
-        this.apiCalls++
+        const logtext = []
+        const result: ImageResult = {
+            file: filepath,
+            tags: {}
+        }
 
         try {
             const apiCall = await this.client.labelDetection(filepath)
+            this.apiCalls++
+
+            // Get the label annotations from the result.
             const apiResult = apiCall[0].labelAnnotations
             logDebug(options, `${filepath} got ${apiResult.length} labels`)
-
-            const logtext = []
-            let tags: any = {}
 
             // Add labels as tags.
             for (let label of apiResult) {
@@ -108,22 +113,19 @@ export class Vision {
 
                 if (score) {
                     logtext.push(`${key}:${score}`)
-                    tags[key] = score
+                    result.tags[key] = score
                 }
             }
 
             const labels = logtext.length > 0 ? logtext.join(", ") : "NONE"
             const logDetails = `${filepath}: ${labels}`
             logInfo(options, logDetails)
-
-            return {
-                file: filepath,
-                tags: tags
-            }
         } catch (ex) {
             logError(options, `${filepath} - error detecting labels`, ex)
-            return null
+            result.error = ex.message || ex.toString()
         }
+
+        return result
     }
 
     /**
@@ -132,15 +134,19 @@ export class Vision {
      * @param filepath Image file to be scanned.
      */
     detectLandmarks = async (options: Options, filepath: string): Promise<ImageResult> => {
-        this.apiCalls++
+        const logtext = []
+        const result: ImageResult = {
+            file: filepath,
+            tags: {}
+        }
 
         try {
             const apiCall = await this.client.landmarkDetection(filepath)
+            this.apiCalls++
+
+            // Get the landmark annotations from the result.
             const apiResult = apiCall[0].landmarkAnnotations
             logDebug(options, `${filepath} got ${apiResult.length} landmarks`)
-
-            const logtext = []
-            let tags: any = {}
 
             // Add landmarks as tags.
             for (let land of apiResult) {
@@ -149,22 +155,19 @@ export class Vision {
 
                 if (score) {
                     logtext.push(`${key}:${score}`)
-                    tags[key] = score
+                    result.tags[key] = score
                 }
             }
 
             const landmarks = logtext.length > 0 ? logtext.join(", ") : "NONE"
             const logDetails = `${filepath}: ${landmarks}`
             logInfo(options, logDetails)
-
-            return {
-                file: filepath,
-                tags: tags
-            }
         } catch (ex) {
             logError(options, `${filepath} - error detecting landmarks`, ex)
-            return null
+            result.error = ex.message || ex.toString()
         }
+
+        return result
     }
 
     /**
@@ -173,15 +176,19 @@ export class Vision {
      * @param filepath Image file to be scanned.
      */
     detectLogos = async (options: Options, filepath: string): Promise<ImageResult> => {
-        this.apiCalls++
+        const logtext = []
+        const result: ImageResult = {
+            file: filepath,
+            tags: {}
+        }
 
         try {
             const apiCall = await this.client.logoDetection(filepath)
+            this.apiCalls++
+
+            // Get the logo annotations from the result.
             const apiResult = apiCall[0].logoAnnotations
             logDebug(options, `${filepath} got ${apiResult.length} logos`)
-
-            const logtext = []
-            let tags: any = {}
 
             // Add logos as tags.
             for (let logo of apiResult) {
@@ -190,22 +197,19 @@ export class Vision {
 
                 if (score) {
                     logtext.push(`${key}:${score}`)
-                    tags[key] = score
+                    result.tags[key] = score
                 }
             }
 
             const logos = logtext.length > 0 ? logtext.join(", ") : "NONE"
             const logDetails = `${filepath}: ${logos}`
             logInfo(options, logDetails)
-
-            return {
-                file: filepath,
-                tags: tags
-            }
         } catch (ex) {
             logError(options, `${filepath} - error detecting logos`, ex)
-            return null
+            result.error = ex.message || ex.toString()
         }
+
+        return result
     }
 
     /**
@@ -215,16 +219,20 @@ export class Vision {
      * @param filepath Image file to be scanned.
      */
     detectUnsafe = async (options: Options, filepath: string): Promise<ImageResult> => {
-        this.apiCalls++
+        const logtext = []
+        const result: ImageResult = {
+            file: filepath,
+            tags: {}
+        }
 
         try {
             const apiCall = await this.client.safeSearchDetection(filepath)
+            this.apiCalls++
+
+            // Get the safe search annotations from the result.
             const apiResult = apiCall[0].safeSearchAnnotation
             const apiKeys = Object.keys(apiResult)
             logDebug(options, `${filepath} got ${apiKeys.length} unsafe properties`)
-
-            const logtext = []
-            let tags: any = {}
 
             // Add safe search labels as tags.
             for (let unsafeKey of apiKeys) {
@@ -235,22 +243,19 @@ export class Vision {
 
                 if (score) {
                     logtext.push(`${key}:${score}`)
-                    tags[key] = score
+                    result.tags[key] = score
                 }
             }
 
             const unsafe = logtext.length > 0 ? logtext.join(", ") : "NONE"
             const logDetails = `${filepath}: ${unsafe}`
             logInfo(options, logDetails)
-
-            return {
-                file: filepath,
-                tags: tags
-            }
         } catch (ex) {
             logError(options, `${filepath} - error detecting unsafe`, ex)
-            return null
+            result.error = ex.message || ex.toString()
         }
+
+        return result
     }
 }
 

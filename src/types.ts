@@ -56,4 +56,6 @@ interface ImageResult {
     tags?: {[id: string]: string}
     /** File properties, mostly taken out of the EXIF tags.  */
     details?: {[id: string]: number | string}
+    /** Any error ocurred during the image processing? */
+    error?: any
 }

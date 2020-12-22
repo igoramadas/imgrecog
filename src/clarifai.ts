@@ -31,6 +31,11 @@ export class Clarifai {
     detect = async (options: Options, filepath: string): Promise<ImageResult> => {
         return new Promise((resolve) => {
             let done = false
+            const logtext = []
+            const result: ImageResult = {
+                file: filepath,
+                tags: {}
+            }
 
             try {
                 const buffer = fs.readFileSync(filepath)
@@ -79,16 +84,14 @@ export class Clarifai {
                         this.apiCalls++
 
                         try {
-                            const logtext = []
-                            const tags = {}
-
-                            // Parse response data as JSON.
                             const data: any = JSON.parse(chunks)
 
                             // Got an error?
                             if (!data.status || data.status.code != 10000) {
                                 const err = data.status ? data.status.description : "Invalid response"
                                 logError(options, `${filepath} - error parsing Clarifai response`, err)
+                                result.error = err
+
                                 if (!done) resolve(null)
                                 done = true
                             }
@@ -102,7 +105,7 @@ export class Clarifai {
 
                                         if (score) {
                                             logtext.push(`${key}:${score}`)
-                                            tags[key] = score
+                                            result.tags[key] = score
                                         }
                                     }
                                 }
@@ -113,12 +116,11 @@ export class Clarifai {
                             logInfo(options, logDetails)
 
                             // Results are ready.
-                            return resolve({
-                                file: filepath,
-                                tags: tags
-                            })
-                        } catch (ex) {
-                            logError(options, `${filepath} - error parsing Clarifai response`, ex)
+                            return resolve(result)
+                        } catch (resEx) {
+                            logError(options, `${filepath} - error parsing Clarifai response`, resEx)
+                            result.error = resEx.message || resEx.toString()
+
                             if (!done) resolve(null)
                             done = true
                         }
@@ -127,6 +129,8 @@ export class Clarifai {
 
                 req.on("error", (err) => {
                     logError(options, `${filepath} - error sending to Clarifai`, err)
+                    result.error = err.message || err.toString()
+
                     if (!done) resolve(null)
                     done = true
                 })
@@ -135,6 +139,8 @@ export class Clarifai {
                 req.end()
             } catch (ex) {
                 logError(options, `${filepath} - could not send to Clarifai`, ex)
+                result.error = ex.message || ex.toString()
+
                 if (!done) resolve(null)
                 done = true
             }

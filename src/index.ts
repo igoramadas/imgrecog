@@ -263,10 +263,14 @@ export class IMGRecog {
             }
         }
 
+        // Execute detection methods.
         await Promise.all(
             methods.map(async (method: Function) => {
                 const mResult = await method.call(null, this.options, filepath)
-                if (mResult) result.tags = Object.assign(result.tags, mResult.tags)
+                if (mResult) {
+                    result.tags = Object.assign(result.tags, mResult.tags)
+                    if (mResult.error) result.error = mResult.console.error()
+                }
                 return mResult
             })
         )
