@@ -34,9 +34,9 @@ export class Categorizer {
             try {
                 if (!image.tags) return 0
 
-                // Images smaller than 50KB are automatically considered bloat.
-                if (image.details.size && image.details.size < 50000) {
-                    logInfo(options, `${image.file}: is bloat, size < 50KB`)
+                // Images smaller than 40KB are automatically considered bloat.
+                if (image.details.size && image.details.size < 40000) {
+                    logInfo(options, `${image.file}: is bloat, size < 40KB`)
                     return 1
                 }
 

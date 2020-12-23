@@ -331,9 +331,11 @@ export class IMGRecog {
                         tempResults = this.results.filter((r) => r.tags[tag] == score)
                         logDebug(this.options, `Filtered ${tempResults.length} results having ${tag} = ${score}`)
                     } else if (filter.indexOf("!") >= 0) {
+                        tag = filter
                         tempResults = this.results.filter((r) => !r.tags[tag])
                         logDebug(this.options, `Filtered ${tempResults.length} results not having ${tag}`)
                     } else {
+                        tag = filter
                         tempResults = this.results.filter((r) => r.tags[tag])
                         logDebug(this.options, `Filtered ${tempResults.length} results having ${tag}`)
                     }
@@ -349,7 +351,7 @@ export class IMGRecog {
 
             // Filter returned results? Remove duplicates and execute specified actions.
             if (filteredResults.length > 0) {
-                filteredResults = filteredResults.filter((item, index) => filteredResults.indexOf(item) == index)
+                filteredResults = filteredResults.filter((item, index) => filteredResults.indexOf(item) === index)
 
                 if (this.options.move) await moveImages(this.options, this.results)
                 if (this.options.delete) await deleteImages(this.options, this.results)
@@ -376,7 +378,7 @@ export class IMGRecog {
         const target = path.isAbsolute(this.options.output) ? this.options.output : path.join(executableFolder, this.options.output)
 
         try {
-            const replacer = (key, value) => (key == "score" ? normalizeScore(value) : value)
+            const replacer = (_key, value) => (!isNaN(value) && value <= 1 ? normalizeScore(value) : value)
             fs.writeFileSync(target, JSON.stringify(this.results, replacer, 2))
             logInfo(this.options, `Saved results to ${target}`)
         } catch (ex) {

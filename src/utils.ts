@@ -78,9 +78,9 @@ export function normalizeTag(value: string): string {
  * Helper to get a score with 3 decimal places.
  * @param value Score to be normalized.
  */
-export function normalizeScore(value: number): string {
+export function normalizeScore(value: number): number {
     if (value < 0.001) return null
-    else return value.toFixed(3)
+    else return Math.round(value * 1000) / 1000
 }
 
 /**

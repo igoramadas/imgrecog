@@ -10,6 +10,8 @@ import path = require("path")
  * @param images Images to be deleted.
  */
 export async function deleteImages(options: Options, images: ImageResult[]) {
+    logDebug(options, `Will delete ${images.length} scanned images`)
+
     for (let image of images) {
         try {
             if (fs.existsSync) {
@@ -30,7 +32,9 @@ export async function deleteImages(options: Options, images: ImageResult[]) {
  * @param images Images to be moved.
  */
 export async function moveImages(options: Options, images: ImageResult[]) {
-    const targetFolder = options.move
+    const currentFolder = process.cwd() + "/"
+    const targetFolder = path.isAbsolute(options.move) ? options.move : path.join(currentFolder, options.move)
+
     logDebug(options, `Will move ${images.length} scanned images to: ${targetFolder}`)
 
     // Make sure target folder exists.
@@ -51,14 +55,14 @@ export async function moveImages(options: Options, images: ImageResult[]) {
                 continue
             }
 
-            const targetFile = path.join(targetFolder, image.file)
+            const targetFile = path.join(targetFolder, image.file.replace(targetFolder, ""))
             const folder = path.dirname(targetFile)
 
             if (!fs.existsSync(folder)) {
                 fs.mkdirSync(folder, {recursive: true})
             }
 
-            fs.renameSync(image.file, targetFolder)
+            fs.renameSync(image.file, targetFile)
         } catch (ex) {
             logError(options, `${image.file}: error moving file`, ex)
         }
