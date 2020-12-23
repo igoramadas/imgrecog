@@ -66,15 +66,26 @@ export class IMGRecog {
     startTime: Date
 
     /**
-     * Run the thing!
+     * Run the thing and return the results (also stored under the .results property).
      */
-    run = async (): Promise<void> => {
+    run = async (): Promise<ImageResult[]> => {
         logInfo(defaultOptions, "###############")
         logInfo(defaultOptions, "# IMGRecog.js #")
         logInfo(defaultOptions, "###############")
 
         if (!this.options.folders || this.options.folders.length < 1) {
             throw new Error("No folders were passed")
+        }
+
+        // Action passed without a filter?
+        if (!this.options.filter) {
+            if (this.options.move) throw new Error(`Missing filter for the "move" action`)
+            if (this.options.delete) throw new Error(`Missing filter for the "delete" action`)
+        }
+
+        // Filter was passed, but no action?
+        if (this.options.filter && !this.options.delete && !this.options.move) {
+            logWarn(this.options, `A filter was passed, but no actions (delete or move)`)
         }
 
         // Reset state.
@@ -107,6 +118,8 @@ export class IMGRecog {
         } catch (ex) {
             logError(this.options, `Failure processing images`, ex)
         }
+
+        return this.results
     }
 
     /**

@@ -55,15 +55,15 @@ export = async function () {
     // Command line options.
     argOptions.env("IMGRECOG")
     argOptions.wrap(Math.min(100, yargs.terminalWidth()))
-    argOptions.implies("delbloat", "labels")
-    argOptions.implies("delunsafe", "unsafe")
-    argOptions.demandCommand(1)
+    argOptions.implies("move", "filter")
+    argOptions.implies("delete", "filter")
 
     // Examples.
     argOptions.usage(`Usage: $0 -[options...] --[detections...] --[actions...] folders...`)
     argOptions.example(`$ $0 --glgkeyfile /path/to/googlekey.json --unsafe .`, "")
     argOptions.example(`$ $0 -d --clakey "mykey" --objects --labels .`, "")
     argOptions.example(`$ $0 -l 8000 --glgkeyfile google.json --clakey "mykey" --all ~/photos1 ~/photos2`, "")
+    argOptions.example(`$ $0 --filter "is-porn, is-bloat" --move /photos/trash ~/photos/downloads ~/photos/camera`, "")
     argOptions.epilog("Need help? More info at https://github.com/igoramadas/imgrecog")
 
     // Options coming from a JSON config file.
