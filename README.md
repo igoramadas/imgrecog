@@ -217,7 +217,7 @@ After the scanning has finished, the JSON results will be saved to the specified
 Each scanning result has the following schema:
 
 - file - the full path to the scanned image file
-- details - fize size and relevant EXIF data
+- size - fize size in bytes
 - tags - map of tags and scores for the scanned image
 - error - list of errors (field will be ommited if no errors occurred)
 

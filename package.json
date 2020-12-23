@@ -24,7 +24,6 @@
         "@google-cloud/vision": "^2.1.2",
         "anyhow": "^2.0.5",
         "chalk": "^4.1.0",
-        "exif": "^0.6.0",
         "form-data": "^3.0.0",
         "yargs": "^16.2.0"
     },

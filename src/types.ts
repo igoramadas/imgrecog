@@ -58,8 +58,8 @@ interface ImageResult {
     file: string
     /** Tags and scores. */
     tags?: {[id: string]: number}
-    /** File properties, mostly taken out of the EXIF tags.  */
-    details?: {[id: string]: number | string}
+    /** File size. */
+    size?: number
     /** Any error(s) ocurred during the image processing? */
     error?: any
 }

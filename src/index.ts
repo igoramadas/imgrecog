@@ -1,6 +1,6 @@
 // IMGRECOG.JS INDEX
 
-import {logDebug, logError, logInfo, logWarn, getEXIF, hasValue, normalizeScore} from "./utils"
+import {logDebug, logError, logInfo, logWarn, hasValue, normalizeScore} from "./utils"
 import {deleteImages, moveImages} from "./actions"
 import categorizer from "./categorizer"
 import clarifai from "./clarifai"
@@ -218,7 +218,6 @@ export class IMGRecog {
     scanFile = async (filepath: string): Promise<void> => {
         const result: ImageResult = {
             file: filepath,
-            details: {},
             tags: {}
         }
 
@@ -227,24 +226,15 @@ export class IMGRecog {
             logWarn(this.options, `File ${filepath} was already scanned`)
         }
 
-        const extension = path.extname(filepath).toLowerCase()
-
         // Get file stats.
         try {
             const stat = fs.statSync(filepath)
-            result.details.size = stat.size
-            result.details.date = stat.mtime.toISOString()
+            result.size = stat.size
         } catch (ex) {
             logError(this.options, `Can't get filestat for ${filepath}`, ex)
         }
 
-        logDebug(this.options, `${filepath}: size ${result.details.size}, date ${result.details.date}`)
-
-        // Extract EXIF tags.
-        if (extension == ".jpg" || extension == ".jpeg") {
-            const exif = await getEXIF(this.options, filepath)
-            result.details = Object.assign(result.details, exif)
-        }
+        logDebug(this.options, `${filepath}: size ${result.size} bytes`)
 
         const methods = []
 
