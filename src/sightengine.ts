@@ -31,7 +31,7 @@ export class Sightengine {
     detect = async (options: Options, filepath: string): Promise<ImageResult> => {
         return new Promise((resolve) => {
             const logtext = []
-            const models = ["properties"]
+            const models = ["properties", "text"]
             const result: ImageResult = {
                 file: filepath,
                 tags: {}
@@ -44,13 +44,9 @@ export class Sightengine {
                 // Detect unsafe?
                 if (options.unsafe) {
                     models.push("offensive")
+                    models.push("scam")
                     models.push("nudity")
                     models.push("wad")
-                }
-
-                // Detect logos?
-                if (options.logos) {
-                    models.push("text")
                 }
 
                 // Create form data to be posted to Sightengine.

@@ -1,6 +1,6 @@
 // CATEGORIZER
 
-import {logDebug, logError} from "./utils"
+import {logError, logInfo} from "./utils"
 
 /**
  * Image categorized.
@@ -21,10 +21,7 @@ export class Categorizer {
         // Iterate tags definitions and check the image against each one of them.
         for (let tag of tags) {
             const score = this.is[tag](options, image)
-
-            if (score) {
-                result[`is-${tag}`] = score
-            }
+            if (score) result[`is-${tag}`] = score
         }
 
         return result
@@ -39,7 +36,7 @@ export class Categorizer {
 
                 // Images smaller than 50KB are automatically considered bloat.
                 if (image.details.size && image.details.size < 50000) {
-                    logDebug(options, `${image.file}: is bloat, size < 50KB`)
+                    logInfo(options, `${image.file}: is bloat, size < 50KB`)
                     return 1
                 }
 
@@ -51,19 +48,19 @@ export class Categorizer {
                 const totalScore = 3.55
 
                 // Get relevant bloat (main) and extra tags.
-                const hasHighScore = imgTags.filter((t) => bloatTags.includes(t) && image.tags[t]>= highScore).length > 0
+                const hasHighScore = imgTags.filter((t) => bloatTags.includes(t) && image.tags[t] >= highScore).length > 0
                 const arrBloat = imgTags.filter((t) => bloatTags.includes(t) && image.tags[t] >= minScore)
                 const arrExtra = imgTags.filter((t) => extraTags.includes(t) && image.tags[t] >= minScore)
 
                 // At least 2 bloat tags, and one having a high score?
                 if (hasHighScore && arrBloat.length >= 2) {
-                    logDebug(options, `${image.file}: is bloat, at least 2 tags found`)
+                    logInfo(options, `${image.file}: is bloat, at least 2 tags found`)
                     return 1
                 }
 
                 // At least 1 bloat tag and 2 extra tags found?
                 if (hasHighScore && arrBloat.length >= 1 && arrExtra.length >= 2) {
-                    logDebug(options, `${image.file}: is bloat, at least 1 tag with extra similar tags found`)
+                    logInfo(options, `${image.file}: is bloat, at least 1 tag with extra similar tags found`)
                     return 1
                 }
 
@@ -72,12 +69,14 @@ export class Categorizer {
 
                 // Total score of found bloat tags is high?
                 if (bloatScore + extraScore >= totalScore) {
-                    logDebug(options, `${image.file}: is bloat, too many tags found`)
+                    logInfo(options, `${image.file}: is bloat, too many tags found`)
                     return 1
                 }
             } catch (ex) {
                 logError(options, `${image.file} - error processing bloat tags`, ex)
             }
+
+            return 0
         },
 
         /** Pornographic and erotic images. */
@@ -99,27 +98,29 @@ export class Categorizer {
 
                 // At least 2 porn tags, and one having a high score?
                 if (hasHighScore && arrPorn.length >= 2) {
-                    logDebug(options, `${image.file}: is porn, at least 2 tags found`)
+                    logInfo(options, `${image.file}: is porn, at least 2 tags found`)
                     return 1
                 }
 
                 // At least 1 porn tag and 2 extra tags found?
                 if (hasHighScore && arrPorn.length >= 1 && arrExtra.length >= 2) {
-                    logDebug(options, `${image.file}: is porn, at least 1 tag with extra similar tags found`)
+                    logInfo(options, `${image.file}: is porn, at least 1 tag with extra similar tags found`)
                     return 1
                 }
 
-                const bloatScore = arrPorn.map((t) => image.tags[t]).reduce((a, b) => a + b, 0)
+                const pornScore = arrPorn.map((t) => image.tags[t]).reduce((a, b) => a + b, 0)
                 const extraScore = arrExtra.map((t) => image.tags[t]).reduce((a, b) => a + b, 0)
 
                 // Total score of found porn tags is high?
-                if (bloatScore + extraScore >= totalScore) {
-                    logDebug(options, `${image.file}: is porn, too many tags found`)
+                if (pornScore + extraScore >= totalScore) {
+                    logInfo(options, `${image.file}: is porn, too many tags found`)
                     return 1
                 }
             } catch (ex) {
                 logError(options, `${image.file} - error processing bloat tags`, ex)
             }
+
+            return 0
         }
     }
 }

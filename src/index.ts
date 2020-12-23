@@ -1,6 +1,6 @@
 // IMGRECOG.JS INDEX
 
-import {logDebug, logError, logInfo, logWarn, getEXIF, hasValue} from "./utils"
+import {logDebug, logError, logInfo, logWarn, getEXIF, hasValue, normalizeScore} from "./utils"
 import {deleteImages, moveImages} from "./actions"
 import categorizer from "./categorizer"
 import clarifai from "./clarifai"
@@ -289,48 +289,60 @@ export class IMGRecog {
             const arrFilter = this.options.filter.replace(/ /g, "").split(",")
 
             for (let filter of arrFilter) {
-                let tempResults
-                let parts: string[]
-                let tag: string
-                let score: number
+                try {
+                    let tempResults
+                    let parts: string[]
+                    let tag: string
+                    let score: number
 
-                if (filter.indexOf(">") > 0) {
-                    parts = filter.split(">")
-                    tag = parts[0]
-                    score = parseFloat(parts[1])
+                    if (filter.indexOf(">") > 0) {
+                        parts = filter.split(">")
+                        tag = parts[0]
+                        score = parseFloat(parts[1])
 
-                    tempResults = this.results.filter((r) => r.tags[tag] && r.tags[tag] > score)
-                    logDebug(this.options, `Filtering ${tempResults.length} results having ${tag} > ${score}`)
-                } else if (filter.indexOf("<") > 0) {
-                    parts = filter.split("<")
-                    tag = parts[0]
-                    score = parseFloat(parts[1])
-                    if (score < 0) score = 0
+                        tempResults = this.results.filter((r) => r.tags[tag] && r.tags[tag] > score)
+                        logDebug(this.options, `Filtered ${tempResults.length} results having ${tag} > ${score}`)
+                    } else if (filter.indexOf("<") > 0) {
+                        parts = filter.split("<")
+                        tag = parts[0]
+                        score = parseFloat(parts[1])
+                        if (score < 0) score = 0
 
-                    tempResults = this.results.filter((r) => r.tags[tag] || r.tags[tag] < score)
-                    logDebug(this.options, `Filtering ${tempResults.length} results having ${tag} < ${score}`)
-                } else if (filter.indexOf("=") > 0) {
-                    parts = filter.split("=")
-                    tag = parts[0]
-                    score = parseFloat(parts[1])
+                        tempResults = this.results.filter((r) => r.tags[tag] || r.tags[tag] < score)
+                        logDebug(this.options, `Filtered ${tempResults.length} results having ${tag} < ${score}`)
+                    } else if (filter.indexOf("=") > 0) {
+                        parts = filter.split("=")
+                        tag = parts[0]
+                        score = parseFloat(parts[1])
 
-                    tempResults = this.results.filter((r) => r.tags[tag] == score)
-                    logDebug(this.options, `Filtering ${tempResults.length} results having ${tag} = ${score}`)
-                } else if (filter.indexOf("!") >= 0) {
-                    tempResults = this.results.filter((r) => !r.tags[tag])
-                    logDebug(this.options, `Filtering ${tempResults.length} results not having ${tag}`)
-                } else {
-                    tempResults = this.results.filter((r) => r.tags[tag])
-                    logDebug(this.options, `Filtering ${tempResults.length} results having ${tag}`)
-                }
+                        tempResults = this.results.filter((r) => r.tags[tag] == score)
+                        logDebug(this.options, `Filtered ${tempResults.length} results having ${tag} = ${score}`)
+                    } else if (filter.indexOf("!") >= 0) {
+                        tempResults = this.results.filter((r) => !r.tags[tag])
+                        logDebug(this.options, `Filtered ${tempResults.length} results not having ${tag}`)
+                    } else {
+                        tempResults = this.results.filter((r) => r.tags[tag])
+                        logDebug(this.options, `Filtered ${tempResults.length} results having ${tag}`)
+                    }
 
-                if (tempResults.length > 0) {
-                    filteredResults = filteredResults.concat(tempResults)
+                    // Merge to the filtered results.
+                    if (tempResults.length > 0) {
+                        filteredResults = filteredResults.concat(tempResults)
+                    }
+                } catch (ex) {
+                    logError(this.options, `Invalid filter: ${filter}`, ex)
                 }
             }
 
-            if (this.options.move) await moveImages(this.options, this.results)
-            if (this.options.delete) await deleteImages(this.options, this.results)
+            // Filter returned results? Remove duplicates and execute specified actions.
+            if (filteredResults.length > 0) {
+                filteredResults = filteredResults.filter((item, index) => filteredResults.indexOf(item) == index)
+
+                if (this.options.move) await moveImages(this.options, this.results)
+                if (this.options.delete) await deleteImages(this.options, this.results)
+            } else {
+                logDebug(this.options, `Filter ${this.options.filter} returned no results`)
+            }
         }
 
         const duration = (Date.now() - startTime) / 1000
@@ -351,7 +363,8 @@ export class IMGRecog {
         const target = path.isAbsolute(this.options.output) ? this.options.output : path.join(executableFolder, this.options.output)
 
         try {
-            fs.writeFileSync(target, JSON.stringify(this.results, null, 2))
+            const replacer = (key, value) => (key == "score" ? normalizeScore(value) : value)
+            fs.writeFileSync(target, JSON.stringify(this.results, replacer, 2))
             logInfo(this.options, `Saved results to ${target}`)
         } catch (ex) {
             logError(this.options, `Could not save output to ${target}`, ex)

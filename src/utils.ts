@@ -70,7 +70,7 @@ export function hasValue(value: any): boolean {
  * @param value Label or description.
  */
 export function normalizeTag(value: string): string {
-    const tag = value.toLowerCase().trim()
+    const tag = value.toLowerCase().trim().replace("!", "")
     return tag.replace(/  /g, " ").replace(/ /g, "-")
 }
 
