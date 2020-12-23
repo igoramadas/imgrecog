@@ -1,6 +1,6 @@
 # IMGRecog.js
 
-This is a small Node.js tool to scan and tag images using [Google Vision](https://cloud.google.com/vision), [Clarifai](https://clarifai.com) and [Sightengine](https://sightengine.com). It was created to automate the cleanup of personal and family photos, but it can be used to whatever suits you best.
+This is a small Node.js tool to scan and tag images using [Google Vision](https://cloud.google.com/vision), [Clarifai](https://clarifai.com) and [Sightengine](https://sightengine.com). It was created to automate the cleanup and maintenance of personal and family photos, but it can be used for whatever suits you best.
 
 ## Features
 
@@ -16,7 +16,9 @@ Because (as of December 2020) there are no other Node.js based tools that allow 
 
 ### What about TensorFlow?
 
-There are tons of great libraries and tools out there doing computer vision with TensorFlow, and the point here is not to reinvent the wheel. Furthermore, adding TensorFlow as a direct dependecy increases the total package by more than 500%. So, for now, IMGRecog.js will focus solely on remote-based APIs.
+There are tons of great libraries and tools out there doing computer vision with TensorFlow, and the point here is not to reinvent the wheel. Search for "tensorflow mobilenet" and you'll find loads. Furthermore, adding TensorFlow as a direct dependecy increases the total package by more than 500%.
+
+So, for now, IMGRecog.js will focus solely on remote APIs.
 
 ## Setup
 
@@ -176,22 +178,24 @@ Shortcut to enable all detections via the command line.
 
 ## Actions
 
-### deleteBloat *`--delbloat`*
+### filter *`--filter`*
 
-This will delete images:
+Tag based filter to be applied on the image results, mandatory if you want to use the `move` or `delete` actions below. Multiple conditions can be defined, separated by comma. Examples:
 
-- smaller than 50 KB
-- having a very high score for any of the tags: "meme", "photo caption", "screenshot", "website", "explicit-spoof", plus a high conbined score  counting the tags "advertising", "document", "map", "text"
+- `summer` - summer images
+- `summer, !beach` - summer images, but no definetely no beach
+- `summer > 0.93, beach < 0.5` - same as above, but using specific scores
+- `is-porn, is-bloat` - images that are categorized as porn or bloat
 
-### deleteUnsafe *`--delunsafe`*
-
-This will delete images:
-
-- having a very high score for any of the tags: "explicit-adult", "explicit-violence", "sexual" plus a high combined score also counting the tags "explicit-racy", "explicit-medical"
+Note that spaces are ignored.
 
 ### move *`--move`*
 
-This will move all the scanned images to the specified folder, replicating their original path. For example if you set move to `/var/photos/scanned`, then an image `/home/someuser/photos/dsc123.jpg` will be moved to `/var/photos/scanned/home/someuser/photos/dsc123.jpg`.
+Move the images that match the filter, replicating their original path. For example if you set move to `/var/photos/scanned`, then an image `/home/someuser/photos/dsc123.jpg` will be moved to `/var/photos/scanned/home/someuser/photos/dsc123.jpg`.
+
+### delete *`--delete`*
+
+Delete the images that match the filter.
 
 ## Interpreting results
 
