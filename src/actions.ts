@@ -15,8 +15,12 @@ export async function deleteImages(options: Options, images: ImageResult[]) {
     for (let image of images) {
         try {
             if (fs.existsSync) {
-                fs.unlinkSync(image.file)
-                logInfo(options, `${image.file}: deleted`)
+                if (options.dryRun) {
+                    logInfo(options, `${image.file}: would be deleted`)
+                } else {
+                    fs.unlinkSync(image.file)
+                    logInfo(options, `${image.file}: deleted`)
+                }
             } else {
                 logDebug(options, `${image.file}: does not exist`)
             }
@@ -47,7 +51,7 @@ export async function moveImages(options: Options, images: ImageResult[]) {
         return
     }
 
-    // Iterate passed images to move them.
+    // Iterate images and move them.
     for (let image of images) {
         try {
             if (!fs.existsSync(image.file)) {
@@ -55,14 +59,20 @@ export async function moveImages(options: Options, images: ImageResult[]) {
                 continue
             }
 
-            const targetFile = path.join(targetFolder, image.file.replace(targetFolder, ""))
+            const targetFile = path.join(targetFolder, image.file.replace(currentFolder, ""))
             const folder = path.dirname(targetFile)
 
+            // Make sure the target folder exists.
             if (!fs.existsSync(folder)) {
                 fs.mkdirSync(folder, {recursive: true})
             }
 
-            fs.renameSync(image.file, targetFile)
+            if (options.dryRun) {
+                logInfo(options, `${image.file}: would be moved`)
+            } else {
+                fs.renameSync(image.file, targetFile)
+                logInfo(options, `${image.file}: moved`)
+            }
         } catch (ex) {
             logError(options, `${image.file}: error moving file`, ex)
         }

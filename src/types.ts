@@ -4,6 +4,8 @@
  * Program options.
  */
 interface Options {
+    /** Dry run, will only process results from imgrecog.results.json. */
+    dryRun?: boolean
     /** List of folders to be scanned. */
     folders?: string[]
     /** Valid file extensions. */

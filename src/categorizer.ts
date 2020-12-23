@@ -86,7 +86,7 @@ export class Categorizer {
 
                 const imgTags = Object.keys(image.tags)
                 const pornTags = ["explicit-adult", "nude", "erotic", "porn", "sexual"]
-                const extraTags = ["explicit-medical", "sexual", "organ"]
+                const extraTags = ["explicit-medical", "sexual", "organ", "adult"]
                 const highScore = 0.91
                 const minScore = 0.71
                 const totalScore = 2.84

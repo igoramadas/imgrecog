@@ -86,7 +86,7 @@ export class Sightengine {
                             // Got good results?
                             if (data.status == "success") {
                                 if (data.nudity && data.nudity.raw) {
-                                    const key = normalizeTag("explicit-adult")
+                                    const key = normalizeTag("nude")
                                     const score = normalizeScore(data.nudity.raw)
 
                                     if (score) {

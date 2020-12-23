@@ -75,9 +75,14 @@ export class Vision {
                 }
             }
 
-            const objects = logtext.length > 0 ? logtext.join(", ") : "No objects"
+            const objects = logtext.length > 0 ? logtext.join(", ") : "None"
             const logDetails = `${filepath}: Google Vision - ${objects}`
-            logInfo(options, logDetails)
+
+            if (objects != "None") {
+                logInfo(options, logDetails)
+            } else {
+                logDebug(options, logDetails)
+            }
         } catch (ex) {
             logError(options, `${filepath} - error detecting objects`, ex)
             result.error = ex.message || ex.toString()
@@ -117,9 +122,14 @@ export class Vision {
                 }
             }
 
-            const labels = logtext.length > 0 ? logtext.join(", ") : "No labels"
+            const labels = logtext.length > 0 ? logtext.join(", ") : "None"
             const logDetails = `${filepath}: Google Vision - ${labels}`
-            logInfo(options, logDetails)
+
+            if (labels != "None") {
+                logInfo(options, logDetails)
+            } else {
+                logDebug(options, logDetails)
+            }
         } catch (ex) {
             logError(options, `${filepath} - error detecting labels`, ex)
             result.error = ex.message || ex.toString()
@@ -159,9 +169,14 @@ export class Vision {
                 }
             }
 
-            const landmarks = logtext.length > 0 ? logtext.join(", ") : "No landmarks"
+            const landmarks = logtext.length > 0 ? logtext.join(", ") : "None"
             const logDetails = `${filepath}: Google Vision - ${landmarks}`
-            logInfo(options, logDetails)
+
+            if (landmarks != "None") {
+                logInfo(options, logDetails)
+            } else {
+                logDebug(options, logDetails)
+            }
         } catch (ex) {
             logError(options, `${filepath} - error detecting landmarks`, ex)
             result.error = ex.message || ex.toString()
@@ -201,9 +216,14 @@ export class Vision {
                 }
             }
 
-            const logos = logtext.length > 0 ? logtext.join(", ") : "No logos"
+            const logos = logtext.length > 0 ? logtext.join(", ") : "None"
             const logDetails = `${filepath}: Google Vision - ${logos}`
-            logInfo(options, logDetails)
+
+            if (logos != "None") {
+                logInfo(options, logDetails)
+            } else {
+                logDebug(options, logDetails)
+            }
         } catch (ex) {
             logError(options, `${filepath} - error detecting logos`, ex)
             result.error = ex.message || ex.toString()
@@ -247,9 +267,14 @@ export class Vision {
                 }
             }
 
-            const unsafe = logtext.length > 0 ? logtext.join(", ") : "No unsafe"
+            const unsafe = logtext.length > 0 ? logtext.join(", ") : "None"
             const logDetails = `${filepath}: Google Vision - ${unsafe}`
-            logInfo(options, logDetails)
+
+            if (unsafe != "None") {
+                logInfo(options, logDetails)
+            } else {
+                logDebug(options, logDetails)
+            }
         } catch (ex) {
             logError(options, `${filepath} - error detecting unsafe`, ex)
             result.error = ex.message || ex.toString()

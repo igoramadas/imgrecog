@@ -73,7 +73,7 @@ export class IMGRecog {
         logInfo(defaultOptions, "# IMGRecog.js #")
         logInfo(defaultOptions, "###############")
 
-        if (!this.options.folders || this.options.folders.length < 1) {
+        if (this.options.dryRun && (!this.options.folders || this.options.folders.length < 1)) {
             throw new Error("No folders were passed")
         }
 
@@ -96,6 +96,27 @@ export class IMGRecog {
         const arr = Object.entries(this.options).map((opt) => (hasValue(opt[1]) ? `${opt[0]}: ${opt[1]}` : null))
         const logOptions = arr.filter((opt) => opt !== null)
         logDebug(this.options, `Options: ${logOptions.join(" | ")}`)
+
+        // Dry run? Parse existing results instead.
+        if (this.options.dryRun) {
+            logInfo(this.options, `Dry run, will only parse existing results...`)
+
+            const existing = await this.readOutput()
+
+            if (!existing || existing.length == 0) {
+                logWarn(this.options, `No valid results loaded from ${this.options.output}`)
+                return []
+            }
+
+            // Valid results are loaded from the passed output file.
+            this.results = existing
+            logInfo(this.options, `Loaded ${this.results.length} results from ${this.options.output}`)
+
+            // Execute actions on loaded results.
+            await this.executeActions()
+
+            return this.results
+        }
 
         // Prepare the detection clients.
         if (this.options.googleKeyfile) await vision.prepare(this.options)
@@ -132,7 +153,8 @@ export class IMGRecog {
             logInfo(this.options, `Scanned ${this.results.length} images in ${duration} seconds`)
 
             await this.executeActions()
-            await this.saveOutput()
+
+            this.saveOutput()
 
             if (this.options.console) {
                 console.log("")
@@ -293,7 +315,6 @@ export class IMGRecog {
      * Execute actions after all passed images have been scanned.
      */
     executeActions = async (): Promise<void> => {
-        let executedActions = []
         const startTime = Date.now()
 
         // Execute actions only if a filter was passed.
@@ -363,19 +384,17 @@ export class IMGRecog {
         const duration = (Date.now() - startTime) / 1000
 
         // Log duration.
-        if (executedActions.length > 0) {
-            logDebug(this.options, `Executed actions ${executedActions.join(", ")} in ${duration} seconds`)
-        } else {
-            logDebug(this.options, `No extra actions were executed`)
+        if (this.options.move || this.options.delete) {
+            logDebug(this.options, `Executed actions in ${duration} seconds`)
         }
     }
 
     /**
      * Save the execution output results to a file.
      */
-    saveOutput = async (): Promise<void> => {
-        const executableFolder = path.dirname(require.main.filename) + "/"
-        const target = path.isAbsolute(this.options.output) ? this.options.output : path.join(executableFolder, this.options.output)
+    saveOutput = (): void => {
+        const currentFolder = process.cwd() + "/"
+        const target = path.isAbsolute(this.options.output) ? this.options.output : path.join(currentFolder, this.options.output)
 
         try {
             const replacer = (_key, value) => (!isNaN(value) && value <= 1 ? normalizeScore(value) : value)
@@ -383,6 +402,22 @@ export class IMGRecog {
             logInfo(this.options, `Saved results to ${target}`)
         } catch (ex) {
             logError(this.options, `Could not save output to ${target}`, ex)
+        }
+    }
+
+    /**
+     * Read results from the saved output.
+     */
+    readOutput = (): ImageResult[] => {
+        const currentFolder = process.cwd() + "/"
+        const target = path.isAbsolute(this.options.output) ? this.options.output : path.join(currentFolder, this.options.output)
+
+        try {
+            const data = fs.readFileSync(target, "utf8")
+            return JSON.parse(data)
+        } catch (ex) {
+            logError(this.options, `Could not read results from ${target}`, ex)
+            return []
         }
     }
 }
