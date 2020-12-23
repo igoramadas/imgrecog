@@ -125,6 +125,8 @@
            <span class="hljs-params">--filter</span> <span class="hljs-string">&quot;is-bloat, is-porn&quot;</span> \
            <span class="hljs-params">--move</span> ~<span class="hljs-string">/trash</span> \
            ~<span class="hljs-string">/camera</span> ~<span class="hljs-string">/downloads</span></code></pre>
+				<p>Dry run with the results from a previous execution.</p>
+				<pre><code>$ <span class="hljs-string">imgrecog</span> <span class="hljs-built_in">--dry</span> <span class="hljs-built_in">--move</span> <span class="hljs-built_in">--filter</span> <span class="hljs-string">&quot;is-bloat&quot;</span></code></pre>
 				<p>For help and the full list of options, ask for help:</p>
 				<pre><code><span class="hljs-meta">$</span><span class="bash"> imgrecog --<span class="hljs-built_in">help</span></span></code></pre>
 				<a href="#importing-as-a-library" id="importing-as-a-library" style="color: inherit; text-decoration: none;">
@@ -186,6 +188,10 @@
 					<h3>verbose <em><code>-v</code></em></h3>
 				</a>
 				<p>Activate verbose mode with extra logging. Defaults to <code>false</code>.</p>
+				<a href="#dry---dry" id="dry---dry" style="color: inherit; text-decoration: none;">
+					<h3>dry <em><code>--dry</code></em></h3>
+				</a>
+				<p>Dry run, if you set this to true it will parse the existing results instead of running the detection process again. Useful to test filters and actions.</p>
 				<a href="#authentication" id="authentication" style="color: inherit; text-decoration: none;">
 					<h2>Authentication</h2>
 				</a>

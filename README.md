@@ -72,6 +72,10 @@ Detect everything on camera and downloads folder, limiting to 15k API calls, and
                --move ~/trash \
                ~/camera ~/downloads
 
+Dry run with the results from a previous execution.
+
+    $ imgrecog --dry --move --filter "is-bloat"
+
 For help and the full list of options, ask for help:
 
     $ imgrecog --help
@@ -136,6 +140,10 @@ Include subfolders when scanning. Defaults to `false`.
 ### verbose *`-v`*
 
 Activate verbose mode with extra logging. Defaults to `false`.
+
+### dry *`--dry`*
+
+Dry run, if you set this to true it will parse the existing results instead of running the detection process again. Useful to test filters and actions.
 
 ## Authentication
 
