@@ -56,7 +56,11 @@ Detect unsafe images under the user's home folder, using Clarifai and Sightengin
 
     $ imgrecog --unsafe --clakey "123" --steuser "abc" --stesecret "abc1234" ~/
 
-Detect everything on camera and downloads folder, limiting to 15k API calls, and then move images to the processed-photos folder.
+Detect and delete images unlikely to have a beach, trasversing the user's home folder, loading options from the imgrecog.options.json file:
+
+    $ imgrecog -d --labels --landmarks --filter "beach < 0.5" ~/
+
+Detect everything on camera and downloads folder, limiting to 15k API calls, and then move porn and bloat images to the trash folder:
 
     $ imgrecog --all --deep \
                --glgkeyfile "mycredentials.json" \
@@ -64,7 +68,8 @@ Detect everything on camera and downloads folder, limiting to 15k API calls, and
                --steuser "abc" \
                --stesecret "abc1234" \
                --limit 15000 \
-               --move ~/processed-photos \
+               --filter "is-bloat, is-porn" \
+               --move ~/trash \
                ~/camera ~/downloads
 
 For help and the full list of options, ask for help:

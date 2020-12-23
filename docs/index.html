@@ -65,7 +65,7 @@
 				<a href="#imgrecogjs" id="imgrecogjs" style="color: inherit; text-decoration: none;">
 					<h1>IMGRecog.js</h1>
 				</a>
-				<p>This is a small Node.js tool to scan and tag images using <a href="https://cloud.google.com/vision">Google Vision</a>, <a href="https://clarifai.com">Clarifai</a> and <a href="https://sightengine.com">Sightengine</a>.</p>
+				<p>This is a small Node.js tool to scan and tag images using <a href="https://cloud.google.com/vision">Google Vision</a>, <a href="https://clarifai.com">Clarifai</a> and <a href="https://sightengine.com">Sightengine</a>. It was created to automate the cleanup and maintenance of personal and family photos, but it can be used for whatever suits you best.</p>
 				<a href="#features" id="features" style="color: inherit; text-decoration: none;">
 					<h2>Features</h2>
 				</a>
@@ -83,7 +83,8 @@
 				<a href="#what-about-tensorflow" id="what-about-tensorflow" style="color: inherit; text-decoration: none;">
 					<h3>What about TensorFlow?</h3>
 				</a>
-				<p>There are tons of great libraries and tools out there doing computer vision with TensorFlow, and the point here is not to reinvent the wheel. Furthermore, adding TensorFlow as a direct dependecy increases the total package by more than 500%. So, for now, IMGRecog.js will focus solely on remote-based APIs.</p>
+				<p>There are tons of great libraries and tools out there doing computer vision with TensorFlow, and the point here is not to reinvent the wheel. Search for &quot;tensorflow mobilenet&quot; and you&#39;ll find loads. Furthermore, adding TensorFlow as a direct dependecy increases the total package by more than 500%.</p>
+				<p>So, for now, IMGRecog.js will focus solely on remote APIs.</p>
 				<a href="#setup" id="setup" style="color: inherit; text-decoration: none;">
 					<h2>Setup</h2>
 				</a>
@@ -112,14 +113,17 @@
 				<pre><code>$ imgrecog <span class="hljs-params">--logos</span> <span class="hljs-params">--glgkeyfile</span> <span class="hljs-string">./auth.json</span> .</code></pre>
 				<p>Detect unsafe images under the user&#39;s home folder, using Clarifai and Sightengine:</p>
 				<pre><code>$ <span class="hljs-string">imgrecog</span> <span class="hljs-built_in">--unsafe</span> <span class="hljs-built_in">--clakey</span> <span class="hljs-string">&quot;123&quot;</span> <span class="hljs-built_in">--steuser</span> <span class="hljs-string">&quot;abc&quot;</span> <span class="hljs-built_in">--stesecret</span> <span class="hljs-string">&quot;abc1234&quot;</span> ~/</code></pre>
-				<p>Detect everything on camera and downloads folder, limiting to 15k API calls, and then move images to the processed-photos folder.</p>
+				<p>Detect and delete images unlikely to have a beach, trasversing the user&#39;s home folder, loading options from the imgrecog.options.json file:</p>
+				<pre><code>$ <span class="hljs-string">imgrecog</span> -<span class="hljs-string">d</span> <span class="hljs-built_in">--labels</span> <span class="hljs-built_in">--landmarks</span> <span class="hljs-built_in">--filter</span> <span class="hljs-string">&quot;beach &lt; 0.5&quot;</span> ~/</code></pre>
+				<p>Detect everything on camera and downloads folder, limiting to 15k API calls, and then move porn and bloat images to the trash folder:</p>
 				<pre><code>$ imgrecog <span class="hljs-params">--all</span> <span class="hljs-params">--deep</span> \
            <span class="hljs-params">--glgkeyfile</span> <span class="hljs-string">&quot;mycredentials.json&quot;</span> \
            <span class="hljs-params">--clakey</span> <span class="hljs-string">&quot;123&quot;</span> \
            <span class="hljs-params">--steuser</span> <span class="hljs-string">&quot;abc&quot;</span> \
            <span class="hljs-params">--stesecret</span> <span class="hljs-string">&quot;abc1234&quot;</span> \
            <span class="hljs-params">--limit</span> 15000 \
-           <span class="hljs-params">--move</span> ~<span class="hljs-string">/processed-photos</span> \
+           <span class="hljs-params">--filter</span> <span class="hljs-string">&quot;is-bloat, is-porn&quot;</span> \
+           <span class="hljs-params">--move</span> ~<span class="hljs-string">/trash</span> \
            ~<span class="hljs-string">/camera</span> ~<span class="hljs-string">/downloads</span></code></pre>
 				<p>For help and the full list of options, ask for help:</p>
 				<pre><code><span class="hljs-meta">$</span><span class="bash"> imgrecog --<span class="hljs-built_in">help</span></span></code></pre>
@@ -140,21 +144,28 @@
 <span class="hljs-keyword">await</span> processor.run()
 
 <span class="hljs-built_in">console</span>.dir(processor.results)</code></pre>
-				<a href="#options" id="options" style="color: inherit; text-decoration: none;">
-					<h2>Options</h2>
+				<a href="#loading-options" id="loading-options" style="color: inherit; text-decoration: none;">
+					<h2>Loading options</h2>
 				</a>
-				<p>The tool will look for a <code>imgrecog.options.json</code> file on the following places:</p>
+				<p>IMGRecog.js will look for a <code>imgrecog.options.json</code> file on the following places:</p>
 				<ul>
 					<li>where the tool is installed</li>
 					<li>current user&#39;s home folder</li>
 					<li>current executing directory</li>
 				</ul>
 				<p>If not found, it will assume all the default options.</p>
-				<p>When running from the command line, all options should be passed as arguments, or via environment variables with the &quot;IMGRECOG_&quot; prefix (examples: <code>IMGRECOG_LIMIT</code>, <code>IMGRECOG_VERBOSE</code> etc).</p>
+				<p>When running from the command line, options should be passed as arguments or via environment variables with the &quot;IMGRECOG_&quot; prefix (examples: <code>IMGRECOG_LIMIT</code>, <code>IMGRECOG_VERBOSE</code> etc).</p>
+				<a href="#options" id="options" style="color: inherit; text-decoration: none;">
+					<h2>Options</h2>
+				</a>
+				<a href="#console" id="console" style="color: inherit; text-decoration: none;">
+					<h3>console</h3>
+				</a>
+				<p>Enable or disable logging to the console. Enabled by default, but you can disable it programatically. <strong>Important:</strong> if you disable the console logging, any error or exception found will get thrown instead, and might potentially stop the detection / parsing.</p>
 				<a href="#extensions--e" id="extensions--e" style="color: inherit; text-decoration: none;">
 					<h3>extensions <em><code>-e</code></em></h3>
 				</a>
-				<p> File extensions should be scanned. Defaults to common image files: <code>&quot;png&quot;, &quot;jpg&quot;, &quot;jpeg&quot;, &quot;gif&quot;, &quot;bmp&quot;</code></p>
+				<p>File extensions should be scanned. Defaults to common image files: <code>&quot;png&quot;, &quot;jpg&quot;, &quot;jpeg&quot;, &quot;gif&quot;, &quot;bmp&quot;</code></p>
 				<a href="#output--o" id="output--o" style="color: inherit; text-decoration: none;">
 					<h3>output <em><code>-o</code></em></h3>
 				</a>
@@ -175,6 +186,9 @@
 					<h3>verbose <em><code>-v</code></em></h3>
 				</a>
 				<p>Activate verbose mode with extra logging. Defaults to <code>false</code>.</p>
+				<a href="#authentication" id="authentication" style="color: inherit; text-decoration: none;">
+					<h2>Authentication</h2>
+				</a>
 				<a href="#googlekeyfile---glgkeyfile" id="googlekeyfile---glgkeyfile" style="color: inherit; text-decoration: none;">
 					<h3>googleKeyfile <em><code>--glgkeyfile</code></em></h3>
 				</a>
@@ -214,32 +228,43 @@
 					<h3>unsafe <em><code>--unsafe</code></em></h3>
 				</a>
 				<p>Detect unsafe images with explicit content (adult, violence, medical, racy, spoof).</p>
-				<a href="#--all" id="--all" style="color: inherit; text-decoration: none;">
-					<h3><em><code>--all</code></em></h3>
+				<a href="#all---all" id="all---all" style="color: inherit; text-decoration: none;">
+					<h3>all <em><code>--all</code></em></h3>
 				</a>
 				<p>Shortcut to enable all detections via the command line.</p>
 				<a href="#actions" id="actions" style="color: inherit; text-decoration: none;">
 					<h2>Actions</h2>
 				</a>
-				<a href="#deletebloat---delbloat" id="deletebloat---delbloat" style="color: inherit; text-decoration: none;">
-					<h3>deleteBloat <em><code>--delbloat</code></em></h3>
+				<a href="#filter---filter" id="filter---filter" style="color: inherit; text-decoration: none;">
+					<h3>filter <em><code>--filter</code></em></h3>
 				</a>
-				<p>This will delete images:</p>
+				<p>Tag based filter to be applied on the image results, mandatory if you want to use the <code>move</code> or <code>delete</code> actions below. Multiple conditions can be defined, separated by comma. Examples:</p>
 				<ul>
-					<li>smaller than 50 KB</li>
-					<li>having a very high score for any of the tags: &quot;meme&quot;, &quot;photo caption&quot;, &quot;screenshot&quot;, &quot;website&quot;, &quot;explicit-spoof&quot;, plus a high conbined score  counting the tags &quot;advertising&quot;, &quot;document&quot;, &quot;map&quot;, &quot;text&quot;</li>
+					<li><code>summer</code> - summer images</li>
+					<li><code>summer, !beach</code> - summer images, but no definetely no beach</li>
+					<li><code>summer &gt; 0.93, beach &lt; 0.5</code> - same as above, but using specific scores</li>
+					<li><code>is-porn, is-bloat</code> - images that are categorized as porn or bloat</li>
 				</ul>
-				<a href="#deleteunsafe---delunsafe" id="deleteunsafe---delunsafe" style="color: inherit; text-decoration: none;">
-					<h3>deleteUnsafe <em><code>--delunsafe</code></em></h3>
-				</a>
-				<p>This will delete images:</p>
-				<ul>
-					<li>having a very high score for any of the tags: &quot;explicit-adult&quot;, &quot;explicit-violence&quot;, plus a high combined score also counting the tags &quot;explicit-racy&quot;, &quot;explicit-medical&quot;</li>
-				</ul>
+				<p>Note that spaces are ignored.</p>
 				<a href="#move---move" id="move---move" style="color: inherit; text-decoration: none;">
 					<h3>move <em><code>--move</code></em></h3>
 				</a>
-				<p>This will move all the scanned images to the specified folder, replicating their original path. For example if you set move to <code>/var/photos/scanned</code>, then an image <code>/home/someuser/photos/dsc123.jpg</code> will be moved to <code>/var/photos/scanned/home/someuser/photos/dsc123.jpg</code>.</p>
+				<p>Move the images that match the filter, replicating their original path. For example if you set move to <code>/var/photos/scanned</code>, then an image <code>/home/someuser/photos/dsc123.jpg</code> will be moved to <code>/var/photos/scanned/home/someuser/photos/dsc123.jpg</code>.</p>
+				<a href="#delete---delete" id="delete---delete" style="color: inherit; text-decoration: none;">
+					<h3>delete <em><code>--delete</code></em></h3>
+				</a>
+				<p>Delete the images that match the filter.</p>
+				<a href="#interpreting-results" id="interpreting-results" style="color: inherit; text-decoration: none;">
+					<h2>Interpreting results</h2>
+				</a>
+				<p>After the scanning has finished, the JSON results will be saved to the specified <code>output</code> path. By default, this is the file &quot;imgrecog.results.json&quot; on the current directory.</p>
+				<p>Each scanning result has the following schema:</p>
+				<ul>
+					<li>file - the full path to the scanned image file</li>
+					<li>details - fize size and relevant EXIF data</li>
+					<li>tags - map of tags and scores for the scanned image</li>
+					<li>error - list of errors (field will be ommited if no errors occurred)</li>
+				</ul>
 				<a href="#need-help" id="need-help" style="color: inherit; text-decoration: none;">
 					<h2>Need help?</h2>
 				</a>
@@ -254,6 +279,9 @@
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="modules/_src_actions_.html">&quot;src/actions&quot;</a>
+					</li>
+					<li class=" tsd-kind-module">
+						<a href="modules/_src_categorizer_.html">&quot;src/categorizer&quot;</a>
 					</li>
 					<li class=" tsd-kind-module">
 						<a href="modules/_src_clarifai_.html">&quot;src/clarifai&quot;</a>
