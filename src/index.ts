@@ -1,7 +1,8 @@
 // IMGRECOG.JS INDEX
 
 import {logDebug, logError, logInfo, logWarn, getEXIF, hasValue} from "./utils"
-import {deleteBloat, deleteUnsafe, moveImages} from "./actions"
+import {deleteImages, moveImages} from "./actions"
+import categorizer from "./categorizer"
 import clarifai from "./clarifai"
 import sightengine from "./sightengine"
 import vision from "./vision"
@@ -84,20 +85,6 @@ export class IMGRecog {
         const arr = Object.entries(this.options).map((opt) => (hasValue(opt[1]) ? `${opt[0]}: ${opt[1]}` : null))
         const logOptions = arr.filter((opt) => opt !== null)
         logDebug(this.options, `Options: ${logOptions.join(" | ")}`)
-
-        // Implied options.
-        if (this.options.deleteBloat) {
-            if (!this.options.labels) {
-                logDebug(this.options, "Action deleteBloat implies 'labels' detection")
-            }
-            this.options.labels = true
-        }
-        if (this.options.deleteUnsafe) {
-            if (!this.options.unsafe) {
-                logDebug(this.options, "Action deleteUnsafe implies 'unsafe' detection")
-            }
-            this.options.unsafe = true
-        }
 
         // Prepare the detection clients.
         if (this.options.googleKeyfile) await vision.prepare(this.options)
@@ -233,11 +220,11 @@ export class IMGRecog {
                     logWarn(this.options, `Limit of ${this.options.limit} API calls reached on Google Vision`)
                 }
             } else {
-                if (this.options.objects) methods.push(vision.detectObjects)
-                if (this.options.labels) methods.push(vision.detectLabels)
-                if (this.options.landmarks) methods.push(vision.detectLandmarks)
-                if (this.options.logos) methods.push(vision.detectLogos)
-                if (this.options.unsafe) methods.push(vision.detectUnsafe)
+                if (this.options.all || this.options.objects) methods.push(vision.detectObjects)
+                if (this.options.all || this.options.labels) methods.push(vision.detectLabels)
+                if (this.options.all || this.options.landmarks) methods.push(vision.detectLandmarks)
+                if (this.options.all || this.options.logos) methods.push(vision.detectLogos)
+                if (this.options.all || this.options.unsafe) methods.push(vision.detectUnsafe)
             }
         }
 
@@ -267,13 +254,24 @@ export class IMGRecog {
         await Promise.all(
             methods.map(async (method: Function) => {
                 const mResult = await method.call(null, this.options, filepath)
-                if (mResult) {
-                    result.tags = Object.assign(result.tags, mResult.tags)
-                    if (mResult.error) result.error = mResult.console.error()
+                if (!mResult) return null
+
+                // Append result tags.
+                result.tags = Object.assign(result.tags, mResult.tags)
+
+                // Errors were found? Append to the error array.
+                if (mResult.error) {
+                    if (!result.error) result.error = []
+                    result.error.push = mResult.error
                 }
+
                 return mResult
             })
         )
+
+        // Run the ategorized.
+        const isTags = categorizer.parse(this.options, result)
+        result.tags = Object.assign(result.tags, isTags)
 
         this.results.push(result)
     }
@@ -285,20 +283,54 @@ export class IMGRecog {
         let executedActions = []
         const startTime = Date.now()
 
-        // Delete bloat images?
-        if (this.options.deleteBloat) {
-            executedActions.push("deleteBloat")
-            await deleteBloat(this.options, this.results)
-        }
+        // Execute actions only if a filter was passed.
+        if (this.options.filter) {
+            let filteredResults = []
+            const arrFilter = this.options.filter.replace(/ /g, "").split(",")
 
-        // Delete unsafe images?
-        if (this.options.deleteUnsafe) {
-            await deleteUnsafe(this.options, this.results)
-        }
+            for (let filter of arrFilter) {
+                let tempResults
+                let parts: string[]
+                let tag: string
+                let score: number
 
-        // Move scanned files to specific directory?
-        if (this.options.move) {
-            await moveImages(this.options, this.results)
+                if (filter.indexOf(">") > 0) {
+                    parts = filter.split(">")
+                    tag = parts[0]
+                    score = parseFloat(parts[1])
+
+                    tempResults = this.results.filter((r) => r.tags[tag] && r.tags[tag] > score)
+                    logDebug(this.options, `Filtering ${tempResults.length} results having ${tag} > ${score}`)
+                } else if (filter.indexOf("<") > 0) {
+                    parts = filter.split("<")
+                    tag = parts[0]
+                    score = parseFloat(parts[1])
+                    if (score < 0) score = 0
+
+                    tempResults = this.results.filter((r) => r.tags[tag] || r.tags[tag] < score)
+                    logDebug(this.options, `Filtering ${tempResults.length} results having ${tag} < ${score}`)
+                } else if (filter.indexOf("=") > 0) {
+                    parts = filter.split("=")
+                    tag = parts[0]
+                    score = parseFloat(parts[1])
+
+                    tempResults = this.results.filter((r) => r.tags[tag] == score)
+                    logDebug(this.options, `Filtering ${tempResults.length} results having ${tag} = ${score}`)
+                } else if (filter.indexOf("!") >= 0) {
+                    tempResults = this.results.filter((r) => !r.tags[tag])
+                    logDebug(this.options, `Filtering ${tempResults.length} results not having ${tag}`)
+                } else {
+                    tempResults = this.results.filter((r) => r.tags[tag])
+                    logDebug(this.options, `Filtering ${tempResults.length} results having ${tag}`)
+                }
+
+                if (tempResults.length > 0) {
+                    filteredResults = filteredResults.concat(tempResults)
+                }
+            }
+
+            if (this.options.move) await moveImages(this.options, this.results)
+            if (this.options.delete) await deleteImages(this.options, this.results)
         }
 
         const duration = (Date.now() - startTime) / 1000

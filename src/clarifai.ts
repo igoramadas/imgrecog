@@ -105,14 +105,14 @@ export class Clarifai {
 
                                         if (score) {
                                             logtext.push(`${key}:${score}`)
-                                            result.tags[key] = score
+                                            result.tags[key] = concept.value
                                         }
                                     }
                                 }
                             }
 
-                            const details = logtext.length > 0 ? logtext.join(", ") : "NONE"
-                            const logDetails = `${filepath}: ${details}`
+                            const details = logtext.length > 0 ? logtext.join(", ") : "No tags"
+                            const logDetails = `${filepath}: Clarifai - ${details}`
                             logInfo(options, logDetails)
 
                             // Results are ready.
@@ -127,6 +127,7 @@ export class Clarifai {
                     })
                 })
 
+                // Oops...
                 req.on("error", (err) => {
                     logError(options, `${filepath} - error sending to Clarifai`, err)
                     result.error = err.message || err.toString()

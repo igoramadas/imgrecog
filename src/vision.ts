@@ -71,12 +71,12 @@ export class Vision {
 
                 if (score) {
                     logtext.push(`${key}:${score}`)
-                    result.tags[key] = score
+                    result.tags[key] = obj.score
                 }
             }
 
-            const objects = logtext.length > 0 ? logtext.join(", ") : "NONE"
-            const logDetails = `${filepath}: ${objects}`
+            const objects = logtext.length > 0 ? logtext.join(", ") : "No objects"
+            const logDetails = `${filepath}: Google Vision - ${objects}`
             logInfo(options, logDetails)
         } catch (ex) {
             logError(options, `${filepath} - error detecting objects`, ex)
@@ -113,12 +113,12 @@ export class Vision {
 
                 if (score) {
                     logtext.push(`${key}:${score}`)
-                    result.tags[key] = score
+                    result.tags[key] = label.score
                 }
             }
 
-            const labels = logtext.length > 0 ? logtext.join(", ") : "NONE"
-            const logDetails = `${filepath}: ${labels}`
+            const labels = logtext.length > 0 ? logtext.join(", ") : "No labels"
+            const logDetails = `${filepath}: Google Vision - ${labels}`
             logInfo(options, logDetails)
         } catch (ex) {
             logError(options, `${filepath} - error detecting labels`, ex)
@@ -155,12 +155,12 @@ export class Vision {
 
                 if (score) {
                     logtext.push(`${key}:${score}`)
-                    result.tags[key] = score
+                    result.tags[key] = land.score
                 }
             }
 
-            const landmarks = logtext.length > 0 ? logtext.join(", ") : "NONE"
-            const logDetails = `${filepath}: ${landmarks}`
+            const landmarks = logtext.length > 0 ? logtext.join(", ") : "No landmarks"
+            const logDetails = `${filepath}: Google Vision - ${landmarks}`
             logInfo(options, logDetails)
         } catch (ex) {
             logError(options, `${filepath} - error detecting landmarks`, ex)
@@ -197,12 +197,12 @@ export class Vision {
 
                 if (score) {
                     logtext.push(`${key}:${score}`)
-                    result.tags[key] = score
+                    result.tags[key] = logo.score
                 }
             }
 
-            const logos = logtext.length > 0 ? logtext.join(", ") : "NONE"
-            const logDetails = `${filepath}: ${logos}`
+            const logos = logtext.length > 0 ? logtext.join(", ") : "No logos"
+            const logDetails = `${filepath}: Google Vision - ${logos}`
             logInfo(options, logDetails)
         } catch (ex) {
             logError(options, `${filepath} - error detecting logos`, ex)
@@ -243,12 +243,12 @@ export class Vision {
 
                 if (score) {
                     logtext.push(`${key}:${score}`)
-                    result.tags[key] = score
+                    result.tags[key] = likelyhood[value]
                 }
             }
 
-            const unsafe = logtext.length > 0 ? logtext.join(", ") : "NONE"
-            const logDetails = `${filepath}: ${unsafe}`
+            const unsafe = logtext.length > 0 ? logtext.join(", ") : "No unsafe"
+            const logDetails = `${filepath}: Google Vision - ${unsafe}`
             logInfo(options, logDetails)
         } catch (ex) {
             logError(options, `${filepath} - error detecting unsafe`, ex)

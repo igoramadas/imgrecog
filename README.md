@@ -1,6 +1,6 @@
 # IMGRecog.js
 
-This is a small Node.js tool to scan and tag images using [Google Vision](https://cloud.google.com/vision), [Clarifai](https://clarifai.com) and [Sightengine](https://sightengine.com).
+This is a small Node.js tool to scan and tag images using [Google Vision](https://cloud.google.com/vision), [Clarifai](https://clarifai.com) and [Sightengine](https://sightengine.com). It was created to automate the cleanup of personal and family photos, but it can be used to whatever suits you best.
 
 ## Features
 
@@ -88,9 +88,9 @@ await processor.run()
 console.dir(processor.results)
 ```
 
-## Options
+## Loading options
 
-The tool will look for a `imgrecog.options.json` file on the following places:
+IMGRecog.js will look for a `imgrecog.options.json` file on the following places:
 
 - where the tool is installed
 - current user's home folder
@@ -98,11 +98,17 @@ The tool will look for a `imgrecog.options.json` file on the following places:
 
 If not found, it will assume all the default options.
 
-When running from the command line, all options should be passed as arguments, or via environment variables with the "IMGRECOG_" prefix (examples: `IMGRECOG_LIMIT`, `IMGRECOG_VERBOSE` etc).
+When running from the command line, options should be passed as arguments or via environment variables with the "IMGRECOG_" prefix (examples: `IMGRECOG_LIMIT`, `IMGRECOG_VERBOSE` etc).
+
+## Options
+
+### console
+
+Enable or disable logging to the console. Enabled by default, but you can disable it programatically. **Important:** if you disable the console logging, any error or exception found will get thrown instead, and might potentially stop the detection / parsing.
 
 ### extensions *`-e`*
 
- File extensions should be scanned. Defaults to common image files: `"png", "jpg", "jpeg", "gif", "bmp"`
+File extensions should be scanned. Defaults to common image files: `"png", "jpg", "jpeg", "gif", "bmp"`
 
 ### output *`-o`*
 
@@ -123,6 +129,8 @@ Include subfolders when scanning. Defaults to `false`.
 ### verbose *`-v`*
 
 Activate verbose mode with extra logging. Defaults to `false`.
+
+## Authentication
 
 ### googleKeyfile *`--glgkeyfile`*
 
@@ -162,7 +170,7 @@ Detect logos and brands on the scanned images.
 
 Detect unsafe images with explicit content (adult, violence, medical, racy, spoof).
 
-### *`--all`*
+### all *`--all`*
 
 Shortcut to enable all detections via the command line.
 
@@ -179,11 +187,22 @@ This will delete images:
 
 This will delete images:
 
-- having a very high score for any of the tags: "explicit-adult", "explicit-violence", plus a high combined score also counting the tags "explicit-racy", "explicit-medical"
+- having a very high score for any of the tags: "explicit-adult", "explicit-violence", "sexual" plus a high combined score also counting the tags "explicit-racy", "explicit-medical"
 
 ### move *`--move`*
 
 This will move all the scanned images to the specified folder, replicating their original path. For example if you set move to `/var/photos/scanned`, then an image `/home/someuser/photos/dsc123.jpg` will be moved to `/var/photos/scanned/home/someuser/photos/dsc123.jpg`.
+
+## Interpreting results
+
+After the scanning has finished, the JSON results will be saved to the specified `output` path. By default, this is the file "imgrecog.results.json" on the current directory.
+
+Each scanning result has the following schema:
+
+- file - the full path to the scanned image file
+- details - fize size and relevant EXIF data
+- tags - map of tags and scores for the scanned image
+- error - list of errors (field will be ommited if no errors occurred)
 
 ## Need help?
 

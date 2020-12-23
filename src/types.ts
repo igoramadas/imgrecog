@@ -38,12 +38,14 @@ interface Options {
     logos?: boolean
     /** Detect adult, violent and generally unsafe images. */
     unsafe?: boolean
-    /** Delete bloat images (memes, screenshots, spoof, websites etc). */
-    deleteBloat?: boolean
-    /** Delete unsafe images. */
-    deleteUnsafe?: boolean
-    /** After the scanning has finished, move all images to the specified folder. */
+    /** Shortcut to enable all detection features. */
+    all?: boolean
+    /** Filter used to delete or move images after they have been processed. */
+    filter?: string
+    /** After the scanning has finished, move all images that passes the filter. Depends on a valid "filter". */
     move?: string
+    /** After the scanning has finished, delete all images that passes the filter. Depends on a valid "filter". */
+    delete?: boolean
 }
 
 /**
@@ -53,9 +55,9 @@ interface ImageResult {
     /** Full path to the image file. */
     file: string
     /** Tags and scores. */
-    tags?: {[id: string]: string}
+    tags?: {[id: string]: number}
     /** File properties, mostly taken out of the EXIF tags.  */
     details?: {[id: string]: number | string}
-    /** Any error ocurred during the image processing? */
+    /** Any error(s) ocurred during the image processing? */
     error?: any
 }

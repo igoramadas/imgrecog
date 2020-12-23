@@ -95,12 +95,12 @@ export class Sightengine {
 
                                     if (score) {
                                         logtext.push(`${key}:${score}`)
-                                        result.tags[key] = score
+                                        result.tags[key] = data.nudity.raw
                                     }
                                 }
 
-                                const details = logtext.length > 0 ? logtext.join(", ") : "NONE"
-                                const logDetails = `${filepath}: ${details}`
+                                const details = logtext.length > 0 ? logtext.join(", ") : "No tags"
+                                const logDetails = `${filepath}: Sightengine - ${details}`
                                 logInfo(options, logDetails)
                             }
 

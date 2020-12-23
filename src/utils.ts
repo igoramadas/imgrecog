@@ -70,12 +70,13 @@ export function hasValue(value: any): boolean {
  * @param value Label or description.
  */
 export function normalizeTag(value: string): string {
-    return value.toLowerCase().trim().replace(/ /gi, "-")
+    const tag = value.toLowerCase().trim()
+    return tag.replace(/  /g, " ").replace(/ /g, "-")
 }
 
 /**
  * Helper to get a score with 3 decimal places.
- * @param value Label or description.
+ * @param value Score to be normalized.
  */
 export function normalizeScore(value: number): string {
     if (value < 0.001) return null

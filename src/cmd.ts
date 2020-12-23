@@ -41,9 +41,9 @@ export = async function () {
         logos: {type: "boolean", describe: "Detect logos and brands"},
         unsafe: {type: "boolean", describe: "Detect unsafe and explicit images"},
         all: {type: "boolean", describe: "Detect everything (all of the above)"},
-        delbloat: {type: "boolean", describe: "Delete bloat images (lowres, memes, screenshots, thumbnails etc)"},
-        delunsafe: {type: "boolean", describe: "Delete violent, adult and generally NSFW images"},
-        move: {type: "string", describe: "Move images to the specified folder after scanning"}
+        filter: {type: "string", describe: "Filter images to be deleted or moved after the scanning"},
+        move: {type: "string", describe: "Move images (according to filter) to the specified folder"},
+        delete: {type: "boolean", describe: "Delete images (according to the filter))"}
     })
 
     // Option grouping.
@@ -108,14 +108,10 @@ export = async function () {
         landmarks: hasValue(argOptions.argv.landmarks) ? argOptions.argv.landmarks : configOptions.landmarks,
         logos: hasValue(argOptions.argv.logos) ? argOptions.argv.logos : configOptions.logos,
         unsafe: hasValue(argOptions.argv.unsafe) ? argOptions.argv.unsafe : configOptions.unsafe,
-        deleteBloat: hasValue(argOptions.argv.delbloat) ? argOptions.argv.delbloat : configOptions.deleteBloat,
-        deleteUnsafe: hasValue(argOptions.argv.delunsafe) ? argOptions.argv.delunsafe : configOptions.deleteUnsafe,
-        move: hasValue(argOptions.argv.move) ? argOptions.argv.move : configOptions.move
-    }
-
-    // Detect everything?
-    if (argOptions.argv.all) {
-        options.objects = options.labels = options.landmarks = options.logos = options.unsafe = true
+        all: hasValue(argOptions.argv.all) ? argOptions.argv.all : configOptions.all,
+        filter: hasValue(argOptions.argv.filter) ? argOptions.argv.filter : configOptions.filter,
+        move: hasValue(argOptions.argv.move) ? argOptions.argv.move : configOptions.move,
+        delete: hasValue(argOptions.argv.delete) ? argOptions.argv.delete : configOptions.delete
     }
 
     // Do it baby!
