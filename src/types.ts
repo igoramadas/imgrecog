@@ -14,7 +14,7 @@ interface Options {
     output?: string
     /** Limit amount of calls to the Vision API. Default is 1000. */
     limit?: number
-    /** How many images should be scanned in parallel? Default is 4. */
+    /** How many images should be scanned in parallel? Default is 5. */
     parallel?: number
     /** Deep, also scan subfolders. */
     deep?: boolean

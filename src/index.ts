@@ -21,13 +21,15 @@ const defaultOptions: Options = {
 /**
  * IMGRecog.js main module.
  */
-export class IMGRecog {
+class IMGRecog {
     constructor(options: Options) {
         this.options = options
 
         // Enforce default options.
         if (!this.options.extensions || this.options.extensions.length < 0) {
             this.options.extensions = defaultOptions.extensions
+        } else {
+            this.options.extensions = this.options.extensions.map((e) => e.toLowerCase())
         }
         if (!this.options.output || this.options.output.length < 0) {
             this.options.output = defaultOptions.output
@@ -156,11 +158,9 @@ export class IMGRecog {
 
             this.saveOutput()
 
-            if (this.options.console) {
-                console.log("")
-            }
+            logInfo(this.options, "")
         } catch (ex) {
-            logError(this.options, `Failure ending the processing queue`, ex)
+            logError(this.options, `Failure ending the program`, ex)
         }
     }
 

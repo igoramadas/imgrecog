@@ -29,7 +29,7 @@ export = async function () {
         o: {alias: "output", type: "string", describe: "Full path to the JSON output file"},
         l: {alias: "limit", type: "number", describe: "Limit API calls (per service, default 1000)"},
         p: {alias: "parallel", type: "number", describe: "How many files processed in parallel (default 5)"},
-        d: {alias: "deep", type: "boolean", describe: "Deep scan, include subdirectories."},
+        d: {alias: "deep", type: "boolean", describe: "Deep scan, include subdirectories"},
         v: {alias: "verbose", type: "boolean", describe: "Verbose mode with extra logging"},
         dry: {type: "boolean", describe: "Dry run, parse existing results instead of running them again"},
         glgkeyfile: {type: "string", describe: "Custom path to the keyfilename for Google Vision"},
@@ -44,7 +44,7 @@ export = async function () {
         all: {type: "boolean", describe: "Detect everything (all of the above)"},
         filter: {type: "string", describe: "Filter images to be deleted or moved after the scanning"},
         move: {type: "string", describe: "Move images (according to filter) to the specified folder"},
-        delete: {type: "boolean", describe: "Delete images (according to the filter))"}
+        delete: {type: "boolean", describe: "Delete images (according to the filter)"}
     })
 
     // Option grouping.
