@@ -118,6 +118,10 @@ export = async function () {
     }
 
     // Do it baby!
-    const imgRecog = new ImgRecog(options)
-    await imgRecog.run()
+    try {
+        const imgRecog = new ImgRecog(options)
+        await imgRecog.run()
+    } catch (ex) {
+        logError(options, `Failure to run`, ex)
+    }
 }

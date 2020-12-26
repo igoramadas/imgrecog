@@ -75,6 +75,10 @@ class IMGRecog {
         logInfo(defaultOptions, "# IMGRecog.js #")
         logInfo(defaultOptions, "###############")
 
+        const arr = Object.entries(this.options).map((opt) => (hasValue(opt[1]) ? `${opt[0]}: ${opt[1]}` : null))
+        const logOptions = arr.filter((opt) => opt !== null)
+        logDebug(this.options, `Options: ${logOptions.join(" | ")}`)
+
         if (this.options.dryRun && (!this.options.folders || this.options.folders.length < 1)) {
             throw new Error("No folders were passed")
         }
@@ -94,10 +98,6 @@ class IMGRecog {
         this.files = []
         this.results = []
         this.startTime = new Date()
-
-        const arr = Object.entries(this.options).map((opt) => (hasValue(opt[1]) ? `${opt[0]}: ${opt[1]}` : null))
-        const logOptions = arr.filter((opt) => opt !== null)
-        logDebug(this.options, `Options: ${logOptions.join(" | ")}`)
 
         // Dry run? Parse existing results instead.
         if (this.options.dryRun) {
