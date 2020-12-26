@@ -17,6 +17,7 @@ docs:
 	rm -rf ./docs/interfaces
 	rm -rf ./docs/modules
 	$(TYPEDOC) --disableOutputCheck
+	cp ./CNAME ./docs/CNAME
 
 # Update dependencies
 update:
