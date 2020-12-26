@@ -223,4 +223,4 @@ Each scanning result has the following schema:
 
 ## Need help?
 
-Post an issue.
+Post an issue [here](https://github.com/igoramadas/imgrecog/issues).
