@@ -71,9 +71,9 @@ class IMGRecog {
      * Run the thing and return the results (also stored under the .results property).
      */
     run = async (): Promise<ImageResult[]> => {
-        logInfo(defaultOptions, "###############")
-        logInfo(defaultOptions, "# IMGRecog.js #")
-        logInfo(defaultOptions, "###############")
+        logInfo(this.options, "###############")
+        logInfo(this.options, "# IMGRecog.js #")
+        logInfo(this.options, "###############")
 
         const arr = Object.entries(this.options).map((opt) => (hasValue(opt[1]) ? `${opt[0]}: ${opt[1]}` : null))
         const logOptions = arr.filter((opt) => opt !== null)
