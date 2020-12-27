@@ -66,6 +66,7 @@ export = async function () {
     argOptions.example(`$ $0 -l 8000 --glgkeyfile google.json --clakey "mykey" --all ~/photos1 ~/photos2`, "")
     argOptions.example(`$ $0 --filter "is-porn, is-bloat" --move /photos/trash ~/photos/downloads ~/photos/camera`, "")
     argOptions.epilog("Need help? More info at https://github.com/igoramadas/imgrecog")
+    argOptions.help().demandCommand(1, "")
 
     // Options coming from a JSON config file.
     let configOptions: Options = {}
