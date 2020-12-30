@@ -1,24 +1,26 @@
-# IMGRecog.js
+# IMGRecog
 
-This is a small Node.js tool to scan and tag images using [Google Vision](https://cloud.google.com/vision), [Clarifai](https://clarifai.com) and [Sightengine](https://sightengine.com). It was created to automate the cleanup and maintenance of personal and family photos, but it can be used for whatever suits you best.
+This is a small Node.js tool to scan and tag images using [Google Vision](https://cloud.google.com/vision), [Clarifai](https://clarifai.com) and [Sightengine](https://sightengine.com).
 
 ## Features
 
-- supports 3 different computer vision APIs: Google Vision, Clarifai and Sightengine
-- results (JSON) are handled as simple tags with a tag name and score (from 0 to 1)
-- can detect objects, labels, landmarks, logos, brands and unsafe content
-- actions to delete or move images according to certain criterias
-- can be used via the command line or programatically
+- Supports 3 different computer vision APIs: Google Vision, Clarifai and Sightengine
+- Results (JSON) are handled as simple tags with a tag name and score (from 0 to 1)
+- Can detect objects, labels, landmarks, logos, brands and unsafe content
+- Actions to delete or move images according to certain criterias
+- Can be used via the command line or programatically
 
 ### But why?
 
 Because (as of December 2020) there are no other Node.js based tools that allow you to easily parse and tag images using more than "free" 1 service. Two is better than one, and three is better than two.
 
+IMGRecog was made by the developer to automate the cleanup tasks of his incoming photos (camera and social media, mostly). Mostly to get rid of bloat and NSFW images. But you can use this tool to whatever suits you best.
+
 ### What about TensorFlow?
 
 There are tons of great libraries and tools out there doing computer vision with TensorFlow, and the point here is not to reinvent the wheel. Search for "tensorflow mobilenet" and you'll find loads. Furthermore, adding TensorFlow as a direct dependecy increases the total package by more than 500%.
 
-So, for now, IMGRecog.js will focus solely on remote APIs.
+For now, IMGRecog will focus solely on remote APIs.
 
 ## Setup
 
@@ -101,7 +103,7 @@ console.dir(processor.results)
 
 ## Loading options
 
-IMGRecog.js will look for a `imgrecog.options.json` file on the following places:
+IMGRecog will look for a `imgrecog.options.json` file on the following places:
 
 - where the tool is installed
 - current user's home folder
@@ -115,7 +117,7 @@ When running from the command line, options should be passed as arguments or via
 
 ### console
 
-Enable or disable logging to the console. Enabled by default, but you can disable it programatically. **Important:** if you disable the console logging, any error or exception found will get thrown instead, and might potentially stop the detection / parsing.
+Enable or disable logging to the console. Enabled by default when using via the command line, but not when using it as a library / programatically.
 
 ### extensions *`-e`*
 

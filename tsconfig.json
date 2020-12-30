@@ -13,10 +13,11 @@
         "skipLibCheck": true
     },
     "typedocOptions": {
+        "entryPoints": ["./src/"],
         "excludeExternals": true,
         "excludePrivate": true,
         "mode": "modules",
-        "name": "IMGRecog.js",
+        "name": "IMGRecog",
         "out": "docs"
     }
 }

@@ -3,10 +3,11 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>IMGRecog.js</title>
-	<meta name="description" content="Documentation for IMGRecog.js">
+	<title>IMGRecog</title>
+	<meta name="description" content="Documentation for IMGRecog">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
+	<script async src="assets/js/search.js" id="search-script"></script>
 </head>
 <body>
 <header>
@@ -22,7 +23,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">IMGRecog.js</a>
+					<a href="index.html" class="title">IMGRecog</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -38,8 +39,6 @@
 							</div>
 							<input type="checkbox" id="tsd-filter-inherited" checked />
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -49,12 +48,7 @@
 	</div>
 	<div class="tsd-page-title">
 		<div class="container">
-			<ul class="tsd-breadcrumb">
-				<li>
-					<a href="globals.html">Globals</a>
-				</li>
-			</ul>
-			<h1>IMGRecog.js</h1>
+			<h1>IMGRecog</h1>
 		</div>
 	</div>
 </header>
@@ -62,36 +56,39 @@
 	<div class="row">
 		<div class="col-8 col-content">
 			<div class="tsd-panel tsd-typography">
-				<a href="#imgrecogjs" id="imgrecogjs" style="color: inherit; text-decoration: none;">
-					<h1>IMGRecog.js</h1>
+				<a href="#imgrecog" id="imgrecog" style="color: inherit; text-decoration: none;">
+					<h1>IMGRecog</h1>
 				</a>
-				<p>This is a small Node.js tool to scan and tag images using <a href="https://cloud.google.com/vision">Google Vision</a>, <a href="https://clarifai.com">Clarifai</a> and <a href="https://sightengine.com">Sightengine</a>. It was created to automate the cleanup and maintenance of personal and family photos, but it can be used for whatever suits you best.</p>
+				<p>This is a small Node.js tool to scan and tag images using <a href="https://cloud.google.com/vision">Google Vision</a>, <a href="https://clarifai.com">Clarifai</a> and <a href="https://sightengine.com">Sightengine</a>.</p>
 				<a href="#features" id="features" style="color: inherit; text-decoration: none;">
 					<h2>Features</h2>
 				</a>
 				<ul>
-					<li>supports 3 different computer vision APIs: Google Vision, Clarifai and Sightengine</li>
-					<li>results (JSON) are handled as simple tags with a tag name and score (from 0 to 1)</li>
-					<li>can detect objects, labels, landmarks, logos, brands and unsafe content</li>
-					<li>actions to delete or move images according to certain criterias</li>
-					<li>can be used via the command line or programatically</li>
+					<li>Supports 3 different computer vision APIs: Google Vision, Clarifai and Sightengine</li>
+					<li>Results (JSON) are handled as simple tags with a tag name and score (from 0 to 1)</li>
+					<li>Can detect objects, labels, landmarks, logos, brands and unsafe content</li>
+					<li>Actions to delete or move images according to certain criterias</li>
+					<li>Can be used via the command line or programatically</li>
 				</ul>
 				<a href="#but-why" id="but-why" style="color: inherit; text-decoration: none;">
 					<h3>But why?</h3>
 				</a>
 				<p>Because (as of December 2020) there are no other Node.js based tools that allow you to easily parse and tag images using more than &quot;free&quot; 1 service. Two is better than one, and three is better than two.</p>
+				<p>IMGRecog was made by the developer to automate the cleanup tasks of his incoming photos (camera and social media, mostly). Mostly to get rid of bloat and NSFW images. But you can use this tool to whatever suits you best.</p>
 				<a href="#what-about-tensorflow" id="what-about-tensorflow" style="color: inherit; text-decoration: none;">
 					<h3>What about TensorFlow?</h3>
 				</a>
 				<p>There are tons of great libraries and tools out there doing computer vision with TensorFlow, and the point here is not to reinvent the wheel. Search for &quot;tensorflow mobilenet&quot; and you&#39;ll find loads. Furthermore, adding TensorFlow as a direct dependecy increases the total package by more than 500%.</p>
-				<p>So, for now, IMGRecog.js will focus solely on remote APIs.</p>
+				<p>For now, IMGRecog will focus solely on remote APIs.</p>
 				<a href="#setup" id="setup" style="color: inherit; text-decoration: none;">
 					<h2>Setup</h2>
 				</a>
 				<p>To install globally on your machine please use:</p>
-				<pre><code>$ npm <span class="hljs-keyword">install</span> imgrecog -g</code></pre>
+				<pre><code><span style="color: #001080">$</span><span style="color: #000000"> </span><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #001080">install</span><span style="color: #000000"> </span><span style="color: #001080">imgrecog</span><span style="color: #000000"> -</span><span style="color: #001080">g</span>
+</code></pre>
 				<p>Or to install locally on your current project:</p>
-				<pre><code>$ npm install imgrecog <span class="hljs-comment">--save</span></code></pre>
+				<pre><code><span style="color: #001080">$</span><span style="color: #000000"> </span><span style="color: #001080">npm</span><span style="color: #000000"> </span><span style="color: #001080">install</span><span style="color: #000000"> </span><span style="color: #001080">imgrecog</span><span style="color: #000000"> --</span><span style="color: #001080">save</span>
+</code></pre>
 				<a href="#using-the-google-vision-api" id="using-the-google-vision-api" style="color: inherit; text-decoration: none;">
 					<h3>Using the Google Vision API</h3>
 				</a>
@@ -108,48 +105,56 @@
 				<a href="#command-line-usage" id="command-line-usage" style="color: inherit; text-decoration: none;">
 					<h2>Command line usage</h2>
 				</a>
-				<pre><code><span class="hljs-symbol">$</span> imgrecog -[<span class="hljs-keyword">options</span>] --[actions] folders</code></pre>
+				<pre><code><span style="color: #001080">$</span><span style="color: #000000"> </span><span style="color: #001080">imgrecog</span><span style="color: #000000"> -[</span><span style="color: #001080">options</span><span style="color: #000000">] --[</span><span style="color: #001080">actions</span><span style="color: #000000">] </span><span style="color: #001080">folders</span>
+</code></pre>
 				<p>Detect logos in the current directory, using Google Vision, credentials from auth.json file:</p>
-				<pre><code>$ imgrecog <span class="hljs-params">--logos</span> <span class="hljs-params">--glgkeyfile</span> <span class="hljs-string">./auth.json</span> .</code></pre>
+				<pre><code><span style="color: #001080">$</span><span style="color: #000000"> </span><span style="color: #001080">imgrecog</span><span style="color: #000000"> --</span><span style="color: #001080">logos</span><span style="color: #000000"> --</span><span style="color: #001080">glgkeyfile</span><span style="color: #000000"> ./</span><span style="color: #001080">auth</span><span style="color: #000000">.</span><span style="color: #001080">json</span><span style="color: #000000"> .</span>
+</code></pre>
 				<p>Detect unsafe images under the user&#39;s home folder, using Clarifai and Sightengine:</p>
-				<pre><code>$ <span class="hljs-string">imgrecog</span> <span class="hljs-built_in">--unsafe</span> <span class="hljs-built_in">--clakey</span> <span class="hljs-string">&quot;123&quot;</span> <span class="hljs-built_in">--steuser</span> <span class="hljs-string">&quot;abc&quot;</span> <span class="hljs-built_in">--stesecret</span> <span class="hljs-string">&quot;abc1234&quot;</span> ~/</code></pre>
+				<pre><code><span style="color: #001080">$</span><span style="color: #000000"> </span><span style="color: #001080">imgrecog</span><span style="color: #000000"> --</span><span style="color: #001080">unsafe</span><span style="color: #000000"> --</span><span style="color: #001080">clakey</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;123&quot;</span><span style="color: #000000"> --</span><span style="color: #001080">steuser</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;abc&quot;</span><span style="color: #000000"> --</span><span style="color: #001080">stesecret</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;abc1234&quot;</span><span style="color: #000000"> ~/</span>
+</code></pre>
 				<p>Detect and delete images unlikely to have a beach, trasversing the user&#39;s home folder, loading options from the imgrecog.options.json file:</p>
-				<pre><code>$ <span class="hljs-string">imgrecog</span> -<span class="hljs-string">d</span> <span class="hljs-built_in">--labels</span> <span class="hljs-built_in">--landmarks</span> <span class="hljs-built_in">--filter</span> <span class="hljs-string">&quot;beach &lt; 0.5&quot;</span> ~/</code></pre>
+				<pre><code><span style="color: #001080">$</span><span style="color: #000000"> </span><span style="color: #001080">imgrecog</span><span style="color: #000000"> -</span><span style="color: #001080">d</span><span style="color: #000000"> --</span><span style="color: #001080">labels</span><span style="color: #000000"> --</span><span style="color: #001080">landmarks</span><span style="color: #000000"> --</span><span style="color: #001080">filter</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;beach &lt; 0.5&quot;</span><span style="color: #000000"> ~/</span>
+</code></pre>
 				<p>Detect everything on camera and downloads folder, limiting to 15k API calls, and then move porn and bloat images to the trash folder:</p>
-				<pre><code>$ imgrecog <span class="hljs-params">--all</span> <span class="hljs-params">--deep</span> \
-           <span class="hljs-params">--glgkeyfile</span> <span class="hljs-string">&quot;mycredentials.json&quot;</span> \
-           <span class="hljs-params">--clakey</span> <span class="hljs-string">&quot;123&quot;</span> \
-           <span class="hljs-params">--steuser</span> <span class="hljs-string">&quot;abc&quot;</span> \
-           <span class="hljs-params">--stesecret</span> <span class="hljs-string">&quot;abc1234&quot;</span> \
-           <span class="hljs-params">--limit</span> 15000 \
-           <span class="hljs-params">--filter</span> <span class="hljs-string">&quot;is-bloat, is-porn&quot;</span> \
-           <span class="hljs-params">--move</span> ~<span class="hljs-string">/trash</span> \
-           ~<span class="hljs-string">/camera</span> ~<span class="hljs-string">/downloads</span></code></pre>
+				<pre><code><span style="color: #001080">$</span><span style="color: #000000"> </span><span style="color: #001080">imgrecog</span><span style="color: #000000"> --</span><span style="color: #001080">all</span><span style="color: #000000"> --</span><span style="color: #001080">deep</span><span style="color: #000000"> \</span>
+<span style="color: #000000">           --</span><span style="color: #001080">glgkeyfile</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;mycredentials.json&quot;</span><span style="color: #000000"> \</span>
+<span style="color: #000000">           --</span><span style="color: #001080">clakey</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;123&quot;</span><span style="color: #000000"> \</span>
+<span style="color: #000000">           --</span><span style="color: #001080">steuser</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;abc&quot;</span><span style="color: #000000"> \</span>
+<span style="color: #000000">           --</span><span style="color: #001080">stesecret</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;abc1234&quot;</span><span style="color: #000000"> \</span>
+<span style="color: #000000">           --</span><span style="color: #001080">limit</span><span style="color: #000000"> </span><span style="color: #098658">15000</span><span style="color: #000000"> \</span>
+<span style="color: #000000">           --</span><span style="color: #001080">filter</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;is-bloat, is-porn&quot;</span><span style="color: #000000"> \</span>
+<span style="color: #000000">           --</span><span style="color: #001080">move</span><span style="color: #000000"> ~/</span><span style="color: #001080">trash</span><span style="color: #000000"> \</span>
+<span style="color: #000000">           ~/</span><span style="color: #001080">camera</span><span style="color: #000000"> ~/</span><span style="color: #001080">downloads</span>
+</code></pre>
 				<p>Dry run with the results from a previous execution.</p>
-				<pre><code>$ <span class="hljs-string">imgrecog</span> <span class="hljs-built_in">--dry</span> <span class="hljs-built_in">--move</span> <span class="hljs-built_in">--filter</span> <span class="hljs-string">&quot;is-bloat&quot;</span></code></pre>
+				<pre><code><span style="color: #001080">$</span><span style="color: #000000"> </span><span style="color: #001080">imgrecog</span><span style="color: #000000"> --</span><span style="color: #001080">dry</span><span style="color: #000000"> --</span><span style="color: #001080">move</span><span style="color: #000000"> --</span><span style="color: #001080">filter</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;is-bloat&quot;</span>
+</code></pre>
 				<p>For help and the full list of options, ask for help:</p>
-				<pre><code><span class="hljs-meta">$</span><span class="bash"> imgrecog --<span class="hljs-built_in">help</span></span></code></pre>
+				<pre><code><span style="color: #001080">$</span><span style="color: #000000"> </span><span style="color: #001080">imgrecog</span><span style="color: #000000"> --</span><span style="color: #001080">help</span>
+</code></pre>
 				<a href="#importing-as-a-library" id="importing-as-a-library" style="color: inherit; text-decoration: none;">
 					<h2>Importing as a library</h2>
 				</a>
-				<pre><code class="language-javascript"><span class="hljs-keyword">import</span> ImgRecog <span class="hljs-keyword">from</span> <span class="hljs-string">&quot;imgrecog&quot;</span>
-<span class="hljs-comment">// const ImgRecog = require(&quot;imgrecog&quot;).default</span>
+				<pre><code class="language-javascript"><span style="color: #AF00DB">import</span><span style="color: #000000"> </span><span style="color: #001080">ImgRecog</span><span style="color: #000000"> </span><span style="color: #AF00DB">from</span><span style="color: #000000"> </span><span style="color: #A31515">&quot;imgrecog&quot;</span>
+<span style="color: #008000">// const ImgRecog = require(&quot;imgrecog&quot;).default</span>
 
-<span class="hljs-keyword">const</span> options = {
-    <span class="hljs-attr">folders</span>: [<span class="hljs-string">&quot;/home/user1/photos&quot;</span>, <span class="hljs-string">&quot;/home/user2/photos&quot;</span>],
-    <span class="hljs-attr">limit</span>: <span class="hljs-number">5000</span>,
-    <span class="hljs-attr">unsafe</span>: <span class="hljs-literal">true</span>
-    <span class="hljs-comment">// more options...</span>
-}
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">options</span><span style="color: #000000"> = {</span>
+<span style="color: #000000">    </span><span style="color: #001080">folders:</span><span style="color: #000000"> [</span><span style="color: #A31515">&quot;/home/user1/photos&quot;</span><span style="color: #000000">, </span><span style="color: #A31515">&quot;/home/user2/photos&quot;</span><span style="color: #000000">],</span>
+<span style="color: #000000">    </span><span style="color: #001080">limit:</span><span style="color: #000000"> </span><span style="color: #098658">5000</span><span style="color: #000000">,</span>
+<span style="color: #000000">    </span><span style="color: #001080">unsafe:</span><span style="color: #000000"> </span><span style="color: #0000FF">true</span>
+<span style="color: #000000">    </span><span style="color: #008000">// more options...</span>
+<span style="color: #000000">}</span>
 
-<span class="hljs-keyword">const</span> processor = <span class="hljs-keyword">new</span> ImgRecog(options)
-<span class="hljs-keyword">await</span> processor.run()
+<span style="color: #0000FF">const</span><span style="color: #000000"> </span><span style="color: #0070C1">processor</span><span style="color: #000000"> = </span><span style="color: #0000FF">new</span><span style="color: #000000"> </span><span style="color: #267F99">ImgRecog</span><span style="color: #000000">(</span><span style="color: #001080">options</span><span style="color: #000000">)</span>
+<span style="color: #AF00DB">await</span><span style="color: #000000"> </span><span style="color: #001080">processor</span><span style="color: #000000">.</span><span style="color: #795E26">run</span><span style="color: #000000">()</span>
 
-<span class="hljs-built_in">console</span>.dir(processor.results)</code></pre>
+<span style="color: #001080">console</span><span style="color: #000000">.</span><span style="color: #795E26">dir</span><span style="color: #000000">(</span><span style="color: #001080">processor</span><span style="color: #000000">.</span><span style="color: #001080">results</span><span style="color: #000000">)</span>
+</code></pre>
 				<a href="#loading-options" id="loading-options" style="color: inherit; text-decoration: none;">
 					<h2>Loading options</h2>
 				</a>
-				<p>IMGRecog.js will look for a <code>imgrecog.options.json</code> file on the following places:</p>
+				<p>IMGRecog will look for a <code>imgrecog.options.json</code> file on the following places:</p>
 				<ul>
 					<li>where the tool is installed</li>
 					<li>current user&#39;s home folder</li>
@@ -163,7 +168,7 @@
 				<a href="#console" id="console" style="color: inherit; text-decoration: none;">
 					<h3>console</h3>
 				</a>
-				<p>Enable or disable logging to the console. Enabled by default, but you can disable it programatically. <strong>Important:</strong> if you disable the console logging, any error or exception found will get thrown instead, and might potentially stop the detection / parsing.</p>
+				<p>Enable or disable logging to the console. Enabled by default when using via the command line, but not when using it as a library / programatically.</p>
 				<a href="#extensions--e" id="extensions--e" style="color: inherit; text-decoration: none;">
 					<h3>extensions <em><code>-e</code></em></h3>
 				</a>
@@ -280,35 +285,35 @@
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
-						<a href="globals.html"><em>Globals</em></a>
+					<li class=" ">
+						<a href="modules.html">Exports</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_src_actions_.html">&quot;src/actions&quot;</a>
+						<a href="modules/actions.html">actions</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_src_categorizer_.html">&quot;src/categorizer&quot;</a>
+						<a href="modules/categorizer.html">categorizer</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_src_clarifai_.html">&quot;src/clarifai&quot;</a>
+						<a href="modules/clarifai.html">clarifai</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_src_cmd_.html">&quot;src/cmd&quot;</a>
+						<a href="modules/cmd.html">cmd</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_src_index_.html">&quot;src/index&quot;</a>
+						<a href="modules/index.html">index</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_src_sightengine_.html">&quot;src/sightengine&quot;</a>
+						<a href="modules/sightengine.html">sightengine</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_src_types_.html">&quot;src/types&quot;</a>
+						<a href="modules/types.html">types</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_src_utils_.html">&quot;src/utils&quot;</a>
+						<a href="modules/utils.html">utils</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="modules/_src_vision_.html">&quot;src/vision&quot;</a>
+						<a href="modules/vision.html">vision</a>
 					</li>
 				</ul>
 			</nav>
@@ -324,8 +329,6 @@
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
 			<ul class="tsd-legend">
-				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
-				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
 				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
 			</ul>
 			<ul class="tsd-legend">

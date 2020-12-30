@@ -3,10 +3,11 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Sightengine | IMGRecog.js</title>
-	<meta name="description" content="Documentation for IMGRecog.js">
+	<title>Sightengine | IMGRecog</title>
+	<meta name="description" content="Documentation for IMGRecog">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
+	<script async src="../assets/js/search.js" id="search-script"></script>
 </head>
 <body>
 <header>
@@ -22,7 +23,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="../index.html" class="title">IMGRecog.js</a>
+					<a href="../index.html" class="title">IMGRecog</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -38,8 +39,6 @@
 							</div>
 							<input type="checkbox" id="tsd-filter-inherited" checked />
 							<label class="tsd-widget" for="tsd-filter-inherited">Inherited</label>
-							<input type="checkbox" id="tsd-filter-only-exported" />
-							<label class="tsd-widget" for="tsd-filter-only-exported">Only exported</label>
 						</div>
 					</div>
 					<a href="#" class="tsd-widget menu no-caption" data-toggle="menu">Menu</a>
@@ -51,13 +50,13 @@
 		<div class="container">
 			<ul class="tsd-breadcrumb">
 				<li>
-					<a href="../globals.html">Globals</a>
+					<a href="../modules.html">IMGRecog</a>
 				</li>
 				<li>
-					<a href="../modules/_src_sightengine_.html">&quot;src/sightengine&quot;</a>
+					<a href="../modules/sightengine.html">sightengine</a>
 				</li>
 				<li>
-					<a href="_src_sightengine_.sightengine.html">Sightengine</a>
+					<a href="sightengine.sightengine-1.html">Sightengine</a>
 				</li>
 			</ul>
 			<h1>Class Sightengine</h1>
@@ -87,20 +86,43 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
+							<h3>Constructors</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-constructor tsd-parent-kind-class"><a href="sightengine.sightengine-1.html#constructor" class="tsd-kind-icon">constructor</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_src_sightengine_.sightengine.html#apicalls" class="tsd-kind-icon">api<wbr>Calls</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-class"><a href="_src_sightengine_.sightengine.html#description" class="tsd-kind-icon">description</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="sightengine.sightengine-1.html#apicalls" class="tsd-kind-icon">api<wbr>Calls</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class"><a href="sightengine.sightengine-1.html#description" class="tsd-kind-icon">description</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_src_sightengine_.sightengine.html#detect" class="tsd-kind-icon">detect</a></li>
-								<li class="tsd-kind-method tsd-parent-kind-class"><a href="_src_sightengine_.sightengine.html#prepare" class="tsd-kind-icon">prepare</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="sightengine.sightengine-1.html#detect" class="tsd-kind-icon">detect</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-class"><a href="sightengine.sightengine-1.html#prepare" class="tsd-kind-icon">prepare</a></li>
 							</ul>
 						</section>
 					</div>
+				</section>
+			</section>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Constructors</h2>
+				<section class="tsd-panel tsd-member tsd-kind-constructor tsd-parent-kind-class">
+					<a name="constructor" class="tsd-anchor"></a>
+					<h3>constructor</h3>
+					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Sightengine<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="sightengine.sightengine-1.html" class="tsd-signature-type" data-tsd-kind="Class">Sightengine</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+							</aside>
+							<h4 class="tsd-returns-title">Returns <a href="sightengine.sightengine-1.html" class="tsd-signature-type" data-tsd-kind="Class">Sightengine</a></h4>
+						</li>
+					</ul>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
@@ -111,7 +133,7 @@
 					<div class="tsd-signature tsd-kind-icon">api<wbr>Calls<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/igoramadas/imgrecog/blob/920086e/src/sightengine.ts#L16">src/sightengine.ts:16</a></li>
+							<li>Defined in <a href="https://github.com/igoramadas/imgrecog/blob/b60a8d0/src/sightengine.ts#L16">sightengine.ts:16</a></li>
 						</ul>
 					</aside>
 					<div class="tsd-comment tsd-typography">
@@ -123,10 +145,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class">
 					<a name="description" class="tsd-anchor"></a>
 					<h3>description</h3>
-					<div class="tsd-signature tsd-kind-icon">description<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"Sightengine API"</span></div>
+					<div class="tsd-signature tsd-kind-icon">description<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">&quot;Sightengine API&quot;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/igoramadas/imgrecog/blob/920086e/src/sightengine.ts#L11">src/sightengine.ts:11</a></li>
+							<li>Defined in <a href="https://github.com/igoramadas/imgrecog/blob/b60a8d0/src/sightengine.ts#L11">sightengine.ts:11</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -137,13 +159,13 @@
 					<a name="detect" class="tsd-anchor"></a>
 					<h3>detect</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">detect<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/_src_types_.options.html" class="tsd-signature-type">Options</a>, filepath<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_src_types_.imageresult.html" class="tsd-signature-type">ImageResult</a><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">detect<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/types.options.html" class="tsd-signature-type" data-tsd-kind="Interface">Options</a>, filepath<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/types.imageresult.html" class="tsd-signature-type" data-tsd-kind="Interface">ImageResult</a><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/igoramadas/imgrecog/blob/920086e/src/sightengine.ts#L31">src/sightengine.ts:31</a></li>
+									<li>Defined in <a href="https://github.com/igoramadas/imgrecog/blob/b60a8d0/src/sightengine.ts#L31">sightengine.ts:31</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -154,23 +176,19 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>options: <a href="../interfaces/_src_types_.options.html" class="tsd-signature-type">Options</a></h5>
+									<h5>options: <a href="../interfaces/types.options.html" class="tsd-signature-type" data-tsd-kind="Interface">Options</a></h5>
 									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<p>Program options.</p>
-										</div>
+										<p>Program options.</p>
 									</div>
 								</li>
 								<li>
 									<h5>filepath: <span class="tsd-signature-type">string</span></h5>
 									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<p>Image file to be scanned.</p>
-										</div>
+										<p>Image file to be scanned.</p>
 									</div>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_src_types_.imageresult.html" class="tsd-signature-type">ImageResult</a><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/types.imageresult.html" class="tsd-signature-type" data-tsd-kind="Interface">ImageResult</a><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -178,13 +196,13 @@
 					<a name="prepare" class="tsd-anchor"></a>
 					<h3>prepare</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">prepare<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/_src_types_.options.html" class="tsd-signature-type">Options</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">prepare<span class="tsd-signature-symbol">(</span>options<span class="tsd-signature-symbol">: </span><a href="../interfaces/types.options.html" class="tsd-signature-type" data-tsd-kind="Interface">Options</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/igoramadas/imgrecog/blob/920086e/src/sightengine.ts#L22">src/sightengine.ts:22</a></li>
+									<li>Defined in <a href="https://github.com/igoramadas/imgrecog/blob/b60a8d0/src/sightengine.ts#L22">sightengine.ts:22</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -195,11 +213,9 @@
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>options: <a href="../interfaces/_src_types_.options.html" class="tsd-signature-type">Options</a></h5>
+									<h5>options: <a href="../interfaces/types.options.html" class="tsd-signature-type" data-tsd-kind="Interface">Options</a></h5>
 									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<p>Program options.</p>
-										</div>
+										<p>Program options.</p>
 									</div>
 								</li>
 							</ul>
@@ -212,35 +228,35 @@
 		<div class="col-4 col-menu menu-sticky-wrap menu-highlight">
 			<nav class="tsd-navigation primary">
 				<ul>
-					<li class="globals  ">
-						<a href="../globals.html"><em>Globals</em></a>
+					<li class=" ">
+						<a href="../modules.html">Exports</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/_src_actions_.html">&quot;src/actions&quot;</a>
+						<a href="../modules/actions.html">actions</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/_src_categorizer_.html">&quot;src/categorizer&quot;</a>
+						<a href="../modules/categorizer.html">categorizer</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/_src_clarifai_.html">&quot;src/clarifai&quot;</a>
+						<a href="../modules/clarifai.html">clarifai</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/_src_cmd_.html">&quot;src/cmd&quot;</a>
+						<a href="../modules/cmd.html">cmd</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/_src_index_.html">&quot;src/index&quot;</a>
+						<a href="../modules/index.html">index</a>
 					</li>
 					<li class="current tsd-kind-module">
-						<a href="../modules/_src_sightengine_.html">&quot;src/sightengine&quot;</a>
+						<a href="../modules/sightengine.html">sightengine</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/_src_types_.html">&quot;src/types&quot;</a>
+						<a href="../modules/types.html">types</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/_src_utils_.html">&quot;src/utils&quot;</a>
+						<a href="../modules/utils.html">utils</a>
 					</li>
 					<li class=" tsd-kind-module">
-						<a href="../modules/_src_vision_.html">&quot;src/vision&quot;</a>
+						<a href="../modules/vision.html">vision</a>
 					</li>
 				</ul>
 			</nav>
@@ -249,29 +265,29 @@
 				</ul>
 				<ul class="current">
 					<li class="current tsd-kind-class tsd-parent-kind-module">
-						<a href="_src_sightengine_.sightengine.html" class="tsd-kind-icon">Sightengine</a>
+						<a href="sightengine.sightengine-1.html" class="tsd-kind-icon">Sightengine</a>
 						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="_src_sightengine_.sightengine.html#apicalls" class="tsd-kind-icon">api<wbr>Calls</a>
+							<li class=" tsd-kind-constructor tsd-parent-kind-class">
+								<a href="sightengine.sightengine-1.html#constructor" class="tsd-kind-icon">constructor</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-class">
-								<a href="_src_sightengine_.sightengine.html#description" class="tsd-kind-icon">description</a>
+								<a href="sightengine.sightengine-1.html#apicalls" class="tsd-kind-icon">api<wbr>Calls</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class">
+								<a href="sightengine.sightengine-1.html#description" class="tsd-kind-icon">description</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_src_sightengine_.sightengine.html#detect" class="tsd-kind-icon">detect</a>
+								<a href="sightengine.sightengine-1.html#detect" class="tsd-kind-icon">detect</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
-								<a href="_src_sightengine_.sightengine.html#prepare" class="tsd-kind-icon">prepare</a>
+								<a href="sightengine.sightengine-1.html#prepare" class="tsd-kind-icon">prepare</a>
 							</li>
 						</ul>
 					</li>
 				</ul>
 				<ul class="after-current">
-					<li class=" tsd-kind-variable tsd-parent-kind-module tsd-is-not-exported">
-						<a href="../modules/_src_sightengine_.html#formdata" class="tsd-kind-icon">Form<wbr>Data</a>
-					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-module tsd-is-not-exported">
-						<a href="../modules/_src_sightengine_.html#fs" class="tsd-kind-icon">fs</a>
+					<li class=" tsd-kind-property tsd-parent-kind-module">
+						<a href="../modules/sightengine.html#default" class="tsd-kind-icon">default</a>
 					</li>
 				</ul>
 			</nav>
@@ -283,14 +299,13 @@
 		<h2>Legend</h2>
 		<div class="tsd-legend-group">
 			<ul class="tsd-legend">
-				<li class="tsd-kind-object-literal"><span class="tsd-kind-icon">Object literal</span></li>
-				<li class="tsd-kind-variable"><span class="tsd-kind-icon">Variable</span></li>
-				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
-			</ul>
-			<ul class="tsd-legend">
 				<li class="tsd-kind-class"><span class="tsd-kind-icon">Class</span></li>
+				<li class="tsd-kind-constructor tsd-parent-kind-class"><span class="tsd-kind-icon">Constructor</span></li>
 				<li class="tsd-kind-property tsd-parent-kind-class"><span class="tsd-kind-icon">Property</span></li>
 				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
+			</ul>
+			<ul class="tsd-legend">
+				<li class="tsd-kind-function"><span class="tsd-kind-icon">Function</span></li>
 			</ul>
 			<ul class="tsd-legend">
 				<li class="tsd-kind-interface"><span class="tsd-kind-icon">Interface</span></li>
