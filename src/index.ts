@@ -10,6 +10,9 @@ import logger = require("anyhow")
 import fs = require("fs")
 import path = require("path")
 
+// Current executing folder.
+const currentFolder = process.cwd() + "/"
+
 // Default options.
 const defaultOptions: Options = {
     extensions: ["png", "jpg", "jpeg", "gif", "bmp"],
@@ -29,16 +32,21 @@ class IMGRecog {
         if (!this.options.extensions || this.options.extensions.length < 0) {
             this.options.extensions = defaultOptions.extensions
         } else {
-            this.options.extensions = this.options.extensions.map((e) => e.toLowerCase())
+            this.options.extensions = this.options.extensions.map((e) => e.toLowerCase().replace(".", ""))
         }
-        if (!this.options.output || this.options.output.length < 0) {
+        if (!this.options.output) {
             this.options.output = defaultOptions.output
         }
-        if (!this.options.limit || this.options.limit < 1) {
+        if (!this.options.limit || this.options.limit < 0) {
             this.options.limit = defaultOptions.limit
         }
-        if (!this.options.parallel || this.options.parallel < 1) {
+        if (!this.options.parallel) {
             this.options.parallel = defaultOptions.parallel
+        }
+
+        // Do not save output?
+        if (this.options.output == "false") {
+            this.options.output = null
         }
 
         // Make sure the logger is set.
@@ -63,17 +71,15 @@ class IMGRecog {
     results: ImageResult[]
 
     /**
-     * If running, when did the process start.
-     */
-    startTime: Date
-
-    /**
      * Run the thing and return the results (also stored under the .results property).
      */
     run = async (): Promise<ImageResult[]> => {
+        const startTime = new Date().valueOf()
+
         logInfo(this.options, "###############")
         logInfo(this.options, "# IMGRecog.js #")
         logInfo(this.options, "###############")
+        logInfo(this.options, "")
 
         const arr = Object.entries(this.options).map((opt) => (hasValue(opt[1]) ? `${opt[0]}: ${opt[1]}` : null))
         const logOptions = arr.filter((opt) => opt !== null)
@@ -94,10 +100,14 @@ class IMGRecog {
             logWarn(this.options, `A filter was passed, but no actions (delete or move)`)
         }
 
+        // Other validation.
+        if (!this.options.parallel || this.options.parallel < 1) {
+            throw new Error("The parallel option must be at least 1")
+        }
+
         // Reset state.
         this.files = []
         this.results = []
-        this.startTime = new Date()
 
         // Dry run? Parse existing results instead.
         if (this.options.dryRun) {
@@ -128,6 +138,10 @@ class IMGRecog {
         // Scan folders and then process all files.
         try {
             for (let folder of this.options.folders) {
+                if (!path.isAbsolute(folder)) {
+                    folder = path.join(currentFolder, folder)
+                }
+
                 this.scanFolder(folder)
             }
 
@@ -137,31 +151,23 @@ class IMGRecog {
                 await Promise.all(chunk.map(async (filepath: string) => await this.scanFile(filepath)))
             }
 
-            this.end()
+            // Execute extra actions.
+            await this.executeActions()
+
+            // Save results to a file?
+            if (this.options.output) {
+                this.saveOutput()
+            }
+
+            // Done!
+            const duration = ((Date.now().valueOf() - startTime) / 1000).toFixed(3)
+            logInfo(this.options, `Finished in ${duration} seconds`)
+            logInfo(this.options, "")
         } catch (ex) {
             logError(this.options, `Failure processing images`, ex)
         }
 
         return this.results
-    }
-
-    /**
-     * End the scanning tasks.
-     * @param kill Force kill the scanning queue.
-     */
-    end = async () => {
-        try {
-            const duration = (Date.now() - this.startTime.valueOf()) / 1000
-            logInfo(this.options, `Scanned ${this.results.length} images in ${duration} seconds`)
-
-            await this.executeActions()
-
-            this.saveOutput()
-
-            logInfo(this.options, "")
-        } catch (ex) {
-            logError(this.options, `Failure ending the program`, ex)
-        }
     }
 
     /**
@@ -190,11 +196,6 @@ class IMGRecog {
             } catch (ex) {
                 logError(this.options, `Error reading ${filepath}`, ex)
             }
-        }
-
-        // Make sure we have the correct folder path.
-        if (!path.isAbsolute(folder)) {
-            folder = path.join(process.cwd(), folder)
         }
 
         logInfo(this.options, `Scanning ${folder}`)
